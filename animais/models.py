@@ -1,31 +1,27 @@
 from django.db import models
 
 
-class SexoAnimal(models.Choices):
-    MACHO = 'M', 'Macho'
-    FEMEA = 'F', 'Fêmea'
-    INDETERMINADO = 'I', 'Indeterminado'
-
-
-class IdadeAproximada(models.Choices):
-    FILHOTE = 'Filhote'
-    ADULTO = 'Adulto'
-    IDOSO = 'Idoso'
-
-
-class Medicamento(models.Choices):
-    SIM = 'Sim'
-    NAO = 'Não'
-    NAO_SABE = 'Nâo sei'
-
-
-class Vacina(models.Choices):
-    SIM = 'Sim'
-    NAO = 'Não'
-    NAO_SABE = 'Nâo sei'
-
-
 class Animais(models.Model):
+    class SexoAnimal(models.TextChoices):
+        MACHO = 'M', 'Macho'
+        FEMEA = 'F', 'Fêmea'
+        INDETERMINADO = 'I', 'Indeterminado'
+
+    class IdadeAproximada(models.TextChoices):
+        FILHOTE = 'Filhote'
+        ADULTO = 'Adulto'
+        IDOSO = 'Idoso'
+
+    class Medicamento(models.TextChoices):
+        SIM = 'Sim'
+        NAO = 'Não'
+        NAO_SABE = 'Nâo sei'
+
+    class Vacina(models.TextChoices):
+        SIM = 'Sim'
+        NAO = 'Não'
+        NAO_SABE = 'Nâo sei'
+
     nome = models.CharField(50, null=True, blank=True)
     raca = models.CharField(50, null=True, blank=True)
     sexo = models.CharField(max_length=1, choices=SexoAnimal)
