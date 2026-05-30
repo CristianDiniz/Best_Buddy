@@ -30,3 +30,4 @@ class Animais(models.Model):
     medicamentos = models.CharField(10, choices=Medicamento)
     vacinacao = models.CharField(10, choices=Vacina)
     contato = models.CharField(15)
+
