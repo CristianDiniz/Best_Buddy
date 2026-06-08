@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import Animais
+from .models import Animal
 
 
 # Register your models here.
-@admin.register(Animais)
+@admin.register(Animal)
 class AnimaisAdmin(admin.ModelAdmin):
     readonly_fields = (
         'created_at',
