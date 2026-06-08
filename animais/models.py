@@ -22,11 +22,21 @@ class Animais(models.Model):
         NAO = 'Não'
         NAO_SABE = 'Nâo sei'
 
-    nome = models.CharField(50, null=True, blank=True)
-    raca = models.CharField(50, null=True, blank=True)
+    nome = models.CharField(max_length=50, null=True, blank=True)
+    raca = models.CharField(max_length=50, null=True, blank=True)
     sexo = models.CharField(max_length=1, choices=SexoAnimal)
-    idade = models.CharField(2, null=True, blank=True)
-    idade_aproximada = models.CharField(10, choices=IdadeAproximada)
-    medicamentos = models.CharField(10, choices=Medicamento)
-    vacinacao = models.CharField(10, choices=Vacina)
-    contato = models.CharField(15)
+    idade = models.CharField(max_length=2, null=True, blank=True)
+    idade_aproximada = models.CharField(max_length=10, choices=IdadeAproximada)
+    medicamentos = models.CharField(max_length=10, choices=Medicamento)
+    vacinacao = models.CharField(max_length=10, choices=Vacina)
+    contato = models.CharField(max_length=15)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Animal'
+        verbose_name_plural = 'Animais'
+        ordering = ['nome']
+
+    def __str__(self):
+        return self.nome
