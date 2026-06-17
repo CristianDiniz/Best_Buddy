@@ -1,11 +1,12 @@
 from django.db import models
 
+
 class Ong(models.Model):
-    nome = models.CharField(max_length=100,null = False, blank=True)
-    cnpj = models.CharField(max_length=20, null = False, blank=True)
+    nome = models.CharField(max_length=100,unique=True)
+    cnpj = models.CharField(max_length=20,unique=True)
     endereco = models.CharField(max_length=200)
-    telefone = models.CharField(max_length=20, null = False, blank=True)
-    email = models.EmailField()
+    telefone = models.CharField(max_length=20,)
+    email = models.EmailField(unique=True)
 
     
     update_at = models.DateTimeField(auto_now=True)
@@ -13,6 +14,6 @@ class Ong(models.Model):
 
     def __str__(self):
         return self.nome 
-    
+
 
 

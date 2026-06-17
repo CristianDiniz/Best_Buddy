@@ -22,14 +22,18 @@ class Animais(models.Model):
         NAO = 'Não'
         NAO_SABE = 'Nâo sei'
 
+    pessoa = models.ForeignKey(
+        "pessoas.Pessoa",
+        on_delete=models.PROTECT,)
     nome = models.CharField(max_length=50, null=True, blank=True)
-    raca = models.CharField(max_length=50, null=True, blank=True)
+    raca = models.CharField("raça",max_length=50, null=True, blank=True)
     sexo = models.CharField(max_length=1, choices=SexoAnimal)
     idade = models.CharField(max_length=2, null=True, blank=True)
     idade_aproximada = models.CharField(max_length=10, choices=IdadeAproximada)
     medicamentos = models.CharField(max_length=10, choices=Medicamento)
     vacinacao = models.CharField(max_length=10, choices=Vacina)
     contato = models.CharField(max_length=15)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

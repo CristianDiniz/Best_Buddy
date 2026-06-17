@@ -28,3 +28,4 @@ class AnimaisAdmin(admin.ModelAdmin):
         'medicamentos',
         'vacinacao',
     )
+
