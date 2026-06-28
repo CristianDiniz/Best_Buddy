@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class Animais(models.Model):
+class Animal(models.Model):
     class SexoAnimal(models.TextChoices):
         MACHO = 'M', 'Macho'
         FEMEA = 'F', 'Fêmea'
@@ -16,23 +16,21 @@ class Animais(models.Model):
 
     class Medicamento(models.TextChoices):
         SIM = 'Sim'
-        NAO = 'Não'
-        NAO_SABE = 'Nâo sei'
-    medicamento = models.CharField(max_length=10, choices=Medicamento)
+        NAO = 'Nao', 'Não'
+        NAO_SABE = 'Nao sei', 'Não sei'
 
     class Vacina(models.TextChoices):
         SIM = 'Sim'
-        NAO = 'Não'
-        NAO_SABE = 'Nâo sei'
-    vacinacao = models.CharField(max_length=10, choices=Vacina)
-
+        NAO = 'Nao', 'Não'
+        NAO_SABE = 'Nao sei', 'Não sei'
 
     nome = models.CharField(max_length=50, null=True, blank=True)
-    raca = models.CharField("raça",max_length=50, null=True, blank=True)
-    
-    
-    
-    
+    raca = models.CharField('raça', max_length=50, null=True, blank=True)
+    sexo = models.CharField(max_length=1, choices=SexoAnimal)
+    idade = models.CharField(max_length=2, null=True, blank=True)
+    idade_aproximada = models.CharField(max_length=10, choices=IdadeAproximada)
+    medicamentos = models.CharField(max_length=10, choices=Medicamento)
+    vacinacao = models.CharField('vacinação', max_length=10, choices=Vacina)
     contato = models.CharField(max_length=15)
     
     created_at = models.DateTimeField(auto_now_add=True)
