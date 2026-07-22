@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BestBuddy - Cadastro PF</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+    <div class="bg-white w-full max-w-md rounded-xl shadow-lg overflow-hidden">
+
+        <!-- Cabeçalho -->
+        <div class="bg-teal-200 py-6 border-b">
+            <h1 class="text-4xl font-bold text-center text-gray-800">
+                BEST BUDDY
+            </h1>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="p-8">
+
+            <h2 class="text-2xl font-bold text-teal-600 mb-6">
+                Cadastro Pessoa Física
+            </h2>
+
+            <form onsubmit="cadastrar(event)">
+
+    <!-- Nome -->
+    <div class="mb-4">
+        <label class="block mb-1 font-semibold">
+            Nome Completo
+        </label>
+
+        <input
+            id="nome"
+            type="text"
+            class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            placeholder="Digite seu nome">
+    </div>
+
+
+    <!-- Telefone -->
+    <div class="mb-4">
+        <label class="block mb-1 font-semibold">
+            Telefone
+        </label>
+
+        <input
+            id="telefone"
+            type="text"
+            class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            placeholder="(11) 99999-9999">
+    </div>
+
+
+    <!-- Email -->
+    <div class="mb-4">
+        <label class="block mb-1 font-semibold">
+            Email
+        </label>
+
+        <input
+            id="email"
+            type="email"
+            class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            placeholder="Digite seu email">
+    </div>
+
+
+    <!-- Senha -->
+    <div class="mb-4">
+        <label class="block mb-1 font-semibold">
+            Senha
+        </label>
+
+        <input
+            id="senha"
+            type="password"
+            class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+    </div>
+
+
+    <!-- Confirmar Senha -->
+    <div class="mb-6">
+        <label class="block mb-1 font-semibold">
+            Confirmar Senha
+        </label>
+
+        <input
+            id="confirmarSenha"
+            type="password"
+            class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+    </div>
+
+
+    <!-- Botão -->
+    <button
+        type="submit"
+        class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 rounded-lg transition">
+        Criar Conta
+    </button>
+
+</form>
+
+
+<script>
+
+function cadastrar(event) {
+
+    event.preventDefault();
+
+    const nome = document.getElementById("nome").value;
+    const telefone = document.getElementById("telefone").value;
+    const email = document.getElementById("email").value;
+    const senha = document.getElementById("senha").value;
+    const confirmarSenha = document.getElementById("confirmarSenha").value;
+
+
+    if (senha !== confirmarSenha) {
+        alert("As senhas não conferem!");
+        return;
+    }
+
+
+    const dados = {
+        email: email,
+        password: senha,
+        tipo: "PF",
+        nome: nome,
+        telefone: telefone
+    };
+
+
+    fetch("http://127.0.0.1:8000/api/usuarios/register/", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify(dados)
+
+    })
+
+
+    .then(response => response.json())
+
+    .then(data => {
+
+        console.log("Resposta da API:", data);
+
+        if (data.access) {
+            alert("Cadastro realizado com sucesso!");
+        }
+
+    })
+
+
+    .catch(error => {
+
+        console.error("Erro:", error);
+        alert("Erro ao cadastrar");
+
+    });
+
+}
+
+
+</script>

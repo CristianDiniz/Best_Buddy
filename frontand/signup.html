@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BestBuddy</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+    <div class="bg-white w-full max-w-md rounded-xl shadow-lg overflow-hidden">
+
+        <!-- Cabeçalho -->
+        <div class="bg-teal-200 py-6 border-b">
+            <h1 class="text-4xl font-bold text-center text-gray-800">
+                BEST BUDDY
+            </h1>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="p-8">
+
+            <h2 class="text-2xl font-bold text-teal-600 mb-6">
+                Criar Conta
+            </h2>
+
+            <form id="signupForm">
+
+                <!-- Email -->
+                <div class="mb-4">
+                    <label class="block mb-1 font-semibold">Email</label>
+                    <input id="email" type="email"
+                        class="w-full border rounded-lg px-3 py-2">
+                </div>
+
+                <!-- Senha -->
+                <div class="mb-4">
+                    <label class="block mb-1 font-semibold">Senha</label>
+                    <input id="senha" type="password"
+                        class="w-full border rounded-lg px-3 py-2">
+                </div>
+
+                <!-- Confirmar senha -->
+                <div class="mb-6">
+                    <label class="block mb-1 font-semibold">Confirmar senha</label>
+                    <input id="confirmarSenha" type="password"
+                        class="w-full border rounded-lg px-3 py-2">
+                </div>
+
+                <!-- Tipo -->
+                <div class="mb-6">
+                    <p class="font-semibold mb-2">Tipo de usuário</p>
+
+                    <label class="mr-6">
+                        <input type="radio" name="tipo" value="PF">
+                        Pessoa Física
+                    </label>
+
+                    <label>
+                        <input type="radio" name="tipo" value="ONG">
+                        ONG
+                    </label>
+                </div>
+
+                <!-- Botão -->
+                <button type="submit"
+                    class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 rounded-lg">
+                    Continuar
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>

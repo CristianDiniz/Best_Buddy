@@ -13,9 +13,8 @@ class AnimaisAdmin(admin.ModelAdmin):
         'nome',
         'raca',
         'sexo',
-        'idade',
         'idade_aproximada',
-        'medicamentos',
+        'medicamento',
         'vacinacao',
         'contato',
         'created_at',
@@ -23,8 +22,8 @@ class AnimaisAdmin(admin.ModelAdmin):
     list_filter = (
         'raca',
         'sexo',
-        'idade',
         'idade_aproximada',
-        'medicamentos',
+        'medicamento',
         'vacinacao',
     )
+
