@@ -8,12 +8,12 @@ from .serializer import UsuarioSerializer, RegisterUsuarioSerializer
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterUsuarioSerializer
 
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         data = serializer.save() 
-
+        
         return Response(data)
     
     

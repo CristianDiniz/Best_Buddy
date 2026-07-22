@@ -16,7 +16,6 @@ class PessoaFisicaSerializer(serializers.ModelSerializer):
     class Meta:
         model = PessoaFisica
         fields = [
-            "cpf",
             "nome",
             "telefone",
         ]
@@ -54,9 +53,10 @@ class RegisterUsuarioSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
     tipo = serializers.ChoiceField(choices=Usuario.TipoUsuario.choices)
 
+
+
     # PF
     nome = serializers.CharField(required=False)
-    cpf = serializers.CharField(required=False)
     telefone = serializers.CharField(required=False)
 
     # PJ
@@ -76,8 +76,9 @@ class RegisterUsuarioSerializer(serializers.Serializer):
             PessoaFisica.objects.create(
                 usuario=user,
                 nome=validated_data.get("nome", ""),
-                cpf=validated_data.get("cpf", ""),
                 telefone=validated_data.get("telefone", "")
+
+        
             )
 
         elif tipo == "PJ":
@@ -92,7 +93,6 @@ class RegisterUsuarioSerializer(serializers.Serializer):
         refresh = RefreshToken.for_user(user)
 
         return {
-            "user": user,
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-        }
+    "refresh": str(refresh),
+    "access": str(refresh.access_token),
+}

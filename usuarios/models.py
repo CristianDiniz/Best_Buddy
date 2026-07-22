@@ -48,7 +48,6 @@ class PessoaFisica(models.Model):
         related_name="perfil_pf"
     )
 
-    cpf = models.CharField(max_length=11, unique=True)
     nome = models.CharField(max_length=100)
     telefone = models.CharField(max_length=15, blank=True)
 

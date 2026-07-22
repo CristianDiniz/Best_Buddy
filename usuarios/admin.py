@@ -26,13 +26,11 @@ class UsuarioAdmin(admin.ModelAdmin):
 class PessoaFisicaAdmin(admin.ModelAdmin):
     list_display = (
         "nome",
-        "cpf",
         "usuario",
     )
 
     search_fields = (
         "nome",
-        "cpf",
         "usuario__email",
     )
 
