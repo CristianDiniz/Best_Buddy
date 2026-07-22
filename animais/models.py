@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class Animais(models.Model):
+class Animal(models.Model):
     class SexoAnimal(models.TextChoices):
         MACHO = 'M', 'Macho'
         FEMEA = 'F', 'Fêmea'
