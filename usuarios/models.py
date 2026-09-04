@@ -12,6 +12,9 @@ class  Endereco(models.Model):
      cidade = models.CharField(max_length=100, verbose_name="Cidade")
      estado = models.CharField(max_length=100, verbose_name="Estado")
 
+     created_at = models.DateTimeField(auto_now_add=True)
+     updated_at = models.DateTimeField(auto_now=True)
+
 
     
 class Usuario(AbstractUser):
@@ -51,6 +54,9 @@ class PessoaFisica(models.Model):
     nome = models.CharField(max_length=100)
     telefone = models.CharField(max_length=15, blank=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     def __str__(self):
         return self.nome
     
@@ -75,6 +81,9 @@ class PessoaJuridica(models.Model):
         null=True,
         blank=True
     )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.razao_social

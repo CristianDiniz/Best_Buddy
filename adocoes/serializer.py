@@ -5,8 +5,6 @@ class AdocoesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Adocao
         fields = [ 
-            'ongs', 
-            'pessoa', 
             'StatusAdocao', 
             'nome', 
             'raca', 
@@ -14,5 +12,6 @@ class AdocoesSerializer(serializers.ModelSerializer):
             'idade_aproximada',
             'medicamentos',
             'vacinacao', 
-            'contato', 
+            'contato',
+            'descricao',
             ]
