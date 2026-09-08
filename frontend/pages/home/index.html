@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Best Buddy — Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="../../css/tailwind.build.css" />
+</head>
+<body>
+  <div class="bb-shell">
+    <div id="bb-nav"></div>
+
+    <main class="bb-main">
+      <div class="bb-container">
+        <div id="bb-hero"></div>
+
+        <section class="mb-10">
+          <h2 class="bb-section-title">📰 Notícias e informações</h2>
+          <div id="bb-news"></div>
+        </section>
+
+        <section>
+          <h2 class="bb-section-title">💬 Posts da comunidade</h2>
+          <div id="bb-posts" class="bb-grid bb-stagger md:grid-cols-2"></div>
+        </section>
+      </div>
+    </main>
+
+    <div id="bb-footer"></div>
+  </div>
+
+  <script src="../../js/config.js"></script>
+  <script src="../../js/utils/storage.js"></script>
+  <script src="../../js/utils/auth-guard.js"></script>
+  <script src="../../js/mocks/mock-utils.js"></script>
+  <script src="../../js/mocks/mock-data.js"></script>
+  <script src="../../js/api/client.js"></script>
+  <script src="../../js/services/communityService.js"></script>
+  <script src="../../js/components/Navigation.js"></script>
+  <script src="../../js/components/Footer.js"></script>
+  <script src="../../js/components/PostCard.js"></script>
+  <script src="../../js/components/StateView.js"></script>
+  <script src="../../js/components/HeroCarousel.js"></script>
+  <script src="../../js/pages/home.js"></script>
+</body>
+</html>

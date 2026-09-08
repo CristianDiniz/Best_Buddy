@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Best Buddy — Entrar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="../../css/tailwind.build.css" />
+</head>
+<body>
+  <div class="bb-auth-shell">
+    <div id="bb-header"></div>
+
+    <main class="bb-container">
+      <div class="bb-card bb-auth-card">
+        <h1 class="bb-auth-subtitle">Entre na sua conta</h1>
+
+        <div class="bb-alert bg-brand-500/10 border border-brand-500/40 text-brand-300 text-xs">
+          <span>💡</span>
+          <span>Modo demo: use <strong>usuario@bestbuddy.com</strong> / <strong>123456</strong></span>
+        </div>
+
+        <div id="bb-form-alert"></div>
+
+        <form id="bb-login-form" novalidate>
+          <div class="bb-field">
+            <label class="bb-label" for="email">Email</label>
+            <input class="bb-input" type="email" id="email" name="email" placeholder="seu@email.com" required />
+            <div class="bb-error-text" id="email-error"></div>
+          </div>
+
+          <div class="bb-field">
+            <label class="bb-label" for="password">Senha</label>
+            <input class="bb-input" type="password" id="password" name="password" placeholder="Digite sua senha" required />
+            <div class="bb-error-text" id="password-error"></div>
+          </div>
+
+          <div class="text-right mb-6">
+            <a href="forgot-password.html">Esqueci minha senha</a>
+          </div>
+
+          <button class="bb-btn bb-btn--primary bb-btn--block" type="submit" id="bb-submit-btn">
+            Entrar
+          </button>
+        </form>
+
+        <div class="bb-auth-footer-link">
+          <p>Ainda não tem uma conta?</p>
+          <a href="register.html">Criar uma conta</a>
+        </div>
+      </div>
+    </main>
+
+    <div id="bb-footer"></div>
+  </div>
+
+  <script src="../../js/config.js"></script>
+  <script src="../../js/utils/storage.js"></script>
+  <script src="../../js/utils/validation.js"></script>
+  <script src="../../js/mocks/mock-utils.js"></script>
+  <script src="../../js/mocks/mock-data.js"></script>
+  <script src="../../js/api/client.js"></script>
+  <script src="../../js/services/authService.js"></script>
+  <script src="../../js/components/AuthHeader.js"></script>
+  <script src="../../js/components/Footer.js"></script>
+  <script src="../../js/pages/login.js"></script>
+</body>
+</html>

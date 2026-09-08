@@ -2,25 +2,17 @@ from django.contrib import admin
 from .models import Adocao
 
 @admin.register(Adocao)
-class adocao(admin.ModelAdmin):
+class AdocaoAdmin(admin.ModelAdmin):
     list_display = (
-        'nome',
-        'raca', 
-        'sexo', 
-        'idade_aproximada')
+        'id',
+        'animal',
+        'nome_adotante',
+        'email_adotante',
+        'telefone_adotante',
+        'status',
+        'created_at',
+    )
+    list_filter = ('status', 'created_at')
+    search_fields = ('nome_adotante', 'email_adotante', 'animal__nome')
+    ordering = ('-created_at',)
 
-    list_filter = (
-        'nome',
-        'idade_aproximada',
-)
-    
-    search_fields = (
-        'nome', 
-        'raca', 
-        'sexo',
-        'idade_aproximada',)
-    
-    ordering = (
-        'nome',
-        'idade_aproximada', 
-        'sexo',)

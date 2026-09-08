@@ -1,15 +1,21 @@
-from django.shortcuts import render
-from rest_framework import generics
+from rest_framework import generics, permissions
 from .models import Animal
-from rest_framework.generics import ListCreateAPIView
 from .serializers import AnimaisSerializer
-from rest_framework.permissions import IsAuthenticated
 
-class AnimaisViewSet(ListCreateAPIView):
+class AnimaisViewSet(generics.ListCreateAPIView):
     queryset = Animal.objects.all()
     serializer_class = AnimaisSerializer
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
 
 class AnimaisDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Animal.objects.all()
     serializer_class = AnimaisSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]

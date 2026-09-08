@@ -15,25 +15,24 @@ class Animal(models.Model):
     idade_aproximada = models.CharField(max_length=10, choices=IdadeAproximada)
 
     class Medicamento(models.TextChoices):
-        SIM = 'Sim'
-        NAO = 'Não'
-        NAO_SABE = 'Nâo sei'
+        SIM = 'Sim', 'Sim'
+        NAO = 'Não', 'Não'
+        NAO_SABE = 'Não sei', 'Não sei'
     medicamento = models.CharField(max_length=10, choices=Medicamento)
 
     class Vacina(models.TextChoices):
-        SIM = 'Sim'
-        NAO = 'Não'
-        NAO_SABE = 'Nâo sei'
+        SIM = 'Sim', 'Sim'
+        NAO = 'Não', 'Não'
+        NAO_SABE = 'Não sei', 'Não sei'
     vacinacao = models.CharField(max_length=10, choices=Vacina)
 
-
     nome = models.CharField(max_length=50, null=True, blank=True)
-    raca = models.CharField("raça",max_length=50, null=True, blank=True)
-    
-    
-    
-    
-    contato = models.CharField(max_length=15)
+    raca = models.CharField("raça", max_length=50, null=True, blank=True)
+    contato = models.CharField(max_length=20)
+    descricao = models.TextField(blank=True, null=True, verbose_name="Descrição do animal")
+    imagem = models.CharField(max_length=500, blank=True, null=True, verbose_name="URL da Foto do animal")
+
+
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -44,4 +43,5 @@ class Animal(models.Model):
         ordering = ['nome']
 
     def __str__(self):
-        return self.nome
+        return self.nome or f"Animal #{self.id}"
+

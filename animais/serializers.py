@@ -5,10 +5,16 @@ class AnimaisSerializer(serializers.ModelSerializer):
     class Meta:
         model = Animal
         fields = [
-            'sexo', 
-            'idade_aproximada', 
-            'medicamento', 
-            'vacinacao', 
-            'nome', 
-            'raca', 
-            'contato']
+            'id',
+            'nome',
+            'raca',
+            'sexo',
+            'idade_aproximada',
+            'medicamento',
+            'vacinacao',
+            'contato',
+            'descricao',
+            'imagem',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'created_at']
