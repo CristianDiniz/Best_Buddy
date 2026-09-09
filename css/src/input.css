@@ -1,0 +1,447 @@
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   Best Buddy — Base
+   ========================================================================== */
+@layer base {
+  * {
+    @apply box-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply m-0 bg-surface-900 text-ink-100 font-body antialiased bg-brand-radial bg-no-repeat;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display m-0;
+  }
+
+  a {
+    @apply text-brand-400 transition-colors duration-200;
+  }
+
+  ::selection {
+    @apply bg-brand-500/40 text-ink-100;
+  }
+
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-brand-300;
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-surface-900;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-500 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-brand-700;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+/* ==========================================================================
+   Best Buddy — Componentes
+   ========================================================================== */
+@layer components {
+  /* --- Layout base --- */
+  .bb-shell {
+    @apply min-h-screen flex flex-col;
+  }
+
+  .bb-container {
+    @apply w-full max-w-[1120px] mx-auto px-6;
+  }
+
+  /* #bb-nav, #bb-header e #bb-footer são só "slots" onde os componentes
+     injetam HTML (o wrapper muda de id conforme a página: telas
+     autenticadas usam #bb-nav, telas de auth usam #bb-header).
+     display:contents remove a caixinha desses ids do layout, para que o
+     header sticky use .bb-shell (altura da página inteira) como
+     containing block, em vez de ficar preso na altura mínima do slot. */
+  #bb-nav,
+  #bb-header,
+  #bb-footer {
+    display: contents;
+  }
+
+  .bb-main {
+    @apply flex-1 py-8 md:py-10 animate-fade-in;
+  }
+
+  /* --- Faixa superior (linha de destaque azul do tema) --- */
+  .bb-topbar {
+    @apply w-full h-2 bg-brand-500;
+  }
+
+  /* --- Header / topo --- */
+  .bb-header {
+    @apply bg-surface-800 border-b border-border sticky top-0 z-30;
+  }
+
+  .bb-header__bar {
+    @apply flex items-center justify-center py-4;
+  }
+
+  .bb-header__bar--nav {
+    @apply justify-between gap-4 py-3;
+  }
+
+  /* --- Efeito de encolher no scroll: título desliza pro centro --- */
+  .bb-header__nav-wrap {
+    @apply transition-all duration-500 ease-out-expo overflow-hidden opacity-100;
+    max-width: 640px;
+  }
+
+  .bb-header--scrolled .bb-header__nav-wrap {
+    max-width: 0px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .bb-header--scrolled .bb-header__bar--nav {
+    justify-content: center;
+  }
+
+  /* --- Logotipo --- */
+  .bb-logo {
+    @apply flex items-center gap-1.5 no-underline select-none leading-none;
+  }
+
+  .bb-logo__icon {
+    @apply text-xl sm:text-2xl mr-0.5;
+  }
+
+  .bb-logo__text {
+    @apply font-logo font-extrabold text-2xl sm:text-3xl tracking-tight;
+  }
+
+  .bb-logo__text--dark {
+    @apply text-ink-100;
+  }
+
+  .bb-logo__text--accent {
+    @apply text-brand-400;
+  }
+
+  /* --- Navegação (app autenticado) --- */
+  .bb-nav__links {
+    @apply flex gap-1 sm:gap-2 list-none m-0 p-1 rounded-full bg-surface-700;
+  }
+
+  .bb-nav__link {
+    @apply flex flex-row sm:flex-row items-center gap-1.5 text-xs sm:text-sm font-medium text-ink-300 no-underline px-3 py-2 rounded-full transition-all duration-200 ease-out-expo hover:text-brand-700 hover:bg-brand-200/70;
+  }
+
+  .bb-nav__link[aria-current="page"] {
+    @apply text-white bg-brand-400 shadow-glow font-semibold hover:bg-brand-300 hover:text-white;
+  }
+
+  .bb-nav__user {
+    @apply flex items-center gap-3 text-sm text-ink-300 transition-all duration-500 ease-out-expo overflow-hidden opacity-100;
+    max-width: 320px;
+  }
+
+  .bb-header--scrolled .bb-nav__user {
+    max-width: 0px;
+    opacity: 0;
+    gap: 0;
+    pointer-events: none;
+  }
+
+  .bb-nav__user span {
+    @apply hidden md:inline;
+  }
+
+  .bb-nav__avatar {
+    @apply w-8 h-8 rounded-full bg-gradient-to-br from-brand-300 to-brand-700 flex items-center justify-center text-white font-bold text-xs shadow-glow ring-2 ring-brand-300/30;
+  }
+
+  /* --- Cards --- */
+  .bb-card {
+    @apply bg-surface-800 bg-card-sheen border border-border rounded-xl p-6 shadow-card transition-all duration-300 ease-out-expo;
+  }
+
+  .bb-card--tight {
+    @apply p-4;
+  }
+
+  /* --- Formulários --- */
+  .bb-field {
+    @apply mb-4;
+  }
+
+  .bb-label {
+    @apply block mb-2 text-sm font-semibold text-ink-300;
+  }
+
+  .bb-input,
+  .bb-select,
+  .bb-textarea {
+    @apply w-full bg-surface-700/70 border border-border rounded-lg px-3.5 py-3 text-ink-100 font-body text-[0.95rem] transition-all duration-200 ease-out-expo placeholder:text-ink-500 focus:border-brand-400 focus:bg-surface-700 focus:shadow-[0_0_0_3px_rgba(47,184,154,0.15)] focus:outline-none hover:border-border-light;
+  }
+
+  .bb-input--error {
+    @apply border-danger focus:border-danger focus:shadow-[0_0_0_3px_rgba(229,86,107,0.15)];
+  }
+
+  .bb-error-text {
+    @apply text-danger text-[0.8rem] mt-1.5 flex items-center gap-1 empty:hidden animate-fade-in-down;
+  }
+
+  .bb-error-text:not(:empty)::before {
+    content: "⚠";
+  }
+
+  .bb-radio-group {
+    @apply flex flex-wrap gap-3;
+  }
+
+  .bb-radio-option {
+    @apply flex items-center gap-2 text-sm text-ink-300 bg-surface-700/50 border border-border rounded-lg px-3 py-2 cursor-pointer transition-all duration-200 hover:border-brand-400 hover:text-ink-100 has-[:checked]:border-brand-400 has-[:checked]:text-brand-300 has-[:checked]:bg-brand-500/10;
+  }
+
+  /* --- Botões --- */
+  .bb-btn {
+    @apply relative isolate inline-flex items-center justify-center gap-2 overflow-hidden border-none rounded-lg px-6 py-3 font-body font-bold text-[0.9rem] cursor-pointer select-none transition-all duration-200 ease-out-expo active:scale-[0.97];
+  }
+
+  /* Conteúdo do botão (ícone/texto) sempre acima do gif de biscoitos */
+  .bb-btn > * {
+    @apply relative z-[2];
+  }
+
+  /* Camada do gif — a imagem só é declarada dentro do :hover, então o
+     navegador só busca/anima o gif quando o botão realmente é hoverado */
+  .bb-btn::after {
+    content: "";
+    @apply absolute inset-0 z-[1] opacity-0 pointer-events-none bg-center bg-cover;
+    transition: opacity 0.2s ease-out;
+  }
+
+  .bb-btn:hover:not(:disabled)::after {
+    opacity: 0.85;
+    background-image: url("../assets/images/biscoitos-caindo.gif");
+  }
+
+  .bb-btn--primary {
+    @apply bg-gradient-to-r from-brand-400 to-brand-500 text-white shadow-[0_4px_14px_rgba(47,138,224,0.35)] hover:shadow-[0_6px_20px_rgba(47,138,224,0.5)] hover:-translate-y-0.5 hover:from-brand-300 hover:to-brand-400;
+  }
+
+  .bb-btn--secondary {
+    @apply bg-transparent border border-border text-ink-100 hover:bg-surface-700 hover:border-border-light hover:-translate-y-0.5;
+  }
+
+  .bb-btn--block {
+    @apply w-full;
+  }
+
+  .bb-btn:disabled {
+    @apply opacity-60 cursor-not-allowed hover:translate-y-0 hover:shadow-none;
+  }
+
+  .bb-btn__spinner {
+    @apply w-3.5 h-3.5 rounded-full border-2 border-black/25 border-t-white animate-spin-fast;
+  }
+
+  /* --- Títulos de seção --- */
+  .bb-section-title {
+    @apply text-lg font-bold text-brand-300 mb-4 flex items-center gap-2 animate-fade-in-up;
+  }
+
+  .bb-page-title {
+    @apply text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-200 via-brand-300 to-brand-400 mb-6 animate-fade-in-up;
+  }
+
+  /* --- Grid de cards de animais --- */
+  .bb-grid {
+    @apply grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-5;
+  }
+
+  .bb-animal-card {
+    @apply bg-surface-800 border border-border rounded-xl overflow-hidden flex flex-col no-underline text-inherit shadow-card transition-all duration-300 ease-out-expo animate-scale-in hover:-translate-y-1.5 hover:border-brand-400/50 hover:shadow-card-hover;
+  }
+
+  .bb-animal-card__image {
+    @apply w-full aspect-[4/3] bg-gradient-to-br from-surface-700 to-surface-800 flex items-center justify-center text-ink-500 text-xs overflow-hidden relative;
+  }
+
+  .bb-animal-card__image--empty::before {
+    content: "🐾";
+    @apply text-3xl opacity-30 group-hover:opacity-50 group-hover:scale-110 transition-all duration-300 block;
+  }
+
+  .bb-animal-card__body {
+    @apply p-4 flex flex-col gap-1;
+  }
+
+  .bb-animal-card__name {
+    @apply font-bold text-[0.95rem] text-ink-100 group-hover:text-brand-300 transition-colors duration-200;
+  }
+
+  .bb-animal-card__meta {
+    @apply text-[0.8rem] text-ink-300;
+  }
+
+  /* --- Post / desaparecido card --- */
+  .bb-post-card {
+    @apply bg-surface-800 bg-card-sheen border border-border rounded-xl p-4 shadow-card transition-all duration-300 ease-out-expo animate-fade-in-up hover:border-border-light hover:-translate-y-0.5;
+  }
+
+  .bb-post-card__meta {
+    @apply flex justify-between text-xs text-ink-500 mt-3 pt-3 border-t border-border;
+  }
+
+  /* --- Estados (loading / empty / error) --- */
+  .bb-state {
+    @apply text-center py-14 px-4 text-ink-300 animate-fade-in;
+  }
+
+  .bb-state__title {
+    @apply font-bold text-ink-100 mb-2 text-base;
+  }
+
+  /* --- Footer --- */
+  .bb-footer {
+    @apply bg-surface-800 border-t border-border py-10 text-[0.85rem] text-ink-300 mt-8;
+  }
+
+  .bb-footer__grid {
+    @apply grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-8;
+  }
+
+  .bb-footer__map {
+    @apply bg-gradient-to-br from-surface-700 to-surface-800 border border-border rounded-xl aspect-[16/7] flex items-center justify-center text-ink-500 relative overflow-hidden;
+  }
+
+  /* --- Auth pages (telas não autenticadas) --- */
+  .bb-auth-shell {
+    @apply min-h-screen flex flex-col items-center bg-surface-900 bg-brand-radial bg-no-repeat;
+  }
+
+  .bb-auth-card {
+    @apply w-full max-w-[420px] my-10 mx-auto animate-scale-in shadow-card-hover;
+  }
+
+  .bb-auth-subtitle {
+    @apply text-brand-300 font-bold text-xl mb-6;
+  }
+
+  .bb-auth-footer-link {
+    @apply text-center mt-6 text-sm text-ink-300;
+  }
+
+  /* --- Toast / alerta inline --- */
+  .bb-alert {
+    @apply rounded-lg px-4 py-3 text-[0.85rem] mb-4 animate-fade-in-down flex items-start gap-2;
+  }
+
+  .bb-alert--error {
+    @apply bg-danger/10 border border-danger text-[#ffb3bd];
+  }
+
+  .bb-alert--success {
+    @apply bg-success/10 border border-success text-brand-300;
+  }
+
+  /* --- Skeleton loading (shimmer) --- */
+  .bb-skeleton {
+    @apply bg-surface-700 bg-shimmer bg-[length:400px_100%] animate-shimmer rounded-lg;
+  }
+
+  /* --- Hero carousel (banner rotativo da Home) --- */
+  .bb-hero {
+    @apply relative overflow-hidden rounded-2xl border border-border mb-10 shadow-card-hover bg-surface-800 h-[280px] sm:h-[340px] md:h-[400px] animate-fade-in-up;
+  }
+
+  .bb-hero__track {
+    @apply relative w-full h-full;
+  }
+
+  .bb-hero__slide {
+    @apply absolute inset-0 flex items-center opacity-0 pointer-events-none transition-opacity duration-700 ease-out-expo;
+  }
+
+  .bb-hero__slide.is-active {
+    @apply opacity-100 pointer-events-auto;
+  }
+
+  .bb-hero__img {
+    @apply absolute inset-0 w-full h-full object-cover bg-surface-700;
+  }
+
+  .bb-hero__overlay {
+    @apply absolute inset-0 bg-gradient-to-r from-brand-900/90 via-brand-900/55 to-brand-900/10;
+  }
+
+  .bb-hero__content {
+    @apply relative z-10 max-w-md px-6 sm:px-10 md:px-14 text-white;
+  }
+
+  .bb-hero__title {
+    @apply text-xl sm:text-2xl md:text-3xl font-display font-extrabold mb-2 md:mb-3 drop-shadow-sm;
+  }
+
+  .bb-hero__desc {
+    @apply text-white/85 text-sm sm:text-base mb-4 md:mb-5 max-w-sm;
+  }
+
+  .bb-hero__arrow {
+    @apply absolute top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/85 hover:bg-white text-brand-900 flex items-center justify-center text-lg sm:text-xl font-bold shadow-card border-none cursor-pointer transition-all duration-200 ease-out-expo hover:scale-105;
+  }
+
+  .bb-hero__arrow--prev {
+    @apply left-3 sm:left-4;
+  }
+
+  .bb-hero__arrow--next {
+    @apply right-3 sm:right-4;
+  }
+
+  .bb-hero__dots {
+    @apply absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2;
+  }
+
+  .bb-hero__dot {
+    @apply w-2.5 h-2.5 rounded-full bg-white/60 border-none cursor-pointer p-0 transition-all duration-200 ease-out-expo hover:bg-white/85;
+  }
+
+  .bb-hero__dot.is-active {
+    @apply bg-white w-6;
+  }
+}
+
+/* ==========================================================================
+   Best Buddy — Utilitários extras
+   ========================================================================== */
+@layer utilities {
+  .bb-stagger > * {
+    animation-fill-mode: both;
+  }
+  .bb-stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .bb-stagger > *:nth-child(2) { animation-delay: 60ms; }
+  .bb-stagger > *:nth-child(3) { animation-delay: 120ms; }
+  .bb-stagger > *:nth-child(4) { animation-delay: 180ms; }
+  .bb-stagger > *:nth-child(5) { animation-delay: 240ms; }
+  .bb-stagger > *:nth-child(6) { animation-delay: 300ms; }
+  .bb-stagger > *:nth-child(7) { animation-delay: 360ms; }
+  .bb-stagger > *:nth-child(8) { animation-delay: 420ms; }
+  .bb-stagger > *:nth-child(n+9) { animation-delay: 480ms; }
+}
