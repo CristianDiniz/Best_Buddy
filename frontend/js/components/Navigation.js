@@ -34,7 +34,7 @@ function bbRenderNavigation(targetSelector, activePage) {
           <span class="bb-logo__icon" aria-hidden="true">🐾</span>
           <span class="bb-logo__text bb-logo__text--dark">Best</span><span class="bb-logo__text bb-logo__text--accent">Buddy</span>
         </a>
-        <nav aria-label="Navegação principal">
+        <nav aria-label="Navegação principal" class="bb-header__nav-wrap">
           <ul class="bb-nav__links">${linksHtml}</ul>
         </nav>
         <div class="bb-nav__user">
@@ -46,5 +46,14 @@ function bbRenderNavigation(targetSelector, activePage) {
     </header>
   `;
 
-  document.getElementById("bb-logout-btn")?.addEventListener("click", () => authService.logout());
+  document.getElementById("bb-logout-btn")?.addEventListener("click", () => {
+    if (typeof authService !== "undefined" && authService.logout) {
+      authService.logout();
+    } else {
+      bbStorage.clearSession();
+      window.location.href = "/pages/auth/login.html";
+    }
+  });
+
+  bbInitHeaderScrollEffect(el.querySelector(".bb-header"));
 }

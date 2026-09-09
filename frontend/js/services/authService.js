@@ -8,7 +8,8 @@ const authService = {
       return bbMockError("Email ou senha inválidos.", 401);
     }
     const data = await bbClient.post("/token/", { email, password }, { auth: false });
-    return { access: data.access, refresh: data.refresh, user: data.user || null };
+    const user = data.user || { email, nome: email.split("@")[0] };
+    return { access: data.access, refresh: data.refresh, user };
   },
 
   async register(payload) {

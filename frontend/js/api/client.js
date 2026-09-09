@@ -10,6 +10,25 @@ class BBApiError extends Error {
   }
 }
 
+/**
+ * O DRF, quando a validação de um serializer falha, devolve um objeto
+ * tipo { "password": ["Este campo é obrigatório."], "email": [...] }
+ * (sem uma chave "detail"). Sem isso, o front mostrava sempre uma
+ * mensagem genérica, escondendo o motivo real do erro.
+ */
+function bbExtractErrorMessage(data, fallback) {
+  if (!data) return fallback;
+  if (typeof data.detail === "string") return data.detail;
+  if (typeof data === "object") {
+    const parts = Object.entries(data).map(([field, msgs]) => {
+      const text = Array.isArray(msgs) ? msgs.join(" ") : String(msgs);
+      return field === "non_field_errors" ? text : `${field}: ${text}`;
+    });
+    if (parts.length) return parts.join(" | ");
+  }
+  return fallback;
+}
+
 const bbClient = {
   async request(path, { method = "GET", body, auth = true } = {}) {
     const headers = { "Content-Type": "application/json" };
@@ -38,7 +57,7 @@ const bbClient = {
 
     if (!response.ok) {
       throw new BBApiError(
-        data?.detail || "Ocorreu um erro ao processar sua solicitação.",
+        bbExtractErrorMessage(data, "Ocorreu um erro ao processar sua solicitação."),
         response.status,
         data
       );

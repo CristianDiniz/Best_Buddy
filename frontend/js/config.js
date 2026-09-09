@@ -11,4 +11,5 @@ window.BB_CONFIG = {
   USE_MOCKS: false, // Integrado à API Django real por padrão
   API_BASE_URL: "http://127.0.0.1:8000/api",
   MOCK_LATENCY_MS: 0,
+  GOOGLE_MAPS_API_KEY: "",
 };

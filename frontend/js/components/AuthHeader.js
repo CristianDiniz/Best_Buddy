@@ -11,4 +11,6 @@ function bbRenderAuthHeader(targetSelector) {
       </div>
     </header>
   `;
+
+  bbInitHeaderScrollEffect(el.querySelector(".bb-header"));
 }
