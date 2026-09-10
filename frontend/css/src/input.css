@@ -70,6 +70,18 @@
     @apply w-full max-w-[1120px] mx-auto px-6;
   }
 
+  /* #bb-nav, #bb-header e #bb-footer são só "slots" onde os componentes
+     injetam HTML (o wrapper muda de id conforme a página: telas
+     autenticadas usam #bb-nav, telas de auth usam #bb-header).
+     display:contents remove a caixinha desses ids do layout, para que o
+     header sticky use .bb-shell (altura da página inteira) como
+     containing block, em vez de ficar preso na altura mínima do slot. */
+  #bb-nav,
+  #bb-header,
+  #bb-footer {
+    display: contents;
+  }
+
   .bb-main {
     @apply flex-1 py-8 md:py-10 animate-fade-in;
   }
@@ -90,6 +102,22 @@
 
   .bb-header__bar--nav {
     @apply justify-between gap-4 py-3;
+  }
+
+  /* --- Efeito de encolher no scroll: título desliza pro centro --- */
+  .bb-header__nav-wrap {
+    @apply transition-all duration-500 ease-out-expo overflow-hidden opacity-100;
+    max-width: 640px;
+  }
+
+  .bb-header--scrolled .bb-header__nav-wrap {
+    max-width: 0px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .bb-header--scrolled .bb-header__bar--nav {
+    justify-content: center;
   }
 
   /* --- Logotipo --- */
@@ -127,7 +155,15 @@
   }
 
   .bb-nav__user {
-    @apply flex items-center gap-3 text-sm text-ink-300;
+    @apply flex items-center gap-3 text-sm text-ink-300 transition-all duration-500 ease-out-expo overflow-hidden opacity-100;
+    max-width: 320px;
+  }
+
+  .bb-header--scrolled .bb-nav__user {
+    max-width: 0px;
+    opacity: 0;
+    gap: 0;
+    pointer-events: none;
   }
 
   .bb-nav__user span {
@@ -184,11 +220,29 @@
 
   /* --- Botões --- */
   .bb-btn {
-    @apply inline-flex items-center justify-center gap-2 border-none rounded-lg px-6 py-3 font-body font-bold text-[0.9rem] cursor-pointer select-none transition-all duration-200 ease-out-expo active:scale-[0.97];
+    @apply relative isolate inline-flex items-center justify-center gap-2 overflow-hidden border-none rounded-lg px-6 py-3 font-body font-bold text-[0.9rem] cursor-pointer select-none transition-all duration-200 ease-out-expo active:scale-[0.97];
+  }
+
+  /* Conteúdo do botão (ícone/texto) sempre acima do gif de biscoitos */
+  .bb-btn > * {
+    @apply relative z-[2];
+  }
+
+  /* Camada do gif — a imagem só é declarada dentro do :hover, então o
+     navegador só busca/anima o gif quando o botão realmente é hoverado */
+  .bb-btn::after {
+    content: "";
+    @apply absolute inset-0 z-[1] opacity-0 pointer-events-none bg-center bg-cover;
+    transition: opacity 0.2s ease-out;
+  }
+
+  .bb-btn:hover:not(:disabled)::after {
+    opacity: 0.85;
+    background-image: url("../assets/images/biscoitos-caindo.gif");
   }
 
   .bb-btn--primary {
-    @apply bg-gradient-to-r from-brand-400 to-brand-500 text-surface-900 shadow-[0_4px_14px_rgba(47,184,154,0.35)] hover:shadow-[0_6px_20px_rgba(47,184,154,0.5)] hover:-translate-y-0.5 hover:from-brand-300 hover:to-brand-400;
+    @apply bg-gradient-to-r from-brand-400 to-brand-500 text-white shadow-[0_4px_14px_rgba(47,138,224,0.35)] hover:shadow-[0_6px_20px_rgba(47,138,224,0.5)] hover:-translate-y-0.5 hover:from-brand-300 hover:to-brand-400;
   }
 
   .bb-btn--secondary {
@@ -204,7 +258,7 @@
   }
 
   .bb-btn__spinner {
-    @apply w-3.5 h-3.5 rounded-full border-2 border-black/25 border-t-surface-900 animate-spin-fast;
+    @apply w-3.5 h-3.5 rounded-full border-2 border-black/25 border-t-white animate-spin-fast;
   }
 
   /* --- Títulos de seção --- */
