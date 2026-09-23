@@ -43,6 +43,17 @@ Este repositório de notas documenta tanto o **Backend Django REST** quanto o **
 - [[03 - Tarefas Frontend (Melhorias)]] — Ajustes na integração real, saudação do usuário e modal de desaparecidos.
 - [[04 - Guia de Execução e Testes]] — Como rodar ambos os projetos localmente e testar ponta a ponta.
 - [[05 - Configuração e Uso do Docker]] — Como executar todo o ecossistema (Django + MySQL + Nginx) via Docker Compose.
+- [[06 - Guia de Alinhamento da Equipe e Novo Roadmap]] — Guia para a reunião de alinhamento: permissões, tabelas, dúvidas e divisão de tarefas.
+
+### 📋 06 - Requisitos & Modelagem (Auditado)
+- [[00 - MOC Requisitos e Modelagem]] — Índice central da especificação canônica do sistema.
+- [[01 - Atores e Matriz de Permissões]] — Visitante, Comum, ONG, Staff e SuperUser com restrições e poderes.
+- [[02 - Requisitos Funcionais]] — RF01 a RF40 categorizados por módulos funcionais.
+- [[03 - Requisitos Não Funcionais]] — RNF01 a RNF07 com métricas e critérios de aceitação.
+- [[04 - Regras de Negócio]] — RN01 a RN12 (Cota de 5, ilimitado para ONGs, ciclo 90+30 dias, moderação).
+- [[05 - Modelagem de Dados e Relacionamentos]] — Diagrama ERD em Mermaid e Dicionário de 8 tabelas.
+- [[06 - Matriz de Gap Analysis (O que Adicionar, Ajustar e Remover)]] — Confronto direto: código atual vs requisitos.
+- [[07 - Plano de Ação e Roadmap de Implementação]] — Cronograma detalhado em 5 fases de execução.
 
 
 ---

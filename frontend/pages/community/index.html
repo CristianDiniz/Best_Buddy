@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Best Buddy — Comunidade</title>
+  <title>Best Buddy — Comunidade & Notícias</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="../../css/tailwind.build.css" />
 </head>
@@ -13,37 +13,112 @@
 
     <main class="bb-main">
       <div class="bb-container">
-        <section class="mb-10">
-          <h2 class="bb-section-title">💬 Posts da comunidade</h2>
-          <div id="bb-posts" class="bb-grid bb-stagger md:grid-cols-2"></div>
+        <div class="mb-8">
+          <h1 class="bb-page-title">Comunidade & Ações 🐾</h1>
+          <p class="text-sm text-slate-400">Acompanhe as notícias oficiais da causa animal e ajude a encontrar pets desaparecidos.</p>
+        </div>
+
+        <!-- Seção 1: Notícias e Artigos -->
+        <section class="mb-12">
+          <h2 class="bb-section-title flex items-center gap-2">
+            <span>📰</span> Notícias e Campanhas
+          </h2>
+          <div id="bb-news" class="bb-grid bb-stagger md:grid-cols-2"></div>
         </section>
 
+        <!-- Seção 2: Mural de Animais Desaparecidos (Compartilha tabela Animal) -->
         <section>
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="bb-section-title mb-0">Desaparecidos</h2>
-            <button class="bb-btn bb-btn--secondary" id="bb-report-btn" type="button">Reportar animal desaparecido</button>
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 class="bb-section-title mb-1 flex items-center gap-2">
+                <span>🚨</span> Pets Desaparecidos
+              </h2>
+              <p class="text-xs text-slate-400">Animais reportados que precisam ser localizados urgentemente.</p>
+            </div>
+            <button class="bb-btn bb-btn--primary" id="bb-report-btn" type="button">
+              + Reportar animal desaparecido
+            </button>
           </div>
-          <div id="bb-missing" class="bb-grid bb-stagger grid-cols-[repeat(auto-fill,minmax(260px,1fr))]"></div>
+
+          <!-- Alerta de bloqueio caso WhatsApp não esteja validado -->
+          <div id="bb-community-alert"></div>
+
+          <div id="bb-missing" class="bb-grid bb-stagger grid-cols-[repeat(auto-fill,minmax(280px,1fr))]"></div>
         </section>
+
       </div>
     </main>
+
+    <!-- Modal para Reportar Animal Desaparecido -->
+    <div id="report-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bb-card max-w-lg w-full bg-slate-900 border border-slate-700 shadow-2xl relative">
+        <button id="modal-close-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-100 text-xl font-bold">&times;</button>
+        <h2 class="text-lg font-bold text-slate-100 mb-2 flex items-center gap-2">
+          <span>🚨</span> Reportar Animal Desaparecido
+        </h2>
+        <p class="text-xs text-slate-400 mb-4">
+          O contato exibido será automaticamente o seu WhatsApp validado cadastrado no perfil.
+        </p>
+
+        <form id="form-report-missing" class="space-y-4">
+          <div>
+            <label class="bb-label" for="missing-nome">Nome do Animal (opcional)</label>
+            <input class="bb-input" type="text" id="missing-nome" placeholder="Ex: Rex, Mel..." />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="bb-label" for="missing-tipo">Tipo de Animal</label>
+              <select class="bb-input" id="missing-tipo">
+                <option value="CACHORRO">Cachorro</option>
+                <option value="GATO">Gato</option>
+                <option value="OUTRO">Outro</option>
+              </select>
+            </div>
+            <div>
+              <label class="bb-label" for="missing-cidade">Cidade *</label>
+              <input class="bb-input" type="text" id="missing-cidade" required placeholder="Ex: Campinas" />
+            </div>
+          </div>
+
+          <div>
+            <label class="bb-label" for="missing-local">Último local visto / Ponto de referência *</label>
+            <input class="bb-input" type="text" id="missing-local" required placeholder="Ex: Próximo à praça central, Rua X..." />
+          </div>
+
+          <div>
+            <label class="bb-label" for="missing-desc">Descrição / Características * (máx 255 chars)</label>
+            <textarea class="bb-input" id="missing-desc" rows="3" maxlength="255" required placeholder="Coleira azul, porte médio, mancha branca no peito..."></textarea>
+          </div>
+
+          <div>
+            <label class="bb-label" for="missing-img">URL da Foto do Pet (opcional)</label>
+            <input class="bb-input" type="url" id="missing-img" placeholder="https://..." />
+          </div>
+
+          <div class="flex justify-end gap-3 pt-2">
+            <button class="bb-btn bb-btn--secondary" type="button" id="modal-cancel-btn">Cancelar</button>
+            <button class="bb-btn bb-btn--primary" type="submit" id="modal-submit-btn">Publicar Anúncio</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <div id="bb-footer"></div>
   </div>
 
   <script src="../../js/config.js"></script>
   <script src="../../js/utils/storage.js"></script>
-  <script src="../../js/utils/auth-guard.js"></script>
   <script src="../../js/mocks/mock-utils.js"></script>
   <script src="../../js/mocks/mock-data.js"></script>
   <script src="../../js/api/client.js"></script>
   <script src="../../js/services/communityService.js"></script>
+  <script src="../../js/services/animalService.js"></script>
   <script src="../../js/services/authService.js"></script>
   <script src="../../js/utils/header-scroll.js"></script>
   <script src="../../js/components/Navigation.js"></script>
   <script src="../../js/components/Footer.js"></script>
   <script src="../../js/components/NearbyOngsMap.js"></script>
-  <script src="../../js/components/PostCard.js"></script>
   <script src="../../js/components/MissingAnimalCard.js"></script>
   <script src="../../js/components/StateView.js"></script>
   <script src="../../js/pages/community.js"></script>

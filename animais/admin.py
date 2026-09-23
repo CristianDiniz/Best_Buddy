@@ -2,28 +2,32 @@ from django.contrib import admin
 from .models import Animal
 
 
-# Register your models here.
 @admin.register(Animal)
 class AnimaisAdmin(admin.ModelAdmin):
     readonly_fields = (
+        'contato',
         'created_at',
         'updated_at',
     )
     list_display = (
         'nome',
-        'raca',
-        'sexo',
-        'idade_aproximada',
-        'medicamento',
-        'vacinacao',
+        'tipo_servico',
+        'tipo_animal',
+        'tutor',
+        'cidade',
+        'status',
         'contato',
         'created_at',
     )
     list_filter = (
-        'raca',
-        'sexo',
-        'idade_aproximada',
-        'medicamento',
-        'vacinacao',
+        'tipo_servico',
+        'tipo_animal',
+        'status',
+        'cidade',
     )
-
+    search_fields = (
+        'nome',
+        'cidade',
+        'descricao',
+        'tutor__email',
+    )

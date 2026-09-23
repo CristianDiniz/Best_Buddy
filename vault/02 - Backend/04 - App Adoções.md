@@ -1,5 +1,10 @@
 # 📋 Backend — App Adoções
-tags: #backend #adocoes #models #refactor #relacionamentos #implementado
+tags: #backend #adocoes #models #refactor #relacionamentos #descontinuado
+
+> [!WARNING]
+> **Aviso de Refatoração de Requisitos (Setembro/2026):**
+> Conforme definido na revisão de requisitos em [[02 - Requisitos Funcionais#RF13 — Contato Direto para Adoção (Sem Formulário Intermediário)]], o fluxo de **questionário de manifestação de interesse foi descontinuado**. 
+> A adoção agora é realizada via **contato direto com o tutor pelo WhatsApp validado** no cadastro do pet. O modelo `Adocao` e o app `adocoes` estão marcados para remoção/descontinuação no roadmap (ver [[06 - Matriz de Gap Analysis (O que Adicionar, Ajustar e Remover)]]).
 
 ## 1. Histórico da Modelagem e Refatoração Realizada
 

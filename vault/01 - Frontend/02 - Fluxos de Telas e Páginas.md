@@ -92,30 +92,33 @@ Todas as telas abaixo importam `js/utils/auth-guard.js`. Se o usuário não tive
 - **Objetivo**: Ficha técnica e perfil detalhado do animal escolhido.
 - **Parâmetro de URL**: `?id=<id>`
 - **Exibição**:
-  - Imagem do pet.
-  - Badges informativos: Raça, Idade aproximada e Sexo formatado (Macho/Fêmea/Indeterminado).
+  - Imagem do pet e tipo de animal (`Cachorro`, `Gato`, `Outro`).
+  - Badges informativos: Raça, Idade aproximada, Sexo formatado (Macho/Fêmea/Indeterminado) e Cidade.
   - Status de vacinação e uso de medicamentos contínuos.
-  - Descrição comportamental e história do resgate.
-  - Botão de ação primário: **"Quero adotar"**, que direciona para `/pages/adoption/create.html?animal_id=<id>`.
+  - Descrição comportamental (até 255 caracteres).
+  - **Botão de Ação Primário**: **"Falar com o Tutor no WhatsApp"** (link direto para `https://wa.me/55...` com o número previamente validado por PIN durante o cadastro).
+  - **Botão Secundário**: **"Denunciar Card"** (exige que o usuário esteja autenticado e abre modal com Enum de motivos de infração).
 
 ---
 
-### `pages/adoption/create.html` & `adoption.js`
-- **Objetivo**: Formulário de intenção de adoção responsável.
-- **Parâmetro de URL**: `?animal_id=<id>`
-- **Comportamento**:
-  1. Busca os dados do animal selecionado via `animalService.getById(animal_id)` e exibe um mini-card de resumo no topo.
-  2. Caso a página seja aberta sem `animal_id`, bloqueia o formulário e avisa o usuário para selecionar um pet primeiro.
-  3. **Campos do Formulário**:
-     - `nome_adotante` (obrigatório)
-     - `email_adotante` (obrigatório, formato email)
-     - `telefone_adotante` (obrigatório)
-     - Radios: `ja_teve_animais` (Sim/Não/Não sei)
-     - Radios: `ja_vacinado` (Sim/Não/Não sei)
-     - `motivacao` (Texto longo: "Conte um pouco sobre você e por que deseja adotar")
-  4. **Proteção Anti-duplicação**: Flag `bbHasSubmitted` impede múltiplos cliques enquanto a requisição está em andamento.
-  5. Ao submeter com sucesso, exibe banner verde e oculta o formulário.
+### `pages/animals/create.html` & `animal-create.js` (Novo Fluxo)
+- **Objetivo**: Cadastro de novo animal para adoção pelo tutor logado.
+- **Etapa 1 (Dados do Pet)**:
+  - Seleção de `tipo_animal` (Enum: Cachorro, Gato, Outro).
+  - Upload de foto, cidade, descrição (até 255 caracteres) e telefone celular com DDD.
+- **Etapa 2 (Validação de WhatsApp por PIN)**:
+  - Dispara código de 6 dígitos para o WhatsApp informado.
+  - Usuário digita o código PIN recebido para autorizar a publicação.
+
+---
+
+### `pages/adoption/create.html` (Descontinuado)
+> [!WARNING]
+> **Fluxo Descontinuado:** Conforme a especificação revisada em [[02 - Requisitos Funcionais#RF13 — Contato Direto para Adoção (Sem Formulário Intermediário)]], o questionário burocrático de aptidão foi removido. A negociação ocorre diretamente com o tutor via WhatsApp.
+
+---
 
 Veja também:
-- [[03 - Serviços e Camada de API]]
-- [[01 - Contrato de API (Endpoints)]]
+- [[02 - Requisitos Funcionais]]
+- [[05 - Modelagem de Dados e Relacionamentos]]
+- [[06 - Matriz de Gap Analysis (O que Adicionar, Ajustar e Remover)]]
