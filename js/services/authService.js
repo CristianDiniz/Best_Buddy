@@ -8,11 +8,7 @@ const authService = {
       return bbMockError("Email ou senha inválidos.", 401);
     }
     const data = await bbClient.post("/token/", { email, password }, { auth: false });
-    // O backend (POST /token/) só devolve os tokens JWT, sem dados de
-    // perfil (não existe endpoint "/me"). Guardamos um usuário mínimo
-    // a partir do que já temos no formulário, só para exibir algo
-    // (nome/inicial) na navegação.
-    const user = { email, nome: email.split("@")[0] };
+    const user = data.user || { email, nome: email.split("@")[0] };
     return { access: data.access, refresh: data.refresh, user };
   },
 
@@ -23,15 +19,19 @@ const authService = {
     return bbClient.post("/usuarios/register/", payload, { auth: false });
   },
 
-  // Backend ainda não implementa recuperação de senha (não existe rota
-  // /usuarios/password-reset/). Mantido mockado até essa API existir.
   async requestPasswordReset(email) {
-    return bbMockDelay({ sent: true });
+    if (window.BB_CONFIG.USE_MOCKS) {
+      return bbMockDelay({ sent: true });
+    }
+    return bbClient.post("/usuarios/password-reset/", { email }, { auth: false });
   },
 
   async confirmPasswordReset({ email, pin, password }) {
-    if (pin === "0000") return bbMockError("PIN inválido.", 400);
-    return bbMockDelay({ reset: true });
+    if (window.BB_CONFIG.USE_MOCKS) {
+      if (pin === "0000") return bbMockError("PIN inválido.", 400);
+      return bbMockDelay({ reset: true });
+    }
+    return bbClient.post("/usuarios/password-reset/confirm/", { email, pin, password }, { auth: false });
   },
 
   logout() {

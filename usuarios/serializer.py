@@ -1,15 +1,21 @@
 from rest_framework import serializers
 from .models import Usuario, PessoaFisica, PessoaJuridica, Endereco
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = [
+            "id",
             "email",
             "tipo",
+            "telefone",
+            "telefone_validado",
+            "created_at",
         ]
+        read_only_fields = ["id", "telefone_validado", "created_at"]
 
 
 class PessoaFisicaSerializer(serializers.ModelSerializer):
@@ -17,7 +23,6 @@ class PessoaFisicaSerializer(serializers.ModelSerializer):
         model = PessoaFisica
         fields = [
             "nome",
-            "cpf",
             "telefone",
         ]
 
@@ -49,15 +54,15 @@ class EnderecoSerializer(serializers.ModelSerializer):
             "estado",
         ]
 
+
 class RegisterUsuarioSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
-    tipo = serializers.ChoiceField(choices=Usuario.TipoUsuario.choices)
+    tipo = serializers.ChoiceField(choices=Usuario.TipoUsuario.choices, default="PF")
+    telefone = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     # PF
     nome = serializers.CharField(required=False, allow_blank=True)
-    cpf = serializers.CharField(required=False, allow_blank=True)
-    telefone = serializers.CharField(required=False, allow_blank=True)
 
     # PJ
     razao_social = serializers.CharField(required=False, allow_blank=True)
@@ -68,26 +73,22 @@ class RegisterUsuarioSerializer(serializers.Serializer):
             raise serializers.ValidationError("Este email já está cadastrado.")
         return value.lower()
 
-    def validate_cpf(self, value):
-        if value and PessoaFisica.objects.filter(cpf=value).exists():
-            raise serializers.ValidationError("Este CPF já está cadastrado.")
-        return value
-
-
     def create(self, validated_data):
-        tipo = validated_data["tipo"]
+        tipo = validated_data.get("tipo", "PF")
+        telefone_informado = validated_data.get("telefone", "").strip() or None
 
         user = Usuario.objects.create_user(
             email=validated_data["email"],
             password=validated_data["password"],
-            tipo=tipo
+            tipo=tipo,
+            telefone=telefone_informado,
+            telefone_validado=False
         )
 
         if tipo == "PF":
             PessoaFisica.objects.create(
                 usuario=user,
                 nome=validated_data.get("nome", ""),
-                cpf=validated_data.get("cpf", ""),
                 telefone=validated_data.get("telefone", "")
             )
 
@@ -104,10 +105,78 @@ class RegisterUsuarioSerializer(serializers.Serializer):
         return {
             "refresh": str(refresh),
             "access": str(refresh.access_token),
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "tipo": user.tipo,
+                "telefone": user.telefone,
+                "telefone_validado": user.telefone_validado,
+            }
         }
 
 
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+class AlterarEmailSerializer(serializers.Serializer):
+    novo_email = serializers.EmailField()
+    senha_atual = serializers.CharField(write_only=True)
+
+    def validate_novo_email(self, value):
+        user = self.context.get("request").user if self.context.get("request") else None
+        if Usuario.objects.filter(email__iexact=value).exclude(pk=user.pk if user else None).exists():
+            raise serializers.ValidationError("Este email já está em uso por outro usuário.")
+        return value.lower()
+
+
+class ConfirmarEmailSerializer(serializers.Serializer):
+    token = serializers.CharField()
+
+
+class AlterarSenhaSerializer(serializers.Serializer):
+    senha_atual = serializers.CharField(write_only=True)
+    nova_senha = serializers.CharField(write_only=True)
+    confirmar_nova_senha = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        if attrs["nova_senha"] != attrs["confirmar_nova_senha"]:
+            raise serializers.ValidationError({"confirmar_nova_senha": "As novas senhas não coincidem."})
+        if len(attrs["nova_senha"]) < 6:
+            raise serializers.ValidationError({"nova_senha": "A nova senha deve ter pelo menos 6 caracteres."})
+        return attrs
+
+
+class TwilioEnviarCodigoSerializer(serializers.Serializer):
+    telefone = serializers.CharField(max_length=25)
+
+    def validate_telefone(self, value):
+        limpo = "".join(filter(str.isdigit, value))
+        if len(limpo) < 10 or len(limpo) > 13:
+            raise serializers.ValidationError("Informe um número de telefone com DDD válido (ex: 11999998888).")
+        return value.strip()
+
+
+class TwilioVerificarCodigoSerializer(serializers.Serializer):
+    telefone = serializers.CharField(max_length=25)
+    codigo = serializers.CharField(max_length=10)
+
+
+class RecuperarSenhaSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        return value.lower().strip()
+
+
+class RedefinirSenhaSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    nova_senha = serializers.CharField(write_only=True)
+    confirmar_nova_senha = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        if attrs["nova_senha"] != attrs["confirmar_nova_senha"]:
+            raise serializers.ValidationError({"confirmar_nova_senha": "As novas senhas não coincidem."})
+        if len(attrs["nova_senha"]) < 6:
+            raise serializers.ValidationError({"nova_senha": "A nova senha deve ter pelo menos 6 caracteres."})
+        return attrs
+
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -123,6 +192,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             'id': self.user.id,
             'email': self.user.email,
             'tipo': self.user.tipo,
+            'telefone': self.user.telefone,
+            'telefone_validado': self.user.telefone_validado,
             'nome': nome or self.user.email.split('@')[0],
         }
-        return data
+        return data

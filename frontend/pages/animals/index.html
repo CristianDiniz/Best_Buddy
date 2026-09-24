@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Best Buddy — Animais para adoção</title>
+  <title>Best Buddy — Encontre ou Ajude um Pet</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="../../css/tailwind.build.css" />
 </head>
@@ -13,23 +13,220 @@
 
     <main class="bb-main">
       <div class="bb-container">
-        <h1 class="bb-page-title">Prontos para receber um lar 🐾</h1>
-        <div id="bb-animals" class="bb-grid bb-stagger"></div>
+        <!-- Topo: Título e Botão de Ação -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div>
+            <h1 class="bb-page-title mb-1">Encontre ou Ajude um Pet 🐾</h1>
+            <p class="text-sm text-ink-300">
+              Adote um companheiro ou ajude uma família a reencontrar seu pet desaparecido.
+            </p>
+          </div>
+          <button class="bb-btn bb-btn--primary shrink-0 flex items-center gap-2" id="bb-announce-pet-btn" type="button">
+            <span>🐾</span> + Anunciar Pet para Adoção
+          </button>
+        </div>
+
+        <!-- Barra de Busca, Filtros e Abas -->
+        <div class="bb-card mb-8">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <!-- Abas: Todos os Pets vs Meus Anúncios -->
+            <div class="flex items-center gap-2 p-1 bg-surface-700/80 rounded-xl border border-border w-fit">
+              <button id="tab-all-pets" type="button" class="px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition-all bg-brand-500 text-white shadow-sm">
+                🐾 Todos os Pets
+              </button>
+              <button id="tab-my-pets" type="button" class="px-4 py-2 text-xs md:text-sm font-medium rounded-lg text-ink-300 hover:text-ink-100 hover:bg-black/5 transition-all">
+                👤 Meus Anúncios
+              </button>
+            </div>
+
+            <!-- Filtros: Cidade e Tipo de Animal -->
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="relative min-w-[200px]">
+                <input
+                  type="text"
+                  id="filter-cidade"
+                  class="bb-input text-xs md:text-sm py-2"
+                  placeholder="🔍 Buscar por cidade..."
+                />
+              </div>
+
+              <div>
+                <select id="filter-tipo-animal" class="bb-input text-xs md:text-sm py-2">
+                  <option value="">Todos os tipos</option>
+                  <option value="CACHORRO">🐶 Cachorros</option>
+                  <option value="GATO">🐱 Gatos</option>
+                  <option value="OUTRO">🐾 Outros</option>
+                </select>
+              </div>
+
+              <button id="filter-apply-btn" type="button" class="bb-btn bb-btn--primary text-xs py-2 px-3">
+                Filtrar
+              </button>
+              <button id="filter-clear-btn" type="button" class="bb-btn bb-btn--secondary text-xs py-2 px-3" title="Limpar filtros">
+                ✕ Limpar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alertas dinâmicos (WhatsApp não validado, erros ou avisos) -->
+        <div id="bb-animals-alert"></div>
+
+        <!-- SEÇÃO 1: Animais Perdidos & Desaparecidos -->
+        <section id="bb-lost-section" class="mb-14">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-border/70">
+            <div class="flex items-center gap-3">
+              <h2 class="text-xl font-bold text-ink-100 flex items-center gap-2">
+                <span>🚨</span> Animais Perdidos & Desaparecidos
+              </h2>
+              <span id="bb-lost-count" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 font-semibold border border-amber-500/30">
+                0
+              </span>
+            </div>
+            <a href="/pages/community/index.html" class="text-xs text-brand-500 hover:underline flex items-center gap-1 font-medium">
+              Reportar desaparecimento no mural →
+            </a>
+          </div>
+          <p class="text-xs text-ink-300 mb-4">
+            Estes pets precisam da ajuda da comunidade. Se reconhecer algum, entre em contato imediatamente com o tutor.
+          </p>
+
+          <div id="bb-lost-grid" class="bb-grid bb-stagger"></div>
+
+          <div id="bb-lost-toggle-wrap" class="mt-6 text-center hidden">
+            <button id="bb-lost-toggle-btn" type="button" class="bb-btn bb-btn--secondary text-xs md:text-sm">
+              Ver mais animais perdidos ↓
+            </button>
+          </div>
+        </section>
+
+        <!-- SEÇÃO 2: Animais Prontos para Adoção -->
+        <section id="bb-adopt-section" class="mb-14">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-border/70">
+            <div class="flex items-center gap-3">
+              <h2 class="text-xl font-bold text-ink-100 flex items-center gap-2">
+                <span>🐾</span> Animais Prontos para Adoção
+              </h2>
+              <span id="bb-adopt-count" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 font-semibold border border-emerald-500/30">
+                0
+              </span>
+            </div>
+            <span class="text-xs text-ink-400">
+              Contato direto via WhatsApp
+            </span>
+          </div>
+          <p class="text-xs text-ink-300 mb-4">
+            Encontre seu novo amigo e converse diretamente com o tutor responsável sem formulários burocráticos.
+          </p>
+
+          <div id="bb-adopt-grid" class="bb-grid bb-stagger"></div>
+
+          <div id="bb-adopt-toggle-wrap" class="mt-6 text-center hidden">
+            <button id="bb-adopt-toggle-btn" type="button" class="bb-btn bb-btn--secondary text-xs md:text-sm">
+              Ver mais animais para adoção ↓
+            </button>
+          </div>
+        </section>
+
       </div>
     </main>
+
+    <!-- Modal para Anunciar Pet para Adoção -->
+    <div id="adopt-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bb-card max-w-xl w-full max-h-[92vh] overflow-y-auto bg-slate-900 border border-slate-700 shadow-2xl relative p-6">
+        <button id="modal-adopt-close-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-100 text-2xl font-bold" type="button">&times;</button>
+        <h2 class="text-lg font-bold text-slate-100 mb-1 flex items-center gap-2">
+          <span>🐾</span> Anunciar Pet para Adoção
+        </h2>
+        <p class="text-xs text-slate-400 mb-4">
+          O contato exibido para interessados será automaticamente o seu WhatsApp verificado no perfil.
+        </p>
+
+        <div id="modal-adopt-alert"></div>
+
+        <form id="form-adopt-pet" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="bb-label" for="pet-nome">Nome do Pet *</label>
+              <input class="bb-input" type="text" id="pet-nome" required placeholder="Ex: Bob, Pipoca..." />
+            </div>
+            <div>
+              <label class="bb-label" for="pet-tipo">Tipo de Animal *</label>
+              <select class="bb-input" id="pet-tipo" required>
+                <option value="CACHORRO">Cachorro</option>
+                <option value="GATO">Gato</option>
+                <option value="OUTRO">Outro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label class="bb-label" for="pet-sexo">Sexo *</label>
+              <select class="bb-input" id="pet-sexo" required>
+                <option value="M">Macho</option>
+                <option value="F">Fêmea</option>
+                <option value="I">Indeterminado</option>
+              </select>
+            </div>
+            <div>
+              <label class="bb-label" for="pet-raca">Raça (opcional)</label>
+              <input class="bb-input" type="text" id="pet-raca" placeholder="Ex: SRD, Poodle..." />
+            </div>
+            <div>
+              <label class="bb-label" for="pet-idade">Idade Aproximada</label>
+              <input class="bb-input" type="text" id="pet-idade" placeholder="Ex: 1 ano, Filhote..." />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="bb-label" for="pet-cidade">Cidade *</label>
+              <input class="bb-input" type="text" id="pet-cidade" required placeholder="Ex: Campinas" />
+            </div>
+            <div>
+              <label class="bb-label" for="pet-vacinacao">Vacinação</label>
+              <input class="bb-input" type="text" id="pet-vacinacao" placeholder="Ex: V8 completa, Antirrábica..." />
+            </div>
+          </div>
+
+          <div>
+            <label class="bb-label" for="pet-medicamento">Medicamentos / Cuidados Especiais (opcional)</label>
+            <input class="bb-input" type="text" id="pet-medicamento" placeholder="Ex: Nenhum, ou castrado, colírio..." />
+          </div>
+
+          <div>
+            <label class="bb-label" for="pet-descricao">Descrição / Temperamento * (máx 255 chars)</label>
+            <textarea class="bb-input" id="pet-descricao" rows="3" maxlength="255" required placeholder="Muito brincalhão, convive bem com outros animais e crianças..."></textarea>
+          </div>
+
+          <div>
+            <label class="bb-label" for="pet-imagem">URL da Foto do Pet (opcional)</label>
+            <input class="bb-input" type="url" id="pet-imagem" placeholder="https://..." />
+          </div>
+
+          <div class="flex justify-end gap-3 pt-3 border-t border-slate-700/60">
+            <button class="bb-btn bb-btn--secondary" type="button" id="modal-adopt-cancel-btn">Cancelar</button>
+            <button class="bb-btn bb-btn--primary" type="submit" id="modal-adopt-submit-btn">Publicar Anúncio</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <div id="bb-footer"></div>
   </div>
 
   <script src="../../js/config.js"></script>
   <script src="../../js/utils/storage.js"></script>
-  <script src="../../js/utils/auth-guard.js"></script>
   <script src="../../js/mocks/mock-utils.js"></script>
   <script src="../../js/mocks/mock-data.js"></script>
   <script src="../../js/api/client.js"></script>
   <script src="../../js/services/animalService.js"></script>
+  <script src="../../js/services/authService.js"></script>
+  <script src="../../js/utils/header-scroll.js"></script>
   <script src="../../js/components/Navigation.js"></script>
   <script src="../../js/components/Footer.js"></script>
+  <script src="../../js/components/NearbyOngsMap.js"></script>
   <script src="../../js/components/AnimalCard.js"></script>
   <script src="../../js/components/StateView.js"></script>
   <script src="../../js/pages/animals.js"></script>

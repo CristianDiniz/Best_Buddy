@@ -4,15 +4,10 @@ function bbRenderFooter(targetSelector) {
     <footer class="bb-footer">
       <div class="bb-container bb-footer__grid">
         <div>
-          <div class="bb-footer__map">
-            <span class="relative z-10 text-sm">🗺️ Mapa da ONG</span>
+          <p class="text-ink-100 mb-3"><strong>ONGs de proteção animal perto de você</strong></p>
+          <div id="bb-ong-map" class="bb-footer__map">
+            <span class="relative z-10 text-sm px-4 text-center">📍 Buscando sua localização...</span>
           </div>
-          <p class="mt-3 leading-relaxed">
-            <strong class="text-ink-100">Endereço:</strong> Rua dos Baptistas, 400 — Jardim São Paulo, SP-CEP<br>
-            <strong class="text-ink-100">WhatsApp / Emergências:</strong> (11) 99999-0000<br>
-            <strong class="text-ink-100">Email:</strong> contato@bestbuddy.org<br>
-            <strong class="text-ink-100">Horário de funcionamento:</strong> Segunda a sexta, das 9h às 18h
-          </p>
         </div>
         <div>
           <p class="text-ink-100"><strong>Encontrou algum problema ou tem uma sugestão de melhoria no nosso site?</strong></p>
@@ -39,4 +34,6 @@ function bbRenderFooter(targetSelector) {
     alert("Mensagem enviada! Nossa equipe entrará em contato em breve.");
     e.target.reset();
   });
+
+  bbRenderNearbyOngsMap("#bb-ong-map");
 }

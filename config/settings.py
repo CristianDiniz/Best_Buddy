@@ -55,7 +55,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'usuarios',
     'animais',
-    'adocoes',
     'comunidade',
 ]
 
@@ -163,4 +162,14 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Email Configuration (Console para testes locais)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Twilio Verify & WhatsApp Configuration
+import os
+TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID', '')
+TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN', '')
+TWILIO_VERIFY_SERVICE_SID = os.getenv('TWILIO_VERIFY_SERVICE_SID', '')
+TWILIO_MOCK_DEV = True  # Simulação em dev quando sem credenciais reais no .env

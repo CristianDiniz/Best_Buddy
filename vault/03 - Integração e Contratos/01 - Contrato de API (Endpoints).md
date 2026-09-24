@@ -140,35 +140,11 @@ Cadastro de novo animal (ONGs / Protetores).
 
 ---
 
-## 3. Adoção (`/api/adocoes/`)
+## 3. Adoção Direta (Contato via WhatsApp)
 
-### `POST /adocoes/`
-Envio de solicitação de adoção.
-- **Headers**: `Authorization: Bearer <access_token>` (se logado).
-- **Request**:
-  ```json
-  {
-    "animal_id": 1,
-    "nome_adotante": "Ana Souza",
-    "email_adotante": "ana@email.com",
-    "telefone_adotante": "(16) 99999-0001",
-    "ja_teve_animais": "Sim",
-    "ja_vacinado": "Sim",
-    "motivacao": "Amo animais e tenho espaço para cuidar com carinho."
-  }
-  ```
-- **Response 201**:
-  ```json
-  {
-    "id": 10,
-    "status": "A",
-    "animal_id": 1,
-    "nome_adotante": "Ana Souza",
-    "created_at": "2026-09-07T18:00:00Z"
-  }
-  ```
-
----
+> [!WARNING]
+> **Endpoint Descontinuado:** O endpoint `POST /adocoes/` e o modelo intermediário de propostas foram **descontinuados**.
+> O fluxo de adoção foi simplificado para contato direto entre interessado e tutor via WhatsApp (`https://wa.me/55...`). A conclusão da adoção é feita pelo tutor atualizando o status do pet diretamente em `PATCH /animais/{id}/` (`status: "ADOTADO"`).
 
 ## 4. Comunidade (`/api/comunidade/`)
 
@@ -214,17 +190,114 @@ Envio de solicitação de adoção.
   ```
 
 ### `POST /comunidade/desaparecidos/`
+- **Headers**: `Authorization: Bearer <access_token>` (exige login)
 - **Request**:
   ```json
   {
     "nome": "Bela",
     "local": "Parque SP, Araraquara, SP",
+    "cidade": "Araraquara",
     "contato": "(16) 98888-1122",
     "descricao": "Desapareceu após queima de fogos."
   }
   ```
 - **Response 201**: Item criado com `id` e `created_at`.
 
+---
+
+## 5. Validação de WhatsApp (`/api/animais/whatsapp/`)
+
+### `POST /animais/whatsapp/solicitar-pin/`
+Dispara PIN de 6 dígitos para o número informado via WhatsApp.
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Request**: `{"telefone": "(16) 99999-8888"}`
+- **Response 200**: `{"sucesso": true, "mensagem": "Código PIN enviado com sucesso via WhatsApp."}`
+
+### `POST /animais/whatsapp/verificar-pin/`
+Confirma o código digitado pelo tutor.
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Request**: `{"telefone": "(16) 99999-8888", "codigo_pin": "123456"}`
+- **Response 200**: `{"verificado": true, "token_validacao": "val_token_xyz"}`
+
+---
+
+## 6. Denúncias (`/api/denuncias/`)
+
+### `POST /denuncias/`
+Registro de denúncia qualificada por usuário autenticado.
+- **Headers**: `Authorization: Bearer <access_token>` (obrigatório)
+- **Request**:
+  ```json
+  {
+    "tipo_alvo": "ADOCAO",
+    "alvo_id": 1,
+    "motivo_categoria": "MAUS_TRATOS",
+    "justificativa_texto": "Animal apresenta sinais graves de desnutrição e abandono nas fotos."
+  }
+  ```
+- **Response 201**:
+  ```json
+  {
+    "id": 5,
+    "status": "PENDENTE",
+    "motivo_categoria": "MAUS_TRATOS",
+    "created_at": "2026-09-15T20:00:00Z"
+  }
+  ```
+- **Response 401**: `{"detail": "Authentication credentials were not provided."}`
+
+---
+
+## 7. Serviços (`/api/servicos/`)
+
+### `GET /servicos/`
+Listagem pública de prestadores homologados.
+- **Query Params Suportados**: `?cidade=Araraquara&tipo_servico=veterinario`
+- **Response 200**: Lista de serviços com status `APROVADO`.
+
+### `POST /servicos/`
+Solicitação de inclusão de serviço profissional.
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Request**:
+  ```json
+  {
+    "tipo_cadastro": "PJ",
+    "nome": "Clínica Veterinária PetCare",
+    "tipos_servicos": ["veterinario", "internacao", "banho_tosa"],
+    "crmv": "SP-12345",
+    "horario_atendimento": "Segunda a Sábado, 08h às 18h",
+    "telefone": "(16) 3333-4444",
+    "aceita_whatsapp": true,
+    "cidades_atuacao": "Araraquara, Américo Brasiliense",
+    "informacoes_extras": "Atendimento 24h em emergências."
+  }
+  ```
+- **Response 201**: Criado com status `PENDENTE` (aguarda moderação no Admin).
+
+---
+
+## 8. Solicitação de ONG (`/api/usuarios/solicitar-ong/`)
+
+### `POST /usuarios/solicitar-ong/`
+Submissão de pedido de upgrade institucional para cota ilimitada.
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Request**:
+  ```json
+  {
+    "cnpj": "12.345.678/0001-90",
+    "razao_social": "Associação Protetora dos Animais Vira-Lata",
+    "nome_contato": "Mariana Ribeiro",
+    "email_contato": "contato@viralata.org.br",
+    "telefone": "(16) 3333-9999",
+    "endereco": "Rua dos Resgatados, 100 - Araraquara/SP"
+  }
+  ```
+- **Response 201**: Pedido gravado com status `PENDENTE` para triagem da Staff.
+
+---
+
 Veja também:
 - [[02 - Matriz de Divergências (Front vs Back)]]
 - [[03 - Fluxo de Autenticação JWT]]
+- [[02 - Requisitos Funcionais]]
+- [[05 - Modelagem de Dados e Relacionamentos]]

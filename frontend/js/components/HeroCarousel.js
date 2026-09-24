@@ -24,9 +24,9 @@ function bbRenderHeroCarousel(targetSelector) {
       img: "../../assets/images/cachorroCoberto.jpg",
       alt: "Cachorro enrolado em cobertor — Adote um animal",
       title: "Adote animais aqui!",
-      desc: "Dê uma segunda chance a quem mais precisa. Comece o processo de adoção agora mesmo.",
+      desc: "Dê uma segunda chance a quem mais precisa. Conheça nossos pets disponíveis para adoção.",
       cta: "Quero adotar",
-      href: "/pages/adoption/create.html",
+      href: "/pages/animals/index.html",
     },
   ];
 

@@ -1,112 +1,128 @@
-# Best Buddy — Front-end
+# 🐾 Best Buddy — Plataforma de Adoção e Proteção Animal
 
-Front-end estático (HTML/JS puro, sem build step **no deploy**), desenvolvido
-de forma **desacoplada** do backend Django. Enquanto o backend não está
-pronto/corrigido, todas as telas funcionam com dados mockados localmente.
+Plataforma comunitária web voltada para a **proteção animal**, **adoção responsável** e **localização de pets perdidos**. O ecossistema conecta adotantes, ONGs/protetores independentes e a comunidade local em um ambiente integrado.
 
-O CSS é gerado com **Tailwind CSS**, mas o build é feito localmente/no CI e o
-resultado (`css/tailwind.build.css`) fica versionado — então o GitHub Pages
-continua publicando arquivos estáticos puros, sem precisar rodar Node no
-deploy.
+---
 
-## Rodando localmente
+## 🏗️ Arquitetura do Sistema
 
-Não há build necessário para só visualizar o site — o CSS já vem compilado
-em `css/tailwind.build.css`. Basta servir a pasta como arquivos estáticos:
+O projeto é estruturado em uma arquitetura desacoplada e conteinerizada:
 
-```bash
+- **Frontend (`/frontend`)**: Interface web moderna e responsiva desenvolvida em **HTML5**, **Vanilla JavaScript (ES6+)** e **Tailwind CSS v3**. Servida via **Nginx** na porta `5500`. Possui camada de Mocks para desenvolvimento offline e cliente HTTP configurado para se conectar à API Django real.
+- **Backend (Raiz)**: API REST desenvolvida em **Python 3.12** com **Django 6.0** e **Django REST Framework (DRF)**, com autenticação JWT (SimpleJWT). Roda na porta `8000`.
+- **Banco de Dados**: Suporte dual configurável via variável de ambiente:
+  - **SQLite** (`db.sqlite3`): Pronto para testes rápidos e desenvolvimento local.
+  - **MySQL 8.0**: Executado via container Docker na porta `3307` (mapeada para `3306` internamente).
+
+---
+
+## 🐳 Como Executar com Docker (Recomendado)
+
+O projeto é orquestrado via Docker Compose, permitindo subir todo o ecossistema (Banco de Dados + Backend Django + Frontend Nginx) com um único comando:
+
+```powershell
+docker compose up --build
+```
+
+### Endereços de Acesso:
+- **Frontend**: [http://localhost:5500](http://localhost:5500)
+- **Backend API**: [http://localhost:8000/api/](http://localhost:8000/api/)
+- **Painel Administrativo Django**: [http://localhost:8000/admin/](http://localhost:8000/admin/)
+- **Banco de Dados MySQL**: `localhost:3307` (Usuário: `bestbuddy_user`, Senha: `bestbuddy_pass`)
+
+> [!NOTE]
+> O container do Nginx do frontend faz proxy reverso automático das rotas `/api/` e `/media/` para o container do backend Django.
+
+---
+
+## 💻 Como Executar Localmente Sem Docker
+
+### 1. Inicializar o Backend (Django)
+
+1. Certifique-se de ter o Python 3.12+ instalado:
+   ```powershell
+   pip install -r requirements.txt
+   ```
+2. Aplique as migrações no banco SQLite local:
+   ```powershell
+   python manage.py migrate
+   ```
+3. (Opcional) Popule o banco com dados de teste:
+   ```powershell
+   python seed_data.py
+   ```
+4. Inicie o servidor da API:
+   ```powershell
+   python manage.py runserver 0.0.0.0:8000
+   ```
+   A API estará acessível em `http://localhost:8000`.
+
+### 2. Inicializar o Frontend (Estático)
+
+Como os estilos do Tailwind já vêm compilados em `frontend/css/tailwind.build.css`, basta servir a pasta estática:
+
+```powershell
+cd frontend
 python -m http.server 5500
 ```
+Acesse: [http://localhost:5500](http://localhost:5500)
 
-Depois acesse `http://localhost:5500`. Você será redirecionado para o login.
+Para editar estilos do Tailwind ou configurar o modo Mock vs Real, consulte o [frontend/README.md](file:///c:/Users/T480/Documents/GitHub/BestBuddy/Best_Buddy/frontend/README.md).
 
-Login de teste (modo mock): `usuario@bestbuddy.com` / `123456`
+---
 
-### Editando estilos (Tailwind)
-
-Só é necessário rodar o Tailwind se você for **alterar** classes/estilos:
-
-```bash
-npm install              # uma vez, instala o Tailwind CLI
-npm run build:css        # build único, minificado
-npm run watch:css        # rebuilda automaticamente enquanto você edita
-```
-
-O arquivo editável é `css/src/input.css` (usa `@apply` sobre as classes
-`bb-*` do projeto) + `tailwind.config.js` (paleta, fontes, animações,
-sombras — os mesmos tokens que existiam em `tokens.css`). O arquivo
-`css/tailwind.build.css` é **gerado**, não deve ser editado à mão — sempre
-rode o build antes de commitar uma mudança de estilo.
-
-## Estrutura
+## 📁 Estrutura de Diretórios do Projeto
 
 ```
-frontend/
-├── index.html                 # redireciona para login ou home
-├── tailwind.config.js         # tokens (cores, fontes, sombras, animações)
-├── package.json                # script build:css / watch:css
-├── pages/
-│   ├── auth/                  # login, register, forgot-password
-│   ├── home/
-│   ├── community/
-│   ├── animals/                # index (listagem) e detail
-│   └── adoption/                # create
-├── js/
-│   ├── config.js               # toggle mock vs API real
-│   ├── api/client.js            # cliente HTTP fino (fetch)
-│   ├── mocks/                  # dados fake + helpers de latência
-│   ├── services/                # authService, animalService, adoptionService, communityService
-│   ├── components/              # Navigation, Footer, AnimalCard, PostCard, etc.
-│   ├── pages/                  # lógica específica de cada página
-│   └── utils/                  # storage, validation, auth-guard
-├── css/
-│   ├── src/input.css           # fonte do Tailwind (@apply dos componentes bb-*, animações)
-│   └── tailwind.build.css      # CSS gerado (minificado) — o que as páginas carregam
-└── .github/workflows/deploy.yml # CI/deploy para GitHub Pages
+Best_Buddy/
+├── frontend/                          # Aplicação Web (HTML5 + Vanilla JS + Tailwind + Nginx)
+│   ├── index.html                     # Ponto de entrada do site
+│   ├── Dockerfile                     # Container Nginx do frontend
+│   ├── nginx.conf                     # Configuração do Nginx (proxy reverso /api/)
+│   ├── tailwind.config.js             # Tokens de estilo do Tailwind
+│   ├── package.json                   # Scripts do Tailwind CLI (build:css / watch:css)
+│   ├── API_CONTRACT.md                # Especificação dos endpoints da API
+│   ├── ARCHITECTURE.md                # Guia detalhado da arquitetura do frontend
+│   ├── README.md                      # Documentação específica do frontend
+│   ├── pages/                         # Telas HTML (auth, home, community, animals, adoption)
+│   ├── js/                            # Lógica JavaScript (serviços, mocks, componentes, utils)
+│   ├── css/                           # Estilos (input.css e tailwind.build.css)
+│   └── assets/                        # Imagens estáticas
+├── animais/                           # App Django: Catálogo de pets (adoção e perdidos) com contato direto via WhatsApp
+├── comunidade/                        # App Django: Notícias e mural comunitário
+├── config/                            # Configurações do Django (settings, urls, wsgi)
+├── usuarios/                          # App Django: Autenticação JWT, perfis PF e PJ com validação de WhatsApp
+├── fixtures/                          # Dados de carga inicial (fixtures JSON)
+├── vault/                             # Documentação técnica completa para Obsidian
+├── .github/                           # Workflows de CI/CD (GitHub Actions)
+├── db.sqlite3                         # Banco de dados local SQLite
+├── docker-compose.yml                 # Orquestrador Docker (db, backend, frontend)
+├── Dockerfile                         # Build do container Django Backend
+├── entrypoint.sh                      # Script de inicialização e espera do banco no Docker
+├── manage.py                          # CLI do Django
+├── requirements.txt                   # Dependências Python do Backend
+├── seed_data.py                       # Script de carga inicial no banco
+├── test_endpoints.py                  # Suíte de testes automatizados dos endpoints
+├── RELATORIO_INTEGRACAO.md            # Relatório técnico completo de auditoria e integração
+└── LICENSE                            # Licença de uso
 ```
 
-## Alternando entre mock e backend real
+---
 
-Edite `js/config.js`:
+## 🧪 Testes Automatizados
 
-```js
-window.BB_CONFIG = {
-  USE_MOCKS: false, // true = dados fake, false = backend real
-  API_BASE_URL: "https://sua-api.exemplo.com/api",
-};
+O repositório inclui uma suíte completa de testes de integração dos endpoints da API:
+
+```powershell
+python test_endpoints.py
 ```
+Todos os 9 endpoints principais (Autenticação JWT, Listagem e Detalhe de Animais, Solicitação de Adoção, Notícias, Posts, Animais Desaparecidos e Cadastro com CPF) são validados automaticamente.
 
-Nenhuma página ou componente precisa mudar — todos chamam os `services`,
-que decidem internamente se usam mock ou `bbClient` (fetch real).
+---
 
-## Contrato de API esperado
+## 📚 Documentação Técnica Adicional
 
-Veja [`API_CONTRACT.md`](./API_CONTRACT.md). Esse é o contrato que o front-end
-foi construído para consumir — pode não bater 100% com o backend atual
-(há inconsistências conhecidas entre models/serializers no backend hoje).
-Use esse documento como referência para alinhar o backend.
-
-## Deploy (GitHub Pages)
-
-O workflow em `.github/workflows/deploy.yml` publica a raiz do repositório
-como site estático a cada push em `main`. Ative em
-**Settings → Pages → Source: GitHub Actions** no repositório.
-Como `css/tailwind.build.css` já vai commitado, o deploy continua sem
-nenhum passo de build.
-
-## Padrões usados
-
-- Sem framework — HTML + JS puro com pequenas convenções de "componente"
-  (funções que retornam/injetam HTML).
-- Estilo com **Tailwind CSS**: os tokens de cor/tipografia/espaçamento que
-  antes viviam em `tokens.css` agora estão em `tailwind.config.js`; as
-  classes `bb-*` continuam existindo (então nenhum HTML/JS precisou trocar
-  de nome de classe), só que agora são compostas com `@apply` em
-  `css/src/input.css`.
-- Microanimações (fade-in, hover com elevação, shimmer de loading) via
-  utilitários Tailwind customizados — respeitam `prefers-reduced-motion`.
-- Toda tela autenticada carrega `js/utils/auth-guard.js`, que redireciona
-  para o login se não houver sessão.
-- Todo formulário trata: validação client-side, estado de loading no botão,
-  erro vindo da API e (na adoção) prevenção de envio duplicado.
-
+- [README do Frontend](file:///c:/Users/T480/Documents/GitHub/BestBuddy/Best_Buddy/frontend/README.md): Guia de desenvolvimento e customização visual da interface.
+- [Contrato da API](file:///c:/Users/T480/Documents/GitHub/BestBuddy/Best_Buddy/frontend/API_CONTRACT.md): Especificação de contratos de payload e resposta esperados.
+- [Relatório de Integração](file:///c:/Users/T480/Documents/GitHub/BestBuddy/Best_Buddy/RELATORIO_INTEGRACAO.md): Diagnóstico aprofundado dos modelos, migrações e auditoria.
+- **Obsidian Vault**: Para visualizar a documentação interativa com links bidirecionais, abra a pasta `vault/` no aplicativo [Obsidian](https://obsidian.md).
