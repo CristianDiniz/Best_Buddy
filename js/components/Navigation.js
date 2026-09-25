@@ -1,17 +1,21 @@
 /**
  * Renderiza o header + navegação do app autenticado dentro do elemento alvo.
- * activePage: "home" | "community" | "animals" | "adoption"
+ * activePage: "home" | "community" | "animals" | "profile"
  */
 function bbRenderNavigation(targetSelector, activePage) {
-  const user = bbStorage.getUser();
+  const isAuth = typeof bbStorage !== "undefined" && bbStorage.isAuthenticated();
+  const user = isAuth ? bbStorage.getUser() : null;
   const initials = user?.nome ? user.nome.trim().charAt(0).toUpperCase() : "U";
 
   const links = [
     { key: "home", label: "Home", href: "/pages/home/index.html", icon: "🏠" },
-    { key: "community", label: "Comunidade", href: "/pages/community/index.html", icon: "👥" },
     { key: "animals", label: "Animais", href: "/pages/animals/index.html", icon: "🐾" },
-    { key: "adoption", label: "Adoção", href: "/pages/adoption/create.html", icon: "📋" },
+    { key: "community", label: "Comunidade", href: "/pages/community/index.html", icon: "📰" },
   ];
+
+  if (isAuth) {
+    links.push({ key: "profile", label: "Meu Perfil", href: "/pages/auth/profile.html", icon: "⚙️" });
+  }
 
   const linksHtml = links
     .map(
@@ -25,7 +29,26 @@ function bbRenderNavigation(targetSelector, activePage) {
     )
     .join("");
 
+  const userAreaHtml = isAuth
+    ? `
+      <div class="bb-nav__user flex items-center gap-3">
+        <a href="/pages/auth/profile.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity text-slate-200">
+          <span>Olá, ${user?.nome ? user.nome.split(" ")[0] : "Usuário"}</span>
+          <div class="bb-nav__avatar">${initials}</div>
+        </a>
+        <button class="bb-btn bb-btn--secondary" id="bb-logout-btn" type="button">Sair</button>
+      </div>
+    `
+    : `
+      <div class="bb-nav__user flex items-center gap-2">
+        <a href="/pages/auth/login.html" class="bb-btn bb-btn--secondary bb-btn--sm">Entrar</a>
+        <a href="/pages/auth/register.html" class="bb-btn bb-btn--primary bb-btn--sm">Cadastre-se</a>
+      </div>
+    `;
+
   const el = document.querySelector(targetSelector);
+  if (!el) return;
+
   el.innerHTML = `
     <div class="bb-topbar"></div>
     <header class="bb-header">
@@ -37,11 +60,7 @@ function bbRenderNavigation(targetSelector, activePage) {
         <nav aria-label="Navegação principal" class="bb-header__nav-wrap">
           <ul class="bb-nav__links">${linksHtml}</ul>
         </nav>
-        <div class="bb-nav__user">
-          <span>Olá, ${user?.nome ? user.nome.split(" ")[0] : "visitante"}</span>
-          <div class="bb-nav__avatar">${initials}</div>
-          <button class="bb-btn bb-btn--secondary" id="bb-logout-btn" type="button">Sair</button>
-        </div>
+        ${userAreaHtml}
       </div>
     </header>
   `;
