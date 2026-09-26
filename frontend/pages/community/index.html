@@ -57,7 +57,7 @@
           <span>🚨</span> Reportar Animal Desaparecido
         </h2>
         <p class="text-xs text-slate-400 mb-4">
-          O contato exibido será automaticamente o seu WhatsApp validado cadastrado no perfil.
+          Preencha as informações do animal para que a comunidade possa ajudar.
         </p>
 
         <form id="form-report-missing" class="space-y-4">
@@ -79,6 +79,11 @@
               <label class="bb-label" for="missing-cidade">Cidade *</label>
               <input class="bb-input" type="text" id="missing-cidade" required placeholder="Ex: Campinas" />
             </div>
+          </div>
+
+          <div>
+            <label class="bb-label" for="missing-telefone">Telefone de Contato (WhatsApp) *</label>
+            <input class="bb-input" type="tel" id="missing-telefone" required placeholder="Ex: (16) 99999-0000" />
           </div>
 
           <div>
@@ -121,6 +126,6 @@
   <script src="../../js/components/NearbyOngsMap.js"></script>
   <script src="../../js/components/MissingAnimalCard.js"></script>
   <script src="../../js/components/StateView.js"></script>
-  <script src="../../js/pages/community.js"></script>
+  <script src="../../js/pages/community.js?v=3"></script>
 </body>
 </html>

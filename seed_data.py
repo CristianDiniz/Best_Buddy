@@ -30,7 +30,6 @@ def seed():
 
     pf, _ = PessoaFisica.objects.get_or_create(usuario=user)
     pf.nome = "Ana Souza"
-    pf.telefone = "(16) 99999-0000"
     pf.save()
     print(f"Usuário pronto: {email_teste} (Telefone validado: {user.telefone_validado})")
 
@@ -50,7 +49,9 @@ def seed():
                 "tipo_servico": Animal.TipoServico.ADOCAO,
                 "tipo_animal": Animal.TipoAnimal.CACHORRO,
                 "nome": item["nome"],
+                "estado": Animal.Estado.SP,
                 "cidade": item["cidade"],
+                "telefone_contato": "(16) 99999-0000",
                 "raca": item["raca"],
                 "sexo": item["sexo"],
                 "idade_aproximada": item["idade_aproximada"],
@@ -76,7 +77,9 @@ def seed():
                 "tipo_servico": Animal.TipoServico.PERDIDO,
                 "tipo_animal": item["tipo_animal"],
                 "nome": item["nome"],
+                "estado": Animal.Estado.SP,
                 "cidade": item["cidade"],
+                "telefone_contato": "(16) 99999-0000",
                 "local": item["local"],
                 "descricao": item["descricao"],
                 "status": Animal.StatusAnimal.PERDIDO,

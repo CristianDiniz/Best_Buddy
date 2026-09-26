@@ -139,7 +139,7 @@
           <span>🐾</span> Anunciar Pet para Adoção
         </h2>
         <p class="text-xs text-slate-400 mb-4">
-          O contato exibido para interessados será automaticamente o seu WhatsApp verificado no perfil.
+          Preencha os dados do pet para adoção. O telefone informado será exibido para interessados.
         </p>
 
         <div id="modal-adopt-alert"></div>
@@ -185,14 +185,20 @@
               <input class="bb-input" type="text" id="pet-cidade" required placeholder="Ex: Campinas" />
             </div>
             <div>
-              <label class="bb-label" for="pet-vacinacao">Vacinação</label>
-              <input class="bb-input" type="text" id="pet-vacinacao" placeholder="Ex: V8 completa, Antirrábica..." />
+              <label class="bb-label" for="pet-telefone">Telefone de Contato (WhatsApp) *</label>
+              <input class="bb-input" type="tel" id="pet-telefone" required placeholder="Ex: (16) 99999-0000" />
             </div>
           </div>
 
-          <div>
-            <label class="bb-label" for="pet-medicamento">Medicamentos / Cuidados Especiais (opcional)</label>
-            <input class="bb-input" type="text" id="pet-medicamento" placeholder="Ex: Nenhum, ou castrado, colírio..." />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="bb-label" for="pet-vacinacao">Vacinação</label>
+              <input class="bb-input" type="text" id="pet-vacinacao" placeholder="Ex: V8 completa, Antirrábica..." />
+            </div>
+            <div>
+              <label class="bb-label" for="pet-medicamento">Medicamentos / Cuidados (opcional)</label>
+              <input class="bb-input" type="text" id="pet-medicamento" placeholder="Ex: Nenhum, ou castrado..." />
+            </div>
           </div>
 
           <div>
@@ -229,6 +235,6 @@
   <script src="../../js/components/NearbyOngsMap.js"></script>
   <script src="../../js/components/AnimalCard.js"></script>
   <script src="../../js/components/StateView.js"></script>
-  <script src="../../js/pages/animals.js"></script>
+  <script src="../../js/pages/animals.js?v=3"></script>
 </body>
 </html>

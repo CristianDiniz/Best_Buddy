@@ -28,7 +28,7 @@ class AnimaisViewSet(generics.ListCreateAPIView):
 
         cidade = self.request.query_params.get('cidade')
         if cidade:
-            queryset = queryset.filter(cidade__icontains=cidade)
+            queryset = queryset.filter(cidade__iexact=cidade)
 
         status_param = self.request.query_params.get('status')
         if status_param:

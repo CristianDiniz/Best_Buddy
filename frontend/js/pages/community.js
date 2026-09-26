@@ -78,18 +78,15 @@ if (btnOpenReport) {
       return;
     }
 
-    // Verifica se usuário tem WhatsApp validado antes de abrir o modal
+    // Pré-preenche o telefone se o usuário já tiver no perfil (RF08)
     try {
       const profile = await authService.getProfile();
-      if (!profile.telefone_validado) {
-        showCommunityAlert("Você precisa validar seu WhatsApp no perfil antes de reportar um animal perdido.");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        return;
+      const phoneInput = document.getElementById("missing-telefone");
+      if (phoneInput && profile && profile.telefone) {
+        phoneInput.value = profile.telefone;
       }
     } catch (e) {
-      // Se não autenticado, redireciona
-      window.location.href = "/pages/auth/login.html";
-      return;
+      console.warn("Não foi possível carregar dados do perfil:", e);
     }
 
     reportModal.classList.remove("hidden");
@@ -109,7 +106,9 @@ if (formReport) {
     e.preventDefault();
     const nome = document.getElementById("missing-nome").value.trim();
     const tipo_animal = document.getElementById("missing-tipo").value;
+    const estado = (document.getElementById("missing-estado")?.value || "SP").trim();
     const cidade = document.getElementById("missing-cidade").value.trim();
+    const telefone_contato = document.getElementById("missing-telefone") ? document.getElementById("missing-telefone").value.trim() : "";
     const local = document.getElementById("missing-local").value.trim();
     const descricao = document.getElementById("missing-desc").value.trim();
     const imagem = document.getElementById("missing-img").value.trim();
@@ -122,14 +121,16 @@ if (formReport) {
       await communityService.reportMissingAnimal({
         nome: nome || null,
         tipo_animal,
+        estado,
         cidade,
+        telefone_contato,
         local,
         descricao,
         imagem: imagem || null,
       });
 
       closeModal();
-      showCommunityAlert("Animal desaparecido registrado com sucesso! O contato exibido é o seu WhatsApp.", true);
+      showCommunityAlert("Animal desaparecido registrado com sucesso!", true);
       bbLoadMissing();
     } catch (err) {
       alert(`Não foi possível cadastrar: ${err.message || err.error || "Erro inesperado."}`);

@@ -204,30 +204,20 @@ async function openAdoptModal() {
     return;
   }
 
-  // Verificar se o usuário possui WhatsApp validado
-  try {
-    const profile = await authService.getProfile();
-    if (!profile.telefone_validado) {
-      bbAnimalsAlertEl.innerHTML = `
-        <div class="bb-alert bb-alert--error mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div>
-            <strong>WhatsApp não validado:</strong> Você precisa validar seu número de WhatsApp no perfil antes de anunciar um animal para adoção.
-          </div>
-          <a href="/pages/auth/profile.html" class="bb-btn bb-btn--xs bb-btn--primary shrink-0">
-            Validar WhatsApp agora →
-          </a>
-        </div>
-      `;
-      bbAnimalsAlertEl.scrollIntoView({ behavior: "smooth" });
-      return;
-    }
-  } catch (err) {
-    bbAnimalsAlertEl.innerHTML = `<div class="bb-alert bb-alert--error mb-6">${err.message}</div>`;
-    return;
-  }
-
   modalAlertEl.innerHTML = "";
   formAdoptPet.reset();
+
+  // Pré-preenche o telefone de contato se o usuário já tiver no perfil (RF08)
+  try {
+    const profile = await authService.getProfile();
+    const phoneInput = document.getElementById("pet-telefone");
+    if (phoneInput && profile && profile.telefone) {
+      phoneInput.value = profile.telefone;
+    }
+  } catch (err) {
+    console.warn("Não foi possível carregar dados do perfil:", err);
+  }
+
   adoptModal.classList.remove("hidden");
 }
 
@@ -257,7 +247,9 @@ formAdoptPet.addEventListener("submit", async (e) => {
     sexo: document.getElementById("pet-sexo").value,
     raca: document.getElementById("pet-raca").value.trim() || undefined,
     idade_aproximada: document.getElementById("pet-idade").value.trim() || undefined,
+    estado: (document.getElementById("pet-estado")?.value || "SP").trim(),
     cidade: document.getElementById("pet-cidade").value.trim(),
+    telefone_contato: document.getElementById("pet-telefone") ? document.getElementById("pet-telefone").value.trim() : "",
     descricao: document.getElementById("pet-descricao").value.trim(),
     vacinacao: document.getElementById("pet-vacinacao").value.trim() || undefined,
     medicamento: document.getElementById("pet-medicamento").value.trim() || undefined,

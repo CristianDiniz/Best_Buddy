@@ -14,7 +14,7 @@ async function bbLoadDetail() {
       ? `<img src="${animal.imagem}" alt="${animal.nome}" class="w-full h-full object-cover" />`
       : `<span class="text-xs uppercase tracking-wide text-ink-500 mt-1">Sem foto</span>`;
 
-    const cleanPhone = (animal.contato || "").replace(/\D/g, "");
+    const cleanPhone = (animal.telefone_contato || "").replace(/\D/g, "");
     const petNome = animal.nome || "pet";
     const isPerdido = animal.tipo_servico === "PERDIDO";
     const tutorNome = animal.tutor_nome || "Tutor / Protetor";
@@ -34,7 +34,7 @@ async function bbLoadDetail() {
             <div class="text-right">
               <span class="text-xs uppercase tracking-wider text-ink-500 font-semibold block">Telefone / Ligação</span>
               <a href="tel:+55${cleanPhone}" class="text-brand-300 font-mono text-sm hover:underline font-bold">
-                📞 ${animal.contato}
+                📞 ${animal.telefone_contato}
               </a>
             </div>
           </div>
