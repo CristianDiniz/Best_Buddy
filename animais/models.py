@@ -39,6 +39,35 @@ class Animal(models.Model):
         ENCONTRADO = 'ENCONTRADO', 'Encontrado'
         INATIVO = 'INATIVO', 'Inativo'
 
+    class Estado(models.TextChoices):
+        AC = 'AC', 'Acre'
+        AL = 'AL', 'Alagoas'
+        AP = 'AP', 'Amapá'
+        AM = 'AM', 'Amazonas'
+        BA = 'BA', 'Bahia'
+        CE = 'CE', 'Ceará'
+        DF = 'DF', 'Distrito Federal'
+        ES = 'ES', 'Espírito Santo'
+        GO = 'GO', 'Goiás'
+        MA = 'MA', 'Maranhão'
+        MT = 'MT', 'Mato Grosso'
+        MS = 'MS', 'Mato Grosso do Sul'
+        MG = 'MG', 'Minas Gerais'
+        PA = 'PA', 'Pará'
+        PB = 'PB', 'Paraíba'
+        PR = 'PR', 'Paraná'
+        PE = 'PE', 'Pernambuco'
+        PI = 'PI', 'Piauí'
+        RJ = 'RJ', 'Rio de Janeiro'
+        RN = 'RN', 'Rio Grande do Norte'
+        RS = 'RS', 'Rio Grande do Sul'
+        RO = 'RO', 'Rondônia'
+        RR = 'RR', 'Roraima'
+        SC = 'SC', 'Santa Catarina'
+        SP = 'SP', 'São Paulo'
+        SE = 'SE', 'Sergipe'
+        TO = 'TO', 'Tocantins'
+
     # Vínculo obrigatório com o tutor autenticado
     tutor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -65,7 +94,17 @@ class Animal(models.Model):
     )
 
     nome = models.CharField(max_length=50, null=True, blank=True, verbose_name="Nome do Pet")
+    estado = models.CharField(
+        max_length=2, 
+        choices=Estado.choices,
+        default=Estado.SP,
+        verbose_name="Estado (UF)"
+    )
     cidade = models.CharField(max_length=100, default='', verbose_name="Cidade")
+    telefone_contato = models.CharField(
+        max_length=20,
+        verbose_name="Telefone de contato do tutor"
+    )
     descricao = models.CharField(max_length=255, blank=True, null=True, verbose_name="Descrição / Informações extras")
     imagem = models.CharField(max_length=500, blank=True, null=True, verbose_name="URL da Foto do animal")
     
@@ -96,13 +135,6 @@ class Animal(models.Model):
         verbose_name = 'Animal'
         verbose_name_plural = 'Animais'
         ordering = ['-created_at']
-
-    @property
-    def contato(self):
-        """O contato vem diretamente da Chave Estrangeira do tutor."""
-        if self.tutor and self.tutor.telefone:
-            return self.tutor.telefone
-        return ""
 
     def __str__(self):
         servico = "Adoção" if self.tipo_servico == self.TipoServico.ADOCAO else "Perdido"

@@ -3,7 +3,6 @@ from .models import Animal
 
 
 class AnimaisSerializer(serializers.ModelSerializer):
-    contato = serializers.CharField(read_only=True)
     tutor_id = serializers.IntegerField(source='tutor.id', read_only=True)
     tutor_email = serializers.EmailField(source='tutor.email', read_only=True)
     tutor_nome = serializers.SerializerMethodField()
@@ -27,7 +26,9 @@ class AnimaisSerializer(serializers.ModelSerializer):
             'tipo_servico',
             'tipo_animal',
             'nome',
+            'estado',
             'cidade',
+            'telefone_contato',
             'descricao',
             'imagem',
             'status',
@@ -37,12 +38,11 @@ class AnimaisSerializer(serializers.ModelSerializer):
             'medicamento',
             'vacinacao',
             'local',
-            'contato',
             'inativado_em',
             'created_at',
             'updated_at',
         ]
-        read_only_fields = ['id', 'tutor_id', 'tutor_email', 'tutor_nome', 'contato', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'tutor_id', 'tutor_email', 'tutor_nome', 'created_at', 'updated_at']
 
     def validate(self, attrs):
         request = self.context.get('request')
@@ -50,11 +50,6 @@ class AnimaisSerializer(serializers.ModelSerializer):
             user = request.user
             if not user or not user.is_authenticated:
                 raise serializers.ValidationError("Autenticação obrigatória para anunciar um animal.")
-
-            if not getattr(user, 'telefone_validado', False):
-                raise serializers.ValidationError(
-                    "Você precisa validar seu WhatsApp no perfil antes de anunciar um animal para adoção ou perdido."
-                )
 
             # Cota de 5 animais ativos para usuários comuns
             tipo_usuario = getattr(user, 'tipo', 'PF')

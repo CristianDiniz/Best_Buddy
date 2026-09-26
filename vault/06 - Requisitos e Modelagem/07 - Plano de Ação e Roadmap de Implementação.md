@@ -1,78 +1,108 @@
 # 🚀 Plano de Ação e Roadmap de Implementação
-tags: #roadmap #tarefas #checklist #implementacao #best-buddy
+tags: #roadmap #tarefas #checklist #implementacao #ibge #best-buddy
 
-Este documento estrutura o plano de execução técnica das mudanças mapeadas no [[06 - Matriz de Gap Analysis (O que Adicionar, Ajustar e Remover)]], contemplando as regras de **tabela unificada de animais**, **contato herdado do tutor**, **validação de WhatsApp via Twilio Verify**, **tela de edição de perfil** e **abandono da função de posts**.
-
----
-
-## 🎯 Fases de Implementação
-
-### 🧱 Fase 1: Perfil de Usuário, Cadastro e Credenciais (MVP)
-*Objetivo: Permitir criação de conta ágil com telefone de contato e tela de edição de perfil segura.*
-- [ ] **1.1 Campo no Model `Usuario`:** Garantir campo `telefone = CharField(max_length=20, blank=True, null=True)`.
-- [ ] **1.2 Serializer de Cadastro:** Atualizar `RegisterUsuarioSerializer` para aceitar `telefone` opcionalmente.
-- [ ] **1.3 Endpoints de Perfil e Segurança (`usuarios/views.py`):**
-  - `GET /api/usuarios/perfil/`: Retorna dados do usuário logado (email, telefone).
-  - `PUT /api/usuarios/perfil/`: Permite atualizar telefone de contato.
-  - `POST /api/usuarios/alterar-email/`: Exige senha atual, valida novo formato e atualiza email.
-  - `POST /api/usuarios/alterar-senha/`: Exige senha atual e define nova senha com `set_password`.
-- [ ] **1.4 Frontend — Tela "Editar Perfil" (`pages/auth/profile.html`):**
-  - Card de atualização de dados e telefone de contato.
-  - Card de alteração de email com senha atual.
-  - Card de alteração de senha com senha atual.
+Este documento estrutura o plano de execução técnica das mudanças do **Best Buddy**, atualizado após a integração do frontend recente e consolidando a utilização da **API de Localidades do IBGE** para eliminação de campos digitáveis e otimização total do banco de dados (sem necessidade de catálogo local de cidades).
 
 ---
 
-### 🐾 Fase 2: Tabela Unificada de Animais (Adoção & Perdidos) e Localização
-*Objetivo: Compartilhar a mesma tabela entre os dois serviços, com validação de Estado/Cidade e contato direto do tutor.*
-- [ ] **2.1 Model `Animal` Unificado (`animais/models.py`):**
-  - FK `tutor` com `Usuario`.
-  - Campo `tipo_servico` (`ADOCAO`, `PERDIDO`).
-  - Campo `tipo_animal` (`CACHORRO`, `GATO`, `OUTRO`).
-  - Campos geográficos: `estado` (Enum com 27 UFs) e `cidade` (CharField).
-  - Campo de contato flexível: `telefone_contato` (opcional caso herde de `tutor.telefone`, ou digitado pelo anunciante).
-  - Campos unificados: `nome`, `descricao`, `imagem`, `status`, `inativado_em`.
-  - Campos de adoção: `raca`, `sexo`, `idade_aproximada`, `medicamento`, `vacinacao`.
-  - Campos de perdidos: `local` (último local visto / ponto de referência).
-- [ ] **2.2 Serializers e Views (`animais/serializers.py`, `animais/views.py`):**
-  - Exigir usuário autenticado para criar anúncios (`perform_create` injeta `tutor=request.user`).
-  - Resolução do contato (`telefone_contato` ou fallback para `tutor.telefone`).
-  - Cota de até 5 animais ativos por usuário.
-  - Filtros por `tipo_servico`, `estado`, `cidade` e `tipo_animal`.
-- [ ] **2.3 Frontend — Formulários de Animais e Filtros:**
-  - Preenchimento inteligente de telefone: pré-carrega telefone do perfil se existente, ou abre campo para digitação.
-  - Implementar preenchimento padronizado de Estado e Cidade (via ViaCEP ou catálogo do IBGE).
-  - Eliminar digitação livre despadronizada de localização.
+## 🧭 Visão Geral do Fluxo com API do IBGE
 
----
-
-### 💬 Fase 3: Abandono da Função de Posts e Limpeza de Rotas
-*Objetivo: Remover por completo os modelos, rotas e interfaces de posts.*
-- [ ] **3.1 Backend:**
-  - Remover modelo `Post` de `comunidade/models.py`.
-  - Remover `AnimalDesaparecido` (já unificado em `animais.Animal`).
-  - Remover endpoints de `/api/comunidade/posts/` em `urls.py` e `views.py`.
-- [ ] **3.2 Frontend:**
-  - Remover feed de posts de `pages/community/index.html`.
-  - Ajustar a barra de navegação (`Navigation.js`).
-
----
-
-### 🚀 Fase 4: Backlog de Implementações Futuras
-*Consultar [[08 - Implementações futuras]] para especificações:*
-- [ ] **4.1 Validação de WhatsApp via Twilio Verify:** Envio de OTP e bloqueio de cadastro sem validação.
-- [ ] **4.2 App `servicos`:** Cadastro de serviços com CRMV e aprovação da Staff.
-- [ ] **4.3 App `denuncias`:** Denúncia autenticada com enum para `ADOCAO` e `PERDIDO`.
-- [ ] **4.4 Fila de ONGs (`SolicitacaoOng`):** Upgrade institucional com liberação de cota ilimitada.
-
----
-
-## 🧪 Verificação e Testes
-
-A cada fase executada, rodar as migrações e a suíte de testes:
-```powershell
-python manage.py makemigrations
-python manage.py migrate
-python test_endpoints.py
 ```
-Garantindo que todos os fluxos atendam estritamente às novas especificações de requisitos e modelagem.
+[Frontend: ibgeService.js]
+       │
+       ├──> GET /estados ───────> Popula <select> de Estados (27 UFs)
+       │
+       └──> GET /estados/{UF}/municipios ─> Popula <select> de Cidades dinamicamente
+                                                        │
+[Envio para API Django] <───────────────────────────────┘
+       │
+       └──> Salva apenas: estado="SP" e cidade="Campinas" (sem catálogo no banco!)
+```
+
+---
+
+## 🎯 Fases de Implementação Manual (Passo a Passo)
+
+### 🧱 Fase 1: Backend — Modelagem e Migrações (`animais/models.py`)
+*Objetivo: Preparar o modelo `Animal` para armazenar a UF do Enum e suportar contato flexível.*
+- [ ] **1.1 Enum de Estados no Model:**
+  - Criar `class Estado(models.TextChoices)` com as 27 siglas e nomes das UFs.
+  - Adicionar campo `estado = models.CharField(max_length=2, choices=Estado.choices, default='SP', verbose_name="Estado (UF)")`.
+- [ ] **1.2 Campo de Contato Flexível:**
+  - Adicionar `telefone_contato = models.CharField(max_length=20, blank=True, null=True, verbose_name="Telefone de Contato do Anúncio")`.
+  - Atualizar a property `@property def contato(self):` para retornar `self.telefone_contato or (self.tutor.telefone if self.tutor else "")`.
+- [ ] **1.3 Executar Migrações:**
+  - Executar no terminal: `python manage.py makemigrations animais` e `python manage.py migrate`.
+- [ ] **1.4 Teste da Fase 1:**
+  - Validar no `python manage.py shell` a criação de instância com UF e resolução de contato.
+
+---
+
+### ⚙️ Fase 2: Backend — Serializer e Filtros da API (`animais/`)
+*Objetivo: Expor os novos campos na API e permitir filtro de busca por Estado.*
+- [ ] **2.1 Atualização de Campos no `AnimaisSerializer`:**
+  - Incluir `'estado'` e `'telefone_contato'` na lista `fields` de `AnimaisSerializer`.
+- [ ] **2.2 Flexibilização da Validação de Telefone:**
+  - Remover a trava anterior de Twilio no método `validate()`.
+  - Nova regra: O usuário autenticado deve ter telefone no cadastro do perfil (`tutor.telefone`) OU deve informar o `telefone_contato` no payload do anúncio.
+- [ ] **2.3 Filtro por Estado na View (`AnimaisViewSet`):**
+  - No método `get_queryset()` de `animais/views.py`, adicionar suporte ao query param `?estado=SP`:
+    ```python
+    estado = self.request.query_params.get('estado')
+    if estado:
+        queryset = queryset.filter(estado__iexact=estado)
+    ```
+- [ ] **2.4 Teste da Fase 2:**
+  - Testar criação de anúncio via endpoint e verificar se o filtro `?estado=...` responde corretamente.
+
+---
+
+### 🌐 Fase 3: Frontend — Serviço de Integração com o IBGE (`js/services/ibgeService.js`)
+*Objetivo: Criar um módulo JavaScript centralizado, leve e reutilizável para consultar estados e cidades sem onerar o banco.*
+- [ ] **3.1 Criação de `js/services/ibgeService.js`:**
+  - `getEstados()`: Consulta `https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome`.
+  - `getCidadesPorEstado(uf)`: Consulta `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios?orderBy=nome`.
+  - Implementar cache simples em memória (objeto JS) para evitar requisições repetidas ao mesmo estado durante a navegação.
+- [ ] **3.2 Importação nas Páginas:**
+  - Incluir `<script src="../../js/services/ibgeService.js"></script>` nos arquivos HTML necessários.
+
+---
+
+### 📝 Fase 4: Frontend — Formulários de Anúncio com IBGE e Contato Flexível
+*Objetivo: Eliminar campo de texto livre de cidade e aplicar cascata de seleção Estado $\rightarrow$ Cidade nos modais de publicação.*
+- [ ] **4.1 Modal de Adoção (`pages/animals/index.html` e `js/pages/animals.js`):**
+  - No HTML: Substituir input texto por `<select id="pet-estado">` e `<select id="pet-cidade" disabled>`.
+  - Adicionar campo de telefone inteligente: carrega o telefone do perfil se existente, ou exibe input obrigatório para digitação caso o usuário não tenha telefone.
+  - No JS: Ao abrir o modal, carregar UFs com `ibgeService.getEstados()`. No evento `change` do estado, carregar as cidades correspondentes e habilitar o select de cidades.
+- [ ] **4.2 Modal de Animal Perdido (`pages/community/index.html` e `js/pages/community.js`):**
+  - Mesma estrutura: selects em cascata Estado $\rightarrow$ Cidade via `ibgeService` e telefone inteligente.
+
+---
+
+### 🔍 Fase 5: Frontend — Filtros Geográficos nas Vitrines
+*Objetivo: Permitir que visitantes filtrem os animais por Estado e Cidade de forma estruturada.*
+- [ ] **5.1 Dropdowns de Filtro nas Vitrines (`animals/index.html` e `community/index.html`):**
+  - Adicionar `<select id="filter-estado">` com opção "Todos os estados" e as UFs do IBGE.
+  - Adicionar `<select id="filter-cidade" disabled>` que lista as cidades ao escolher um estado.
+- [ ] **5.2 Integração com a Busca:**
+  - Ao mudar o Estado ou a Cidade, disparar a busca na API passando `?estado=UF&cidade=Nome`.
+
+---
+
+### ⏳ Fase 6: Rotina de Expiração Automática (90 + 30 dias)
+*Objetivo: Automatizar o ciclo de vida dos anúncios (`RF16` e `RF17`).*
+- [ ] **6.1 Comando Django (`animais/management/commands/expirar_anuncios.py`):**
+  - Inativar anúncios com mais de 90 dias (`status = 'INATIVO'`, `inativado_em = now()`).
+  - Excluir registros inativos há mais de 30 dias (120 dias no total).
+- [ ] **6.2 Teste do Comando:**
+  - Executar `python manage.py expirar_anuncios` e validar a atualização no banco.
+
+---
+
+### 🧪 Fase 7: Testes Integrados e Homologação Final
+- [ ] **7.1 Bateria de Testes (`test_endpoints.py`):**
+  - Validar criação de animais com `estado` e `cidade` do IBGE.
+  - Validar filtros combinados.
+  - Validar cota de 5 animais.
+- [ ] **7.2 Homologação no Navegador:**
+  - Testar fluxo completo de visitante navegando, filtrando por estado/cidade, logando, anunciando com os selects do IBGE e testando botão de WhatsApp.
