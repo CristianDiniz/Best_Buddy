@@ -9,12 +9,14 @@ Este documento define os **5 perfis de acesso** (atores) do sistema **Best Buddy
 
 ### 1. Visitante (Não Autenticado)
 * **Perfil:** Qualquer pessoa acessando o site sem login ou cadastro prévio.
-* **Poderes:** Navegar e visualizar todas as vitrines (animais para adoção, animais perdidos, catálogo de serviços e notícias). Entrar em contato direto com o tutor via WhatsApp para interesse de adoção ou resgate de perdidos.
+* **Poderes / Acesso Liberado:**
+  - **Acesso público e irrestrito liberado** para navegar e visualizar todas as vitrines da plataforma (catálogo de animais para adoção, mural de animais perdidos, catálogo de serviços e notícias/campanhas), sem exigir login ou cadastro prévio para consulta.
+  - Visualização dos detalhes completos dos anúncios e contato direto com o tutor via WhatsApp ou telefone para manifestar interesse de adoção ou fornecer informações sobre pets desaparecidos.
 * **Restrições:**
   - **Não pode** cadastrar animais para adoção nem reportar perdidos.
   - **Não pode** solicitar credenciamento no catalogo de serviços.
   - **Não pode registrar denúncias** (exige autenticação obrigatória).
-  - Se clicar em botões de ação restrita, deve ser redirecionado para a tela de login/cadastro.
+  - Se clicar em botões de ação restrita, é redirecionado automaticamente para a tela de login/cadastro.
   - Proibido de acessar a rota administrativa (`/admin/`), recebendo erro `403 Forbidden`.
 
 ### 2. Usuário Autenticado (Comum / Tutor)
