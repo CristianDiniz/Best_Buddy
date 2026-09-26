@@ -1,45 +1,40 @@
 # 📋 Requisitos & Modelagem — Mapa de Conteúdo (MOC)
 tags: #moc #requisitos #regras-de-negocio #modelagem #gap-analysis #best-buddy
 
-Este módulo do **Obsidian Vault** reúne a documentação canônica de requisitos funcionais, não funcionais, regras de negócio, modelagem de banco de dados e a auditoria de divergências (**Gap Analysis**) do projeto **Best Buddy**, consolidando as decisões de produto: **tabela única de animais**, **validação de WhatsApp via Twilio**, **tela de edição de perfil** e **descontinuação da função de posts**.
+Este módulo do **Obsidian Vault** reúne a documentação canônica de requisitos funcionais, não funcionais, regras de negócio, modelagem de banco de dados e a auditoria de divergências (**Gap Analysis**) do projeto **Best Buddy**, consolidando as decisões de produto: **tabela única de animais**, **foco no MVP (Adoção e Perdidos)**, **edição de perfil** e **postergação de serviços, ONGs e denúncias para implementações futuras**.
 
 ---
 
 ## 🗺️ Estrutura da Documentação
 
 ### 1. [[01 - Atores e Matriz de Permissões]]
-- Mapeamento dos 5 perfis de acesso: Visitante, Usuário Autenticado Comum, Usuário de ONG, Staff e SuperUser.
-- Permissões de gestão de perfil (email, senha, WhatsApp via Twilio Verify).
-- Matriz de permissões CRUD e restrições operacionais de cada perfil.
+- Mapeamento dos perfis ativos do MVP: Visitante, Usuário Autenticado (Tutor), Staff e SuperUser.
+- Matriz de permissões CRUD com segregação clara entre o escopo atual e recursos futuros.
 
 ### 2. [[02 - Requisitos Funcionais]]
-- Catálogo completo de requisitos funcionais categorizado por módulos:
-  - Autenticação e Perfil (`RF01`, `RF01.1`: Edição de Perfil com senha atual e revalidação de email, validação de WhatsApp via Twilio Verify).
-  - Animais (Tabela unificada `Animal` com `tipo_servico`: Adoção e Perdidos, contato herdado do tutor, cota de 5).
-  - Contato Direto para Adoção e Perdidos (via link direto do WhatsApp do tutor validado).
-  - Serviços Profissionais e Clínicas (com CRMV).
-  - Abandono Completo da Função de Posts (feed descontinuado).
-  - Solicitação e Upgrade de ONG.
-  - Sistema de Denúncias Autenticado com Enum de Motivos.
-  - Painel Administrativo e Políticas da Staff.
-  - Rotina Automática de Expiração (90 + 30 dias).
+- Catálogo completo de 17 requisitos funcionais organizados em 4 módulos prioritários:
+  - Módulo 1: Autenticação, Perfil e Controle de Acesso (`RF01` a `RF04`).
+  - Módulo 2: Animais para Adoção (`RF05` a `RF11`).
+  - Módulo 3: Animais Perdidos (`RF12` a `RF15`).
+  - Módulo 4: Rotina Automática de Expiração 90 + 30 dias (`RF16` e `RF17`).
 
 ### 3. [[03 - Requisitos Não Funcionais]]
-- Critérios de qualidade técnica: **RNF01 a RNF07** (Usabilidade, Mobile-First, Compatibilidade Cross-Browser, Desempenho, Segurança e Criptografia, Integridade de Dados, Arquitetura Desacoplada).
+- Critérios de qualidade técnica: **RNF01 a RNF08** (Usabilidade, Mobile-First, Compatibilidade Cross-Browser, Desempenho, Segurança e Criptografia, Integridade Transacional, Arquitetura Modular e Isolamento da Rota Administrativa).
 
 ### 4. [[04 - Regras de Negócio]]
-- Detalhamento das 15 regras do sistema: **RN01 a RN15** (Cota de 5 animais na tabela unificada, Ilimitado para ONGs, Validação prévia de WhatsApp no perfil via Twilio, Adoção direta peer-to-peer, Denúncia autenticada com enum, Segurança na edição de perfil, Ciclo 90+30 dias, Homologação em 2 etapas, etc.).
+- Detalhamento das regras mandatórias do MVP: **RN01 a RN09** (Navegação pública, Ações autenticadas, Cota de 5 animais, Titularidade de edição, Adoção direta peer-to-peer, Ciclo 90+30 dias, Limite de 255 chars, Segurança no perfil e Padronização geográfica de Estado e Cidade).
 
 ### 5. [[05 - Modelagem de Dados e Relacionamentos]]
-- Diagrama Entidade-Relacionamento (ERD) completo em Mermaid.
-- Dicionário de Dados das tabelas: `Usuario` (com `telefone` e `telefone_validado`), `SolicitacaoOng`, `Animal` (tabela unificada para adoção e perdidos com contato via FK), `Servico`, `Denuncia`.
-- Descontinuação formal de `comunidade_post`, `animais_validacaowhatsapp` e `adocoes_adocao`.
+- Diagrama Entidade-Relacionamento (ERD) e Dicionário de Dados com foco nas tabelas ativas (`Usuario`, `Animal`) e demarcação dos modelos de backlog.
 
 ### 6. [[06 - Matriz de Gap Analysis (O que Adicionar, Ajustar e Remover)]]
 - Comparativo direto entre o código atual (`Best_Buddy`) e a especificação consolidada.
 
 ### 7. [[07 - Plano de Ação e Roadmap de Implementação]]
-- Checklist operacional estruturado em fases para guiar a execução das mudanças.
+- Checklist operacional estruturado em sprints para guiar a execução das mudanças.
+
+### 8. [[08 - Implementações futuras]]
+- Backlog de evolução: Twilio WhatsApp, Contas de ONG com cota ilimitada, Catálogo de Serviços e Clínicas, Sistema Universal de Denúncias, Moderação Avançada de Staff e Recuperação de Senha por Email.
 
 ---
 

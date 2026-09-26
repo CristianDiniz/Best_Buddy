@@ -5,18 +5,22 @@ Este documento apresenta a análise de divergências entre a base de código do 
 
 ---
 
-## 🟢 1. O que ADICIONAR ao Projeto
+## 🟢 1. O que ADICIONAR ao Projeto (Foco MVP)
 
 | Recurso / Item | Onde Deve Ser Adicionado | Detalhes Técnicos da Adição | Prioridade |
 | :--- | :--- | :--- | :---: |
-| **Tela "Editar Perfil"** | Frontend: `pages/auth/profile.html`<br>Backend: `usuarios/views.py` | Telas e endpoints para: 1) Alterar email com confirmação de senha atual e envio de token de revalidação; 2) Alterar senha com senha atual; 3) Gerenciamento e status de validação de WhatsApp. | 🔴 Alta |
-| **Campos `telefone` e `telefone_validado` no Usuário** | Backend: `usuarios/models.py`<br>Frontend: `register.html` e `profile.html` | Inclusão de `telefone` (CharField opcional no primeiro momento) e `telefone_validado` (BooleanField, default=False) diretamente no modelo `Usuario`. | 🔴 Alta |
-| **Integração com Twilio Verify (WhatsApp)** | Backend: `usuarios/views.py`<br>Frontend: Modal no perfil | Endpoints para disparar OTP via Twilio Verify (canal `whatsapp`) e checar código recebido. Ao aprovar, salva o número e ativa `telefone_validado = True`. | 🔴 Alta |
-| **Tabela Unificada de Animais (`Animal`)** | Backend: `animais/models.py`<br>Frontend: `animals/index.html` e cadastro | Unificar adoção e animais perdidos em uma única tabela com flag `tipo_servico` (`ADOCAO` / `PERDIDO`). Contato resolvido via FK com o tutor autenticado (`animal.tutor.telefone`). | 🔴 Alta |
-| **Bloqueio de Cadastro sem WhatsApp Validado** | Backend: `animais/serializers.py`<br>Frontend: Navegação e formulários | Usuários com `telefone_validado == False` são impedidos de anunciar pets e orientados a validar o WhatsApp no perfil. | 🔴 Alta |
-| **Módulo de Denúncias Autenticadas** | Backend: App `denuncias`<br>Frontend: Modal nos cards | Model `Denuncia` associado a `Usuario` e campo `motivo_categoria` como Enum, com alvos `ADOCAO`, `PERDIDO` e `SERVICO`. | 🔴 Alta |
-| **Módulo de Serviços Credenciados** | Backend: App `servicos`<br>Frontend: `pages/services/` | Model `Servico` com múltipla escolha de serviços prestados, CRMV se veterinário, horários e aprovação formal pela Staff. | 🔴 Alta |
-| **Módulo de Solicitação de ONG** | Backend: App `usuarios`<br>Frontend: Tela de perfil | Model `SolicitacaoOng` com CNPJ, Razão Social, Telefone e Endereço, para homologação pela Staff. | 🔴 Alta |
+| **Tela "Editar Perfil"** | Frontend: `pages/auth/profile.html`<br>Backend: `usuarios/views.py` | Telas e endpoints para: 1) Alterar email com confirmação de senha atual; 2) Alterar senha com confirmação de senha atual; 3) Gerenciamento do número de telefone de contato. | 🔴 Alta |
+| **Campo `telefone` no Usuário** | Backend: `usuarios/models.py`<br>Frontend: `register.html` e `profile.html` | Inclusão de `telefone` (CharField opcional no registro inicial) diretamente no modelo `Usuario`. | 🔴 Alta |
+| **Tabela Unificada de Animais (`Animal`)** | Backend: `animais/models.py`<br>Frontend: `animals/index.html` e modais | Unificar adoção e animais perdidos em uma única tabela com flag `tipo_servico` (`ADOCAO` / `PERDIDO`). Contato resolvido via FK com o tutor (`animal.tutor.telefone`). | 🔴 Alta |
+| **Padronização Geográfica (Estado e Cidade)** | Backend: `animais/models.py`<br>Frontend: formulários de animais | Adicionar campo `estado` (Enum de 27 UFs) e integração com ViaCEP/IBGE para preenchimento de cidade e estado sem permitir digitação livre inconsistente. | 🔴 Alta |
+| **Cota de 5 Animais Ativos** | Backend: `animais/serializers.py` e `views.py` | Validação estrita impedindo o cadastro do 6º animal ativo (adoção + perdido) para o usuário comum. | 🔴 Alta |
+
+### 🚀 Itens Postergados para o Backlog de Futuras Fases
+*Consultar [[08 - Implementações futuras]] para especificações detalhadas:*
+- **Integração com Twilio Verify (WhatsApp):** Validação por OTP gerenciado.
+- **Módulo de Serviços Credenciados:** Vitrine profissional, CRMV e aprovação Staff.
+- **Módulo de Solicitação e Upgrade de ONG:** CNPJ e cota ilimitada de animais.
+- **Módulo Universal de Denúncias:** Categorias em Enum e fila de triagem.
 
 ---
 

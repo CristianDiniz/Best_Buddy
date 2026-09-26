@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "06 - Requisitos e Modelagem/06 - Matriz de Gap Analysis (O que Adicionar, Ajustar e Remover).md",
+                "file": "06 - Requisitos e Modelagem/02 - Requisitos Funcionais.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "06 - Matriz de Gap Analysis (O que Adicionar, Ajustar e Remover)"
+              "title": "02 - Requisitos Funcionais"
             }
           }
         ]
@@ -190,18 +190,20 @@
   },
   "active": "373cc9a7f2c37c1d",
   "lastOpenFiles": [
-    "06 - Requisitos e Modelagem/05 - Modelagem de Dados e Relacionamentos.md",
+    "06 - Requisitos e Modelagem/03 - Requisitos Não Funcionais.md",
     "06 - Requisitos e Modelagem/04 - Regras de Negócio.md",
     "06 - Requisitos e Modelagem/02 - Requisitos Funcionais.md",
+    "06 - Requisitos e Modelagem/08 - Implementações futuras.md",
+    "06 - Requisitos e Modelagem/05 - Modelagem de Dados e Relacionamentos.md",
+    "06 - Requisitos e Modelagem/06 - Matriz de Gap Analysis (O que Adicionar, Ajustar e Remover).md",
+    "06 - Requisitos e Modelagem/07 - Plano de Ação e Roadmap de Implementação.md",
+    "06 - Requisitos e Modelagem/00 - MOC Requisitos e Modelagem.md",
     "06 - Requisitos e Modelagem/01 - Atores e Matriz de Permissões.md",
+    "05 - Tarefas e Roadmap/06 - Guia de Alinhamento da Equipe e Novo Roadmap.md",
     "01 - Frontend/02 - Fluxos de Telas e Páginas.md",
     "00 - Visão Geral/01 - Visão Geral do Projeto.md",
     "00 - Visão Geral/00 - MOC (Início).md",
-    "06 - Requisitos e Modelagem/03 - Requisitos Não Funcionais.md",
     "00 - Visão Geral/02 - Arquitetura do Sistema.md",
-    "06 - Requisitos e Modelagem/07 - Plano de Ação e Roadmap de Implementação.md",
-    "06 - Requisitos e Modelagem/06 - Matriz de Gap Analysis (O que Adicionar, Ajustar e Remover).md",
-    "06 - Requisitos e Modelagem/00 - MOC Requisitos e Modelagem.md",
     "06 - Requisitos e Modelagem/Sem título",
     "04 - Status e Funcionalidades/01 - Matriz de Funcionalidades (O que funciona).md",
     "05 - Tarefas e Roadmap/02 - Tarefas Backend (Django).md",
@@ -214,8 +216,6 @@
     "04 - Status e Funcionalidades/02 - Diagnóstico dos Bugs Atuais.md",
     "05 - Tarefas e Roadmap/05 - Configuração e Uso do Docker.md",
     "02 - Backend/04 - App Adoções.md",
-    "02 - Backend/05 - App Comunidade (Planejamento).md",
-    "02 - Backend/03 - App Animais.md",
-    "00 - Visão Geral/03 - Transição SQLite para MySQL.md"
+    "02 - Backend/05 - App Comunidade (Planejamento).md"
   ]
 }

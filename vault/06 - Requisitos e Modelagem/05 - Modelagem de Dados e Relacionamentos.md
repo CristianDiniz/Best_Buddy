@@ -63,6 +63,8 @@ erDiagram
         string tipo_animal "CACHORRO, GATO, OUTRO"
         string nome "Opcional"
         string cidade "Filtro geografico obrigatorio"
+        string estado "Sigla UF Enum (2 caracteres, ex: SP)"
+        string telefone_contato "Opcional (se vazio, herda tutor.telefone)"
         string descricao "Max 255 chars"
         string imagem "URL ou foto do animal"
         string status "DISPONIVEL, ADOTADO, PERDIDO, ENCONTRADO, INATIVO"
@@ -133,7 +135,7 @@ erDiagram
 
 ---
 
-### 2. `usuarios_solicitacaoong` (Fila de Homologação de ONGs)
+### 2. `usuarios_solicitacaoong` *(Implementação Futura — ver [[08 - Implementações futuras]])*
 * **Finalidade:** Armazenar dados e histórico de pedidos de upgrade para entidade protetora.
 * **Campos:**
   - `id` (INTEGER, PK, AutoIncrement)
@@ -154,14 +156,19 @@ erDiagram
 
 ### 3. `animais_animal` (Tabela Unificada de Animais: Adoção & Perdidos)
 * **Finalidade:** Tabela única compartilhada para ambos os serviços (Animais para Adoção e Animais Perdidos), diferenciada pelo campo `tipo_servico`.
-* **Regra de Contato:** O número de contato do anúncio **não é persistido nesta tabela** como string solta; ele é obtido diretamente de `tutor.telefone`. Quando o tutor atualiza e valida um novo número em seu perfil, todos os seus cadastros (adoção ou perdidos) passam a exibir o novo número imediatamente.
+* **Regra de Contato Flexível:** A resolução do telefone de contato para exibição pública e botão de WhatsApp funciona de forma híbrida:
+  1. Se o tutor possuir telefone cadastrado em seu perfil (`tutor.telefone`), o anúncio herda este valor automaticamente.
+  2. Se o tutor não possuir telefone no cadastro (ou desejar informar um contato específico para aquele resgate/adoção), o valor é registrado diretamente no campo `telefone_contato`.
+  3. Resolução no backend: `contato = animal.telefone_contato or (animal.tutor.telefone if animal.tutor else '')`.
 * **Campos:**
   - `id` (INTEGER, PK, AutoIncrement)
-  - `tutor_id` (FK -> `usuarios_usuario.id`, ON DELETE CASCADE): Usuário anunciante autenticado (exige `telefone_validado == True`).
+  - `tutor_id` (FK -> `usuarios_usuario.id`, ON DELETE CASCADE): Usuário anunciante autenticado.
   - `tipo_servico` (VARCHAR(10), NOT NULL, DEFAULT 'ADOCAO'): `ADOCAO`, `PERDIDO`.
   - `tipo_animal` (VARCHAR(15), NOT NULL, DEFAULT 'CACHORRO'): `CACHORRO`, `GATO`, `OUTRO`.
   - `nome` (VARCHAR(50), BLANK/NULL): Nome do animal (opcional).
+  - `telefone_contato` (VARCHAR(20), BLANK/NULL): Telefone informado no anúncio (usado quando o tutor não possui telefone no perfil ou informa número específico).
   - `cidade` (VARCHAR(100), NOT NULL): Cidade para filtros de busca.
+  - `estado` (VARCHAR(2), NOT NULL, DEFAULT 'SP', CHOICES: 27 UFs): Sigla da Unidade Federativa para filtros combinados.
   - `descricao` (VARCHAR(255), BLANK/NULL): Informações limitadas a 255 caracteres.
   - `imagem` (VARCHAR(500), BLANK/NULL): URL ou foto do pet.
   - `status` (VARCHAR(15), DEFAULT 'DISPONIVEL'):
@@ -179,7 +186,7 @@ erDiagram
 
 ---
 
-### 4. `servicos_servico` (Serviços e Clínicas Credenciadas)
+### 4. `servicos_servico` *(Implementação Futura — ver [[08 - Implementações futuras]])*
 * **Finalidade:** Catálogo de estabelecimentos, veterinários e prestadores credenciados.
 * **Campos:**
   - `id` (INTEGER, PK, AutoIncrement)
@@ -202,7 +209,7 @@ erDiagram
 
 ---
 
-### 5. `denuncias_denuncia` (Denúncias Autenticadas com Motivo Enum)
+### 5. `denuncias_denuncia` *(Implementação Futura — ver [[08 - Implementações futuras]])*
 * **Finalidade:** Fila centralizada de moderação para conteúdo impróprio ou suspeito, vinculada a usuário autenticado.
 * **Campos:**
   - `id` (INTEGER, PK, AutoIncrement)
