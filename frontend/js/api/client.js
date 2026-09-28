@@ -30,10 +30,60 @@ function bbExtractErrorMessage(data, fallback) {
 }
 
 const bbClient = {
-  async request(path, { method = "GET", body, auth = true } = {}) {
+  _refreshPromise: null,
+
+  async refreshAccessToken() {
+    if (this._refreshPromise) return this._refreshPromise;
+
+    this._refreshPromise = (async () => {
+      if (typeof bbStorage === "undefined") return null;
+
+      const refresh = bbStorage.getRefreshToken();
+      if (!refresh || bbStorage.isTokenExpired(refresh)) {
+        return null;
+      }
+
+      try {
+        const response = await fetch(`${window.BB_CONFIG.API_BASE_URL}/token/refresh/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refresh }),
+        });
+
+        if (!response.ok) {
+          return null;
+        }
+
+        const data = await response.json();
+        if (data && data.access) {
+          bbStorage.setAccessToken(data.access);
+          return data.access;
+        }
+      } catch (_) {
+        return null;
+      } finally {
+        this._refreshPromise = null;
+      }
+      return null;
+    })();
+
+    return this._refreshPromise;
+  },
+
+  async request(path, { method = "GET", body, auth = true, isRetry = false } = {}) {
     const headers = { "Content-Type": "application/json" };
-    if (auth) {
-      const token = bbStorage.getAccessToken();
+    if (auth && typeof bbStorage !== "undefined") {
+      let token = bbStorage.getAccessToken();
+
+      // Se o token de acesso estiver expirado, tenta renovar silenciosamente antes de disparar
+      if (token && bbStorage.isTokenExpired(token) && !isRetry) {
+        token = await this.refreshAccessToken();
+        if (!token) {
+          bbStorage.handleSessionExpired();
+          throw new BBApiError("Sessão expirada. Faça login novamente.", 401, null);
+        }
+      }
+
       if (token) headers.Authorization = `Bearer ${token}`;
     }
 
@@ -46,6 +96,21 @@ const bbClient = {
       });
     } catch (networkError) {
       throw new BBApiError("Não foi possível conectar ao servidor.", 0, null);
+    }
+
+    // Se receber 401 Unauthorized em requisição autenticada
+    if (response.status === 401 && auth && !isRetry && !path.includes("/token/")) {
+      const refreshedToken = await this.refreshAccessToken();
+      if (refreshedToken) {
+        // Tenta novamente a requisição original com o novo token
+        return this.request(path, { method, body, auth, isRetry: true });
+      } else {
+        // Refresh token expirou ou falhou: encerra a sessão e redireciona se necessário
+        if (typeof bbStorage !== "undefined") {
+          bbStorage.handleSessionExpired();
+        }
+        throw new BBApiError("Sua sessão expirou.", 401, null);
+      }
     }
 
     let data = null;

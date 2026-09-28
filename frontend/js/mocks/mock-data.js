@@ -26,5 +26,3 @@ const BB_MOCK_ANIMALS = [
   { id: 5, nome: "Bidu", raca: "Poodle", sexo: "M", idade_aproximada: "Adulto", medicamento: "Não", vacinacao: "Sim", contato: "(16) 99999-0005", descricao: "Late pouco, já é castrado.", imagem: null },
   { id: 6, nome: "Mel", raca: "SRD", sexo: "F", idade_aproximada: "Filhote", medicamento: "Não", vacinacao: "Não", contato: "(16) 99999-0006", descricao: "Resgatada há 1 semana, em observação.", imagem: null },
 ];
-
-];

@@ -39,6 +39,10 @@ class BBApiError extends Error {
 
 ### Funcionalidades do `bbClient`:
 - **Injeção Automática de JWT**: Caso `auth: true` (padrão), busca o token no `bbStorage.getAccessToken()` e adiciona o header `Authorization: Bearer <token>`.
+- **Renovação Silenciosa (Silent Refresh)**: Se o `access_token` estiver expirado antes da requisição ou se a resposta retornar `401 Unauthorized`, chama `refreshAccessToken()` automaticamente via `/api/token/refresh/`.
+- **Fila de Concorrência (`_refreshPromise`)**: Múltiplas requisições simultâneas aguardam a mesma promessa de renovação para não sobrecarregar a API.
+- **Auto-Retry Transparente**: Refaz a requisição original com o novo token sem interrupção para o usuário.
+- **Tratamento de Sessão Expirada**: Se o `refresh_token` também estiver inválido/expirado, aciona `bbStorage.handleSessionExpired()`.
 - **Parsing Seguro de JSON**: Captura payloads de resposta tanto para status 200 quanto para erros 400/401/404/500.
 - **Tratamento de Queda de Rede**: Se a conexão for recusada, lança `BBApiError("Não foi possível conectar ao servidor.", 0, null)`.
 - **Métodos Auxiliares**: `get()`, `post()`, `patch()`, `delete()`.
@@ -58,7 +62,7 @@ class BBApiError extends Error {
 - `confirmPasswordReset({ email, pin, password })`:
   - Real: `POST /usuarios/password-reset/confirm/`
 - `logout()`:
-  - Limpa os tokens com `bbStorage.clearSession()` e redireciona para `login.html`.
+  - Limpa os tokens com `bbStorage.clearSession()` e redireciona para a Home (`/pages/home/index.html`).
 
 ### `animalService.js`
 Serviço central de gestão e consulta da tabela unificada de animais:
@@ -106,6 +110,12 @@ Encapsula o acesso a `localStorage` com prefixo `bb_`:
 - `bb_access_token`: Token de curta duração para autenticar no header Bearer.
 - `bb_refresh_token`: Token de longa duração para renovação.
 - `bb_user`: Objeto JSON com dados básicos (`id`, `nome`, `email`, `tipo`).
+
+### Métodos Principais:
+- `isTokenExpired(token)`: Decodifica o payload base64 do JWT e avalia `exp * 1000 <= Date.now()`.
+- `isAuthenticated()`: Valida a presença e integridade dos tokens, limpando a sessão proativamente se ambos estiverem expirados.
+- `setSession({ access, refresh, user })` / `clearSession()`: Persistência e limpeza atômica da sessão.
+- `handleSessionExpired()`: Limpa o storage, dispara o evento customizado `bb:auth-state-changed` e redireciona rotas protegidas para `/pages/home/index.html?session=expired`.
 
 > [!TIP]
 > Centralizar o `storage.js` permite migrar para Cookies `HttpOnly` no futuro sem alterar uma única linha de código nos componentes ou nas páginas.

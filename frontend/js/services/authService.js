@@ -113,6 +113,6 @@ const authService = {
 
   logout() {
     bbStorage.clearSession();
-    window.location.href = "/pages/auth/login.html";
+    window.location.href = "/pages/home/index.html";
   },
 };
