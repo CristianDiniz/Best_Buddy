@@ -21,14 +21,9 @@
               Adote um companheiro ou ajude uma família a reencontrar seu pet desaparecido.
             </p>
           </div>
-          <div class="flex flex-wrap items-center gap-3">
-            <button class="bb-btn bb-btn--secondary shrink-0 flex items-center gap-2" id="bb-report-lost-btn" type="button">
-              <span>🚨</span> + Reportar Pet Perdido
-            </button>
-            <button class="bb-btn bb-btn--primary shrink-0 flex items-center gap-2" id="bb-announce-pet-btn" type="button">
-              <span>🐾</span> + Anunciar Pet para Adoção
-            </button>
-          </div>
+          <button class="bb-btn bb-btn--primary shrink-0 flex items-center gap-2" id="bb-announce-pet-btn" type="button">
+            <span>🐾</span> + Anunciar Pet para Adoção
+          </button>
         </div>
 
         <!-- Barra de Busca, Filtros e Abas -->
@@ -44,24 +39,15 @@
               </button>
             </div>
 
-            <!-- Filtros: Estado, Cidade e Tipo de Animal -->
+            <!-- Filtros: Cidade e Tipo de Animal -->
             <div class="flex flex-wrap items-center gap-3">
-              <div>
-                <select id="filter-estado" class="bb-input text-xs md:text-sm py-2">
-                  <option value="">Todos os estados</option>
-                </select>
-              </div>
-
               <div class="relative min-w-[200px]">
                 <input
                   type="text"
                   id="filter-cidade"
-                  list="filter-cidades-list"
                   class="bb-input text-xs md:text-sm py-2"
                   placeholder="🔍 Buscar por cidade..."
-                  autocomplete="off"
                 />
-                <datalist id="filter-cidades-list"></datalist>
               </div>
 
               <div>
@@ -161,26 +147,13 @@
         <h2 class="text-lg font-bold text-slate-100 mb-1 flex items-center gap-2">
           <span>🐾</span> Anunciar Pet para Adoção
         </h2>
-        <p class="text-xs text-slate-400 mb-4" id="modal-adopt-desc">
-          Preencha os dados do animal. O telefone informado será o canal direto para interessados entrarem em contato via WhatsApp.
+        <p class="text-xs text-slate-400 mb-4">
+          O contato exibido para interessados será automaticamente o seu WhatsApp verificado no perfil.
         </p>
 
         <div id="modal-adopt-alert"></div>
 
         <form id="form-adopt-pet" class="space-y-4">
-          <div>
-            <label class="bb-label" for="pet-servico">Finalidade do Anúncio *</label>
-            <select class="bb-input" id="pet-servico" required>
-              <option value="ADOCAO">🐾 Doação / Colocar para Adoção</option>
-              <option value="PERDIDO">🚨 Animal Perdido / Desaparecido</option>
-            </select>
-          </div>
-
-          <div id="wrap-pet-local" class="hidden">
-            <label class="bb-label" for="pet-local">Último local visto / Ponto de referência *</label>
-            <input class="bb-input" type="text" id="pet-local" placeholder="Ex: Próximo à praça central, Bairro X, Rua Y..." />
-          </div>
-
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label class="bb-label" for="pet-nome">Nome do Pet *</label>
@@ -215,42 +188,20 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-              <label class="bb-label" for="pet-estado">Estado (UF) *</label>
-              <select id="pet-estado" class="bb-input" required>
-                <option value="">Selecione a UF...</option>
-              </select>
-            </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label class="bb-label" for="pet-cidade">Cidade *</label>
-              <input
-                class="bb-input"
-                type="text"
-                id="pet-cidade"
-                list="pet-cidades-list"
-                required
-                disabled
-                placeholder="Selecione a UF primeiro..."
-                autocomplete="off"
-              />
-              <datalist id="pet-cidades-list"></datalist>
+              <input class="bb-input" type="text" id="pet-cidade" required placeholder="Ex: Campinas" />
             </div>
-            <div>
-              <label class="bb-label" for="pet-telefone">Telefone de Contato (WhatsApp com DDD) *</label>
-              <input class="bb-input" type="tel" id="pet-telefone" required placeholder="Ex: (11) 99999-0000" maxlength="15" />
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label class="bb-label" for="pet-vacinacao">Vacinação</label>
               <input class="bb-input" type="text" id="pet-vacinacao" placeholder="Ex: V8 completa, Antirrábica..." />
             </div>
-            <div>
-              <label class="bb-label" for="pet-medicamento">Medicamentos / Cuidados (opcional)</label>
-              <input class="bb-input" type="text" id="pet-medicamento" placeholder="Ex: Nenhum, ou castrado..." />
-            </div>
+          </div>
+
+          <div>
+            <label class="bb-label" for="pet-medicamento">Medicamentos / Cuidados Especiais (opcional)</label>
+            <input class="bb-input" type="text" id="pet-medicamento" placeholder="Ex: Nenhum, ou castrado, colírio..." />
           </div>
 
           <div>
@@ -279,7 +230,6 @@
   <script src="../../js/mocks/mock-utils.js"></script>
   <script src="../../js/mocks/mock-data.js"></script>
   <script src="../../js/api/client.js"></script>
-  <script src="../../js/services/ibgeService.js"></script>
   <script src="../../js/services/animalService.js"></script>
   <script src="../../js/services/authService.js"></script>
   <script src="../../js/utils/header-scroll.js"></script>
@@ -288,6 +238,6 @@
   <script src="../../js/components/NearbyOngsMap.js"></script>
   <script src="../../js/components/AnimalCard.js"></script>
   <script src="../../js/components/StateView.js"></script>
-  <script src="../../js/pages/animals.js?v=3"></script>
+  <script src="../../js/pages/animals.js"></script>
 </body>
 </html>
