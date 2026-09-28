@@ -12,10 +12,10 @@ Este documento é o inventário detalhado de todas as tarefas e funcionalidades 
 | Módulo / Funcionalidade          |  Front (Modo Mock)  |          Front (Modo Real)           |        Backend (Django REST)        |           Banco (SQLite / MySQL)            |
 | :------------------------------- | :-----------------: | :----------------------------------: | :---------------------------------: | :-----------------------------------------: |
 | **Login com Email e Senha**      |     🟢 Funciona     |  🟢 Funciona (`data.user` no header)  | 🟢 Funciona (`/api/token/` c/ user) |      🟢 Tabela `usuarios_usuario` ok        |
-| **Renovação de Token (Refresh)** |     🟢 Mockado      |         🟢 Pronto no client          | 🟢 Funciona (`/api/token/refresh/`) |            🟢 Tokens stateless              |
+| **Renovação de Token (Refresh)** |     🟢 Mockado      |  🟢 Silent refresh c/ auto-retry 401  | 🟢 Funciona (`/api/token/refresh/`) |            🟢 Tokens stateless              |
 | **Cadastro de Usuário (PF)**     |     🟢 Funciona     |         🟢 Rápido sem CPF            |      🟢 Registro simplificado       | 🟢 Tabela `usuarios_usuario` sem fricção    |
 | **Recuperação de Senha (Token)** |     🟢 Funciona     |    🟢 Token assinado via email/API   |  🟢 Endpoints de recuperação prontos | 🟢 Validado via `test_endpoints.py`         |
-| **Guarda de Rotas (AuthGuard)**  |     🟢 Funciona     |             🟢 Funciona              |        🟢 `IsAuthenticated`         |                    N/A                      |
+| **Guarda de Rotas (AuthGuard)**  |     🟢 Funciona     |  🟢 Redireciona para Home com aviso   |        🟢 `IsAuthenticated`         |                    N/A                      |
 | **Listagem Unificada de Animais**|  🟢 Vitrine ativa   |   🟢 Filtros de Adoção e Perdidos    | 🟢 `GET /api/animais/` (`AllowAny`) |     🟢 Tabela unificada `animais_animal`    |
 | **Filtros Geográficos (IBGE)**   |     🟢 Funciona     |   🟢 27 UFs + Datalist de Cidades    | 🟢 Suporte a `?estado=` e `?cidade=`| 🟢 Campos `estado` e `cidade` no model      |
 | **Detalhes do Animal**           |     🟢 Funciona     |        🟢 Ficha completa c/ ID       | 🟢 `GET /api/animais/{id}/`         |       🟢 Com `descricao` e `imagem`         |
@@ -27,7 +27,7 @@ Este documento é o inventário detalhado de todas as tarefas e funcionalidades 
 | **Feed de Posts da Comunidade**  |  ❌ Descontinuado   |          ❌ Descontinuado            |   ❌ Abandonado (HTTP 404)          |       ❌ Tabela descontinuada               |
 | **Mural de Desaparecidos**       |     🟢 Funciona     | 🟢 Unificado em `animals/index.html` | 🟢 `GET /api/animais/?tipo=PERDIDO` | 🟢 Tabela unificada `animais_animal`        |
 | **Reportar Desaparecido**        |     🟢 Funciona     |   🟢 Modal unificado no frontend     |   🟢 POST em `/api/animais/`        |  🟢 Registro persistido no banco            |
-| **Logout**                       |  🟢 Limpa storage   |           🟢 Limpa storage           |           N/A (Stateless)           |                    N/A                      |
+| **Logout**                       |  🟢 Limpa storage   |     🟢 Limpa storage e vai p/ Home   |           N/A (Stateless)           |                    N/A                      |
 
 ---
 
@@ -37,13 +37,17 @@ Este documento é o inventário detalhado de todas as tarefas e funcionalidades 
    - Layout responsivo para Desktop, Tablet e Mobile.
    - Skeletons de loading em todas as vitrines de dados.
    - Microanimações e feedback visual consistente.
-2. **Integração com IBGE (`ibgeService.js`)**:
+2. **Autenticação Resiliente & Silent Refresh**:
+   - Decodificação e inspeção proativa de expiração de JWT no client (`isTokenExpired`).
+   - Renovação transparente no backend sem deslogar o usuário em uso ativo (`refreshAccessToken` com trava de concorrência).
+   - Encerramento suave de sessão (redirecionamento à Home com aviso amigável em rotas restritas e atualização reativa da navbar sem quebrar navegação em rotas públicas).
+3. **Integração com IBGE (`ibgeService.js`)**:
    - Lista estática síncrona das 27 UFs brasileiras.
    - Municípios carregados sob demanda em `<datalist>` com cache de 2 níveis (RAM + `sessionStorage`).
-3. **Formulários e Validação Estrita**:
+4. **Formulários e Validação Estrita**:
    - Validação client-side para o `telefone_contato` com DDD obrigatório. Se inválido, emite o popup `alert("É necessário um número de contato para cadastrar o animal.");` e interrompe o fluxo antes de chamar a rota.
    - Máscara automática de telefone brasileiro `(XX) XXXXX-XXXX`.
-4. **Navegação Limpa**:
+5. **Navegação Limpa**:
    - Menu sem opções órfãs (apenas *Home*, *Animais* e *Meu Perfil*).
    - Redirecionamento transparente da antiga rota de comunidade para a vitrine de animais perdidos.
 
