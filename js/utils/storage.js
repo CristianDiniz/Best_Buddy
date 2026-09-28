@@ -20,9 +20,21 @@ const bbStorage = {
     return localStorage.getItem(BB_STORAGE_KEYS.ACCESS_TOKEN);
   },
 
+  getRefreshToken() {
+    return localStorage.getItem(BB_STORAGE_KEYS.REFRESH_TOKEN);
+  },
+
+  setAccessToken(token) {
+    if (token) localStorage.setItem(BB_STORAGE_KEYS.ACCESS_TOKEN, token);
+  },
+
   getUser() {
     const raw = localStorage.getItem(BB_STORAGE_KEYS.USER);
     return raw ? JSON.parse(raw) : null;
+  },
+
+  setUser(user) {
+    if (user) localStorage.setItem(BB_STORAGE_KEYS.USER, JSON.stringify(user));
   },
 
   isAuthenticated() {

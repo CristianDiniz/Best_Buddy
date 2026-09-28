@@ -29,12 +29,16 @@ function bbRenderNavigation(targetSelector, activePage) {
     )
     .join("");
 
+  const avatarContent = user?.avatar
+    ? `<img src="${user.avatar}" alt="Avatar" class="w-full h-full rounded-full object-cover" />`
+    : initials;
+
   const userAreaHtml = isAuth
     ? `
       <div class="bb-nav__user flex items-center gap-3">
         <a href="/pages/auth/profile.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity text-slate-200">
           <span>Olá, ${user?.nome ? user.nome.split(" ")[0] : "Usuário"}</span>
-          <div class="bb-nav__avatar">${initials}</div>
+          <div class="bb-nav__avatar overflow-hidden">${avatarContent}</div>
         </a>
         <button class="bb-btn bb-btn--secondary" id="bb-logout-btn" type="button">Sair</button>
       </div>

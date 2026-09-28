@@ -17,6 +17,7 @@ const tabAllPets = document.getElementById("tab-all-pets");
 const tabMyPets = document.getElementById("tab-my-pets");
 const filterCidadeInput = document.getElementById("filter-cidade");
 const filterTipoAnimalSelect = document.getElementById("filter-tipo-animal");
+const filterTempoSelect = document.getElementById("filter-tempo");
 const filterApplyBtn = document.getElementById("filter-apply-btn");
 const filterClearBtn = document.getElementById("filter-clear-btn");
 
@@ -38,6 +39,7 @@ let adoptExpanded = false;
 let activeTab = "all"; // "all" | "my"
 let filterCidade = "";
 let filterTipoAnimal = "";
+let filterTempo = "";
 
 function renderLost() {
   bbLostCountEl.textContent = allLostAnimals.length;
@@ -101,6 +103,7 @@ async function bbLoadAnimals() {
   const commonParams = {};
   if (filterCidade) commonParams.cidade = filterCidade;
   if (filterTipoAnimal) commonParams.tipo_animal = filterTipoAnimal;
+  if (filterTempo) commonParams.tempo = filterTempo;
   if (activeTab === "my" && currentUser) commonParams.tutor_id = currentUser.id;
 
   try {
@@ -109,8 +112,22 @@ async function bbLoadAnimals() {
       animalService.list({ ...commonParams, tipo_servico: "ADOCAO" }),
     ]);
 
-    allLostAnimals = Array.isArray(lostList) ? lostList : [];
-    allAdoptAnimals = Array.isArray(adoptList) ? adoptList : [];
+    let rawLost = Array.isArray(lostList) ? lostList : [];
+    let rawAdopt = Array.isArray(adoptList) ? adoptList : [];
+
+    // Filtros de reforço no front-end para tempo
+    if (filterTempo === "semana") {
+      const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      rawLost = rawLost.filter((a) => !a.created_at || new Date(a.created_at).getTime() >= weekAgo);
+      rawAdopt = rawAdopt.filter((a) => !a.created_at || new Date(a.created_at).getTime() >= weekAgo);
+    } else if (filterTempo === "mes") {
+      const monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      rawLost = rawLost.filter((a) => !a.created_at || new Date(a.created_at).getTime() >= monthAgo);
+      rawAdopt = rawAdopt.filter((a) => !a.created_at || new Date(a.created_at).getTime() >= monthAgo);
+    }
+
+    allLostAnimals = rawLost;
+    allAdoptAnimals = rawAdopt;
 
     renderLost();
     renderAdopt();
@@ -139,10 +156,11 @@ bbAdoptToggleBtn.addEventListener("click", () => {
   renderAdopt();
 });
 
-// Ações de Filtro
+// Ações de Filtro (RF08)
 function applyFilters() {
-  filterCidade = filterCidadeInput.value.trim();
-  filterTipoAnimal = filterTipoAnimalSelect.value;
+  filterCidade = filterCidadeInput ? filterCidadeInput.value.trim() : "";
+  filterTipoAnimal = filterTipoAnimalSelect ? filterTipoAnimalSelect.value : "";
+  filterTempo = filterTempoSelect ? filterTempoSelect.value : "";
   lostExpanded = false;
   adoptExpanded = false;
   bbLoadAnimals();
@@ -153,12 +171,15 @@ filterCidadeInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") applyFilters();
 });
 filterTipoAnimalSelect.addEventListener("change", applyFilters);
+if (filterTempoSelect) filterTempoSelect.addEventListener("change", applyFilters);
 
 filterClearBtn.addEventListener("click", () => {
-  filterCidadeInput.value = "";
-  filterTipoAnimalSelect.value = "";
+  if (filterCidadeInput) filterCidadeInput.value = "";
+  if (filterTipoAnimalSelect) filterTipoAnimalSelect.value = "";
+  if (filterTempoSelect) filterTempoSelect.value = "";
   filterCidade = "";
   filterTipoAnimal = "";
+  filterTempo = "";
   lostExpanded = false;
   adoptExpanded = false;
   bbLoadAnimals();
@@ -204,17 +225,17 @@ async function openAdoptModal() {
     return;
   }
 
-  // Verificar se o usuário possui WhatsApp validado
+  // Verificar se o usuário possui telefone cadastrado
   try {
     const profile = await authService.getProfile();
-    if (!profile.telefone_validado) {
+    if (!profile.telefone_validado && !profile.telefone) {
       bbAnimalsAlertEl.innerHTML = `
         <div class="bb-alert bb-alert--error mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
-            <strong>WhatsApp não validado:</strong> Você precisa validar seu número de WhatsApp no perfil antes de anunciar um animal para adoção.
+            <strong>Telefone não informado:</strong> Cadastre seu telefone de contato no perfil para poder anunciar pets para adoção ou perdidos.
           </div>
           <a href="/pages/auth/profile.html" class="bb-btn bb-btn--xs bb-btn--primary shrink-0">
-            Validar WhatsApp agora →
+            Ir para Meu Perfil →
           </a>
         </div>
       `;
