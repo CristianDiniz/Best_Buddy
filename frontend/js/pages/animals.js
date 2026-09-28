@@ -171,8 +171,9 @@ bbAdoptToggleBtn.addEventListener("click", () => {
 // Ações de Filtro (RF08)
 function applyFilters() {
   filterEstado = filterEstadoSelect ? filterEstadoSelect.value : "";
-  filterCidade = filterCidadeInput.value.trim();
-  filterTipoAnimal = filterTipoAnimalSelect.value;
+  filterCidade = filterCidadeInput ? filterCidadeInput.value.trim() : "";
+  filterTipoAnimal = filterTipoAnimalSelect ? filterTipoAnimalSelect.value : "";
+  filterTempo = filterTempoSelect ? filterTempoSelect.value : "";
   lostExpanded = false;
   adoptExpanded = false;
   bbLoadAnimals();
@@ -212,9 +213,12 @@ if (filterEstadoSelect) {
 filterClearBtn.addEventListener("click", () => {
   if (filterEstadoSelect) filterEstadoSelect.value = "";
   if (filterCidadesDatalist) filterCidadesDatalist.innerHTML = "";
-  filterCidadeInput.value = "";
-  filterCidadeInput.placeholder = "🔍 Buscar por cidade...";
-  filterTipoAnimalSelect.value = "";
+  if (filterCidadeInput) {
+    filterCidadeInput.value = "";
+    filterCidadeInput.placeholder = "🔍 Buscar por cidade...";
+  }
+  if (filterTipoAnimalSelect) filterTipoAnimalSelect.value = "";
+  if (filterTempoSelect) filterTempoSelect.value = "";
   filterEstado = "";
   filterCidade = "";
   filterTipoAnimal = "";

@@ -80,6 +80,10 @@ const bbClient = {
         token = await this.refreshAccessToken();
         if (!token) {
           bbStorage.handleSessionExpired();
+          // Se for requisição GET (como listar animais públicos), tenta novamente sem auth
+          if (method === "GET") {
+            return this.request(path, { method, body, auth: false, isRetry: true });
+          }
           throw new BBApiError("Sessão expirada. Faça login novamente.", 401, null);
         }
       }
@@ -108,6 +112,10 @@ const bbClient = {
         // Refresh token expirou ou falhou: encerra a sessão e redireciona se necessário
         if (typeof bbStorage !== "undefined") {
           bbStorage.handleSessionExpired();
+        }
+        // Se for requisição GET pública, tenta sem auth em vez de travar a tela
+        if (method === "GET") {
+          return this.request(path, { method, body, auth: false, isRetry: true });
         }
         throw new BBApiError("Sua sessão expirou.", 401, null);
       }
