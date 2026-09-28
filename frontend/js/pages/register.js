@@ -1,9 +1,21 @@
+// RF03: Redireciona para Home se já estiver logado
+if (typeof bbStorage !== "undefined" && bbStorage.isAuthenticated()) {
+  window.location.href = "/pages/home/index.html";
+}
+
 bbRenderAuthHeader("#bb-header");
-bbRenderFooter("#bb-footer");
 
 const bbRegisterForm = document.getElementById("bb-register-form");
 const bbSubmitBtn = document.getElementById("bb-submit-btn");
 const bbFormAlert = document.getElementById("bb-form-alert");
+const bbTelefoneInput = document.getElementById("telefone");
+
+// Máscara dinâmica para o campo de telefone opcional
+if (bbTelefoneInput) {
+  bbTelefoneInput.addEventListener("input", (e) => {
+    e.target.value = bbValidation.formatPhone(e.target.value);
+  });
+}
 
 function bbClearErrors() {
   bbFormAlert.innerHTML = "";
@@ -14,8 +26,8 @@ function bbClearErrors() {
 function bbShowFieldError(fieldId, message) {
   const input = document.getElementById(fieldId);
   const errorEl = document.getElementById(`${fieldId}-error`);
-  input.classList.add("bb-input--error");
-  errorEl.textContent = message;
+  if (input) input.classList.add("bb-input--error");
+  if (errorEl) errorEl.textContent = message;
 }
 
 function bbSetLoading(isLoading) {
@@ -43,6 +55,9 @@ bbRegisterForm.addEventListener("submit", async (event) => {
       { test: bbValidation.isRequired, message: "Informe seu email." },
       { test: bbValidation.isEmail, message: "Email inválido." },
     ],
+    telefone: [
+      { test: bbValidation.isPhone, message: "Informe um telefone válido com DDD (ex: (11) 99999-9999) ou deixe em branco." },
+    ],
     senha: [{ test: (v) => bbValidation.minLength(v, 6), message: "Senha deve ter ao menos 6 caracteres." }],
     confirmar_senha: [
       { test: (v, all) => bbValidation.passwordsMatch(v, all.senha), message: "As senhas não coincidem." },
@@ -61,7 +76,7 @@ bbRegisterForm.addEventListener("submit", async (event) => {
     await authService.register({
       nome: data.nome,
       email: data.email,
-      telefone: data.telefone,
+      telefone: data.telefone.replace(/\D/g, ""),
       password: data.senha,
       tipo: "PF",
     });
@@ -73,3 +88,4 @@ bbRegisterForm.addEventListener("submit", async (event) => {
     bbSetLoading(false);
   }
 });
+

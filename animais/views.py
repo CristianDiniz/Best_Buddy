@@ -34,7 +34,17 @@ class AnimaisViewSet(generics.ListCreateAPIView):
         if tutor_id:
             queryset = queryset.filter(tutor_id=tutor_id)
 
-        return queryset
+        tempo = self.request.query_params.get('tempo')
+        if tempo:
+            from django.utils import timezone
+            from datetime import timedelta
+            now = timezone.now()
+            if tempo == 'semana':
+                queryset = queryset.filter(created_at__gte=now - timedelta(days=7))
+            elif tempo == 'mes':
+                queryset = queryset.filter(created_at__gte=now - timedelta(days=30))
+
+        return queryset.order_by('-created_at')
 
     def perform_create(self, serializer):
         serializer.save(tutor=self.request.user)

@@ -331,13 +331,33 @@
     @apply bg-gradient-to-br from-surface-700 to-surface-800 border border-border rounded-xl aspect-[16/7] flex items-center justify-center text-ink-500 relative overflow-hidden;
   }
 
-  /* --- Auth pages (telas não autenticadas) --- */
+  /* --- Auth pages (telas não autenticadas com vídeo em background) --- */
   .bb-auth-shell {
-    @apply min-h-screen flex flex-col items-center bg-surface-900 bg-brand-radial bg-no-repeat;
+    @apply relative min-h-screen flex flex-col justify-between items-center bg-surface-900 overflow-x-hidden;
+  }
+
+  .bb-auth-video-bg {
+    @apply fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0;
+  }
+
+  .bb-auth-video {
+    @apply w-full h-full object-cover scale-[1.02];
+  }
+
+  .bb-auth-video-overlay {
+    @apply absolute inset-0 bg-surface-900/65 backdrop-blur-[2px] bg-gradient-to-b from-surface-900/80 via-surface-900/55 to-surface-900/85;
+  }
+
+  .bb-auth-header {
+    @apply w-full flex justify-center py-6 px-4 relative z-10;
+  }
+
+  .bb-auth-logo-badge {
+    @apply inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-surface-800/90 backdrop-blur-md border border-white/15 shadow-glow no-underline hover:scale-105 hover:bg-surface-800 transition-all duration-300 select-none;
   }
 
   .bb-auth-card {
-    @apply w-full max-w-[420px] my-10 mx-auto animate-scale-in shadow-card-hover;
+    @apply relative z-10 w-full max-w-[440px] my-auto mx-auto rounded-3xl bg-surface-800/95 backdrop-blur-xl border border-white/10 p-7 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-scale-in;
   }
 
   .bb-auth-subtitle {
@@ -346,6 +366,10 @@
 
   .bb-auth-footer-link {
     @apply text-center mt-6 text-sm text-ink-300;
+  }
+
+  .bb-auth-footer-simple {
+    @apply relative z-10 py-4 text-center text-xs text-ink-500 select-none;
   }
 
   /* --- Toast / alerta inline --- */

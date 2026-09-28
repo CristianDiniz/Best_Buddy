@@ -51,9 +51,9 @@ class AnimaisSerializer(serializers.ModelSerializer):
             if not user or not user.is_authenticated:
                 raise serializers.ValidationError("Autenticação obrigatória para anunciar um animal.")
 
-            if not getattr(user, 'telefone_validado', False):
+            if not getattr(user, 'telefone_validado', False) and not getattr(user, 'telefone', None):
                 raise serializers.ValidationError(
-                    "Você precisa validar seu WhatsApp no perfil antes de anunciar um animal para adoção ou perdido."
+                    "Cadastre um telefone de contato no seu perfil antes de anunciar um animal para adoção ou perdido."
                 )
 
             # Cota de 5 animais ativos para usuários comuns
