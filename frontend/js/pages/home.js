@@ -27,4 +27,27 @@ async function bbLoadHomePets() {
   }
 }
 
+function bbCheckSessionExpiredNotice() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("session") === "expired") {
+    const banner = document.createElement("div");
+    banner.className =
+      "bg-amber-500/10 border border-amber-500/30 text-amber-200 text-sm px-4 py-3 rounded-xl mb-6 flex items-center justify-between";
+    banner.innerHTML = `
+      <div class="flex items-center gap-2">
+        <span>⚠️</span>
+        <span>Sua sessão expirou por inatividade. Você pode continuar navegando ou entrar novamente quando quiser.</span>
+      </div>
+      <button type="button" class="text-amber-300 hover:text-white text-xs font-bold uppercase tracking-wider ml-4" onclick="this.parentElement.remove()">✕</button>
+    `;
+    const container = document.querySelector(".bb-container");
+    if (container) {
+      container.insertBefore(banner, container.firstChild);
+    }
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+}
+
+bbCheckSessionExpiredNotice();
 bbLoadHomePets();
+

@@ -69,9 +69,17 @@ function bbRenderNavigation(targetSelector, activePage) {
       authService.logout();
     } else {
       bbStorage.clearSession();
-      window.location.href = "/pages/auth/login.html";
+      window.location.href = "/pages/home/index.html";
     }
   });
 
   bbInitHeaderScrollEffect(el.querySelector(".bb-header"));
+
+  if (!window._bbNavAuthListenerAttached) {
+    window._bbNavAuthListenerAttached = true;
+    window.addEventListener("bb:auth-state-changed", () => {
+      bbRenderNavigation(targetSelector, activePage);
+    });
+  }
 }
+

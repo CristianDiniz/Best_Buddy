@@ -1,10 +1,13 @@
 /**
  * Inclua este script nas páginas que exigem login.
- * Se não houver sessão, redireciona para o login.
+ * Se não houver sessão ativa ou se tiver expirado, redireciona para a Home.
  */
+window.BB_IS_PROTECTED_PAGE = true;
+
 (function bbAuthGuard() {
-  if (!bbStorage.isAuthenticated()) {
-    const next = encodeURIComponent(window.location.pathname);
-    window.location.href = `/pages/auth/login.html?next=${next}`;
+  if (typeof bbStorage !== "undefined" && !bbStorage.isAuthenticated()) {
+    bbStorage.clearSession();
+    window.location.href = "/pages/home/index.html?session=expired";
   }
 })();
+
