@@ -81,19 +81,16 @@ Best_Buddy/
 │   ├── nginx.conf                     # Configuração do Nginx (proxy reverso /api/)
 │   ├── tailwind.config.js             # Tokens de estilo do Tailwind
 │   ├── package.json                   # Scripts do Tailwind CLI (build:css / watch:css)
-│   ├── API_CONTRACT.md                # Especificação dos endpoints da API
-│   ├── ARCHITECTURE.md                # Guia detalhado da arquitetura do frontend
-│   ├── README.md                      # Documentação específica do frontend
-│   ├── pages/                         # Telas HTML (auth, home, community, animals, adoption)
+│   ├── README.md                      # Documentação de execução do frontend
+│   ├── pages/                         # Telas HTML (auth, home, animals)
 │   ├── js/                            # Lógica JavaScript (serviços, mocks, componentes, utils)
 │   ├── css/                           # Estilos (input.css e tailwind.build.css)
 │   └── assets/                        # Imagens estáticas
-├── animais/                           # App Django: Catálogo de pets (adoção e perdidos) com contato direto via WhatsApp
-├── comunidade/                        # App Django: Notícias e mural comunitário
+├── animais/                           # App Django: Catálogo unificado de pets (adoção e perdidos) com contato direto via WhatsApp
 ├── config/                            # Configurações do Django (settings, urls, wsgi)
-├── usuarios/                          # App Django: Autenticação JWT, perfis PF e PJ com validação de WhatsApp
+├── usuarios/                          # App Django: Autenticação JWT, perfis e validação de WhatsApp via Twilio
 ├── fixtures/                          # Dados de carga inicial (fixtures JSON)
-├── vault/                             # Documentação técnica completa para Obsidian
+├── vault/                             # Documentação técnica completa e centralizada para Obsidian
 ├── .github/                           # Workflows de CI/CD (GitHub Actions)
 ├── db.sqlite3                         # Banco de dados local SQLite
 ├── docker-compose.yml                 # Orquestrador Docker (db, backend, frontend)
@@ -103,7 +100,6 @@ Best_Buddy/
 ├── requirements.txt                   # Dependências Python do Backend
 ├── seed_data.py                       # Script de carga inicial no banco
 ├── test_endpoints.py                  # Suíte de testes automatizados dos endpoints
-├── RELATORIO_INTEGRACAO.md            # Relatório técnico completo de auditoria e integração
 └── LICENSE                            # Licença de uso
 ```
 
@@ -116,13 +112,18 @@ O repositório inclui uma suíte completa de testes de integração dos endpoint
 ```powershell
 python test_endpoints.py
 ```
-Todos os 9 endpoints principais (Autenticação JWT, Listagem e Detalhe de Animais, Solicitação de Adoção, Notícias, Posts, Animais Desaparecidos e Cadastro com CPF) são validados automaticamente.
+Todos os 14 cenários de teste (Autenticação JWT, Registro sem CPF, Listagem e Detalhe de Animais, Filtros IBGE, Contato Obrigatório com DDD, Validação Twilio, Recuperação de Senha por Token, Cota de 5 Pets e Gestão pelo Tutor) são validados com 100% de sucesso.
 
 ---
 
-## 📚 Documentação Técnica Adicional
+## 📚 Documentação Técnica no Obsidian Vault
 
-- [README do Frontend](file:///c:/Users/T480/Documents/GitHub/BestBuddy/Best_Buddy/frontend/README.md): Guia de desenvolvimento e customização visual da interface.
-- [Contrato da API](file:///c:/Users/T480/Documents/GitHub/BestBuddy/Best_Buddy/frontend/API_CONTRACT.md): Especificação de contratos de payload e resposta esperados.
-- [Relatório de Integração](file:///c:/Users/T480/Documents/GitHub/BestBuddy/Best_Buddy/RELATORIO_INTEGRACAO.md): Diagnóstico aprofundado dos modelos, migrações e auditoria.
-- **Obsidian Vault**: Para visualizar a documentação interativa com links bidirecionais, abra a pasta `vault/` no aplicativo [Obsidian](https://obsidian.md).
+Toda a documentação arquitetural, contratos de API, modelagem e regras de negócio estão centralizadas no **Obsidian Vault** (`vault/`):
+
+- **Visão Geral & MOCs**: `vault/00 - Visão Geral/`
+- **Frontend & Telas**: `vault/01 - Frontend/`
+- **Backend & Models**: `vault/02 - Backend/`
+- **Contratos de API & Endpoints**: `vault/03 - Integração e Contratos/01 - Contrato de API (Endpoints).md`
+- **Regras de Negócio & Roadmap**: `vault/06 - Requisitos e Modelagem/`
+
+Para visualizar a documentação interativa com links bidirecionais e navegação em grafo, abra a pasta `vault/` no aplicativo [Obsidian](https://obsidian.md).
