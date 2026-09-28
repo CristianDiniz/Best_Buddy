@@ -103,8 +103,13 @@ class Animal(models.Model):
     cidade = models.CharField(max_length=100, default='', verbose_name="Cidade")
     telefone_contato = models.CharField(
         max_length=20,
+        default='',
         verbose_name="Telefone de contato do tutor"
     )
+
+    @property
+    def contato(self):
+        return self.telefone_contato or (self.tutor.telefone if self.tutor and hasattr(self.tutor, 'telefone') else "")
     descricao = models.CharField(max_length=255, blank=True, null=True, verbose_name="Descrição / Informações extras")
     imagem = models.CharField(max_length=500, blank=True, null=True, verbose_name="URL da Foto do animal")
     

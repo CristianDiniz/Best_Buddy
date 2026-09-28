@@ -2,31 +2,29 @@ bbRenderNavigation("#bb-nav", "home");
 bbRenderFooter("#bb-footer");
 bbRenderHeroCarousel("#bb-hero");
 
-const bbNewsEl = document.getElementById("bb-news");
+const bbHomePetsEl = document.getElementById("bb-home-pets");
 
-async function bbLoadNews() {
-  bbNewsEl.innerHTML = typeof bbLoadingHtml !== "undefined" ? bbLoadingHtml : "Carregando notícias...";
+async function bbLoadHomePets() {
+  if (!bbHomePetsEl) return;
+  bbHomePetsEl.innerHTML = typeof bbSkeletonGridHtml === "function" ? bbSkeletonGridHtml(4) : "Carregando animais...";
   try {
-    const news = await communityService.listNews();
-    if (news.length === 0) {
-      bbNewsEl.innerHTML = bbStateHtml({ title: "Nenhuma novidade por aqui ainda.", description: "" });
+    const list = await animalService.list({ tipo_servico: "ADOCAO" });
+    const pets = Array.isArray(list) ? list.slice(0, 4) : [];
+    if (pets.length === 0) {
+      bbHomePetsEl.innerHTML = bbStateHtml({
+        title: "Nenhum animal disponível para adoção no momento.",
+        description: "Que tal anunciar um pet e ajudar a encontrar um lar?",
+      });
       return;
     }
-    bbNewsEl.innerHTML = `<div class="flex flex-col gap-3 bb-stagger">${news
-      .map(
-        (item) => `
-        <div class="bb-card animate-fade-in-up flex gap-3 items-start">
-          <span class="text-xl mt-0.5">📰</span>
-          <div>
-            <strong class="text-ink-100">${item.titulo}</strong>
-            <p class="text-ink-300 mt-1 mb-0">${item.resumo || item.conteudo || ""}</p>
-          </div>
-        </div>`
-      )
-      .join("")}</div>`;
+    bbHomePetsEl.innerHTML = pets.map(bbAnimalCardHtml).join("");
   } catch (err) {
-    bbNewsEl.innerHTML = bbStateHtml({ title: "Não foi possível carregar as notícias.", description: err.message, isError: true });
+    bbHomePetsEl.innerHTML = bbStateHtml({
+      title: "Não foi possível carregar os animais.",
+      description: err.message,
+      isError: true,
+    });
   }
 }
 
-bbLoadNews();
+bbLoadHomePets();

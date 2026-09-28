@@ -55,7 +55,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'usuarios',
     'animais',
-    'comunidade',
 ]
 
 MIDDLEWARE = [

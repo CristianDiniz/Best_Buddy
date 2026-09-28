@@ -33,8 +33,12 @@ As Regras de Negócio estabelecem as diretrizes funcionais e restrições mandat
 
 ---
 
-### `RN05` — Adoção Direta Peer-to-Peer (Sem Intermediação)
-* **Regra:** A plataforma não retém nem intermedeia propostas de adoção através de formulários burocráticos internos. O interessado entra em contato diretamente com o tutor pelo WhatsApp. O próprio tutor avalia o adotante e, após a entrega, altera o status do animal para `Adotado` no painel. O número de contato do anúncio herda automaticamente o telefone cadastrado no perfil do tutor ou, caso o usuário não possua número no cadastro, permite a digitação manual de telefone no próprio formulário de anúncio.
+### `RN05` — Contato Obrigatório e Adoção Direta Peer-to-Peer
+* **Regra:** 
+  1. **Telefone Obrigatório:** O anúncio de qualquer animal (seja para adoção ou perdido) **deve obrigatoriamente possuir um telefone de contato com DDD**, pois essa é a única via de contato entre interessados e anunciantes.
+  2. **Validação Bloqueante no Frontend:** O frontend valida a presença de DDD brasileiro válido (11 a 99) e tamanho total (10 a 11 dígitos numéricos). Se o campo for inválido, emite o popup `alert("É necessário um número de contato para cadastrar o animal.");` e bloqueia a submissão sem chamar a rota da API.
+  3. **Persistência no Backend:** O modelo `Animal.telefone_contato` é obrigatório. Caso uma chamada de API omita o campo, o serializer herda automaticamente o telefone cadastrado no perfil do tutor; se nenhum existir, a API rejeita com HTTP 400.
+  4. **Sem Burocracia Intermediária:** A plataforma não retém nem intermedeia propostas via formulários burocráticos internos. O interessado clica no botão "Falar com o Tutor no WhatsApp" e combina diretamente. O tutor altera o status para `Adotado` ou `Encontrado` no seu painel.
 
 ---
 

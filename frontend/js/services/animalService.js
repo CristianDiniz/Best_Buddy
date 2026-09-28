@@ -5,6 +5,9 @@ const animalService = {
       if (params.tipo_servico) {
         items = items.filter((a) => (a.tipo_servico || "ADOCAO") === params.tipo_servico);
       }
+      if (params.estado) {
+        items = items.filter((a) => (a.estado || "").toUpperCase() === params.estado.toUpperCase());
+      }
       if (params.cidade) {
         items = items.filter((a) => (a.cidade || "").toLowerCase().includes(params.cidade.toLowerCase()));
       }

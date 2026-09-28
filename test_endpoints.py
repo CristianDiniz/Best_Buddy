@@ -181,18 +181,17 @@ def run_tests():
     novo_user.delete()
     tutor_validado.delete()
 
-    # 10. Comunidade: Notícias Funcionando
-    print("\n10. Testando GET /api/comunidade/noticias/ ...")
+    # 10. Comunidade e Notícias DESCONTINUADOS (Deve retornar 404)
+    print("\n10. Testando descontinuação de Notícias (GET /api/comunidade/noticias/) ...")
     res_noticias = client.get('/api/comunidade/noticias/')
-    assert res_noticias.status_code == 200
-    assert len(res_noticias.data) >= 1
-    print(f"OK! Notícias: {len(res_noticias.data)}")
+    assert res_noticias.status_code == 404, f"Notícias deveriam estar descontinuadas, retornou {res_noticias.status_code}"
+    print("OK! Rota de notícias descontinuada retornou 404 conforme esperado.")
 
-    # 11. Comunidade: Posts ABANDONADOS (Deve retornar 404)
-    print("\n11. Testando abandono de Posts (GET /api/comunidade/posts/) ...")
+    # 11. Comunidade: Posts DESCONTINUADOS (Deve retornar 404)
+    print("\n11. Testando descontinuação de Posts (GET /api/comunidade/posts/) ...")
     res_posts = client.get('/api/comunidade/posts/')
     assert res_posts.status_code == 404, f"Posts deveriam estar descontinuados, retornou {res_posts.status_code}"
-    print(f"OK! Rota de posts descontinuada retornou 404 conforme esperado.")
+    print("OK! Rota de posts descontinuada retornou 404 conforme esperado.")
 
     # 12. Intermediação de Adoções DESCONTINUADA (Deve retornar 404 em favor do WhatsApp direto)
     print("\n12. Testando descontinuação da intermediação de adoções (GET /api/adocoes/) ...")

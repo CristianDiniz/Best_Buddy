@@ -72,7 +72,7 @@ async function bbLoadDetail() {
           </div>
 
           <p class="text-ink-300 mb-4 flex flex-wrap gap-2">
-            ${animal.cidade ? `<span class="px-3 py-1 rounded-full bg-surface-700 border border-border text-sm">📍 ${animal.cidade}</span>` : ""}
+            ${animal.cidade ? `<span class="px-3 py-1 rounded-full bg-surface-700 border border-border text-sm">📍 ${animal.cidade}${animal.estado ? ` - ${animal.estado}` : ''}</span>` : ""}
             <span class="px-3 py-1 rounded-full bg-surface-700 border border-border text-sm">${animal.raca || "SRD"}</span>
             ${animal.idade_aproximada ? `<span class="px-3 py-1 rounded-full bg-surface-700 border border-border text-sm">${animal.idade_aproximada}</span>` : ""}
             ${animal.sexo ? `<span class="px-3 py-1 rounded-full bg-surface-700 border border-border text-sm">${bbSexoLabel[animal.sexo] || animal.sexo}</span>` : ""}

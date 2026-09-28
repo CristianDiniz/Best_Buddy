@@ -16,6 +16,15 @@ class AnimaisSerializer(serializers.ModelSerializer):
             return obj.tutor.perfil_pj.nome_fantasia or obj.tutor.perfil_pj.razao_social or "ONG"
         return obj.tutor.email.split('@')[0]
 
+    contato = serializers.CharField(read_only=True)
+    telefone_contato = serializers.CharField(
+        max_length=20,
+        required=False,
+        error_messages={
+            "blank": "É necessário um número de contato para cadastrar o animal.",
+        }
+    )
+
     class Meta:
         model = Animal
         fields = [
@@ -23,6 +32,7 @@ class AnimaisSerializer(serializers.ModelSerializer):
             'tutor_id',
             'tutor_email',
             'tutor_nome',
+            'contato',
             'tipo_servico',
             'tipo_animal',
             'nome',
@@ -42,7 +52,7 @@ class AnimaisSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         ]
-        read_only_fields = ['id', 'tutor_id', 'tutor_email', 'tutor_nome', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'tutor_id', 'tutor_email', 'tutor_nome', 'contato', 'created_at', 'updated_at']
 
     def validate(self, attrs):
         request = self.context.get('request')
@@ -50,6 +60,18 @@ class AnimaisSerializer(serializers.ModelSerializer):
             user = request.user
             if not user or not user.is_authenticated:
                 raise serializers.ValidationError("Autenticação obrigatória para anunciar um animal.")
+
+            telefone_contato = attrs.get('telefone_contato')
+            telefone_validado = getattr(user, 'telefone_validado', False)
+            telefone_tutor = getattr(user, 'telefone', None)
+
+            if not telefone_contato:
+                if telefone_validado and telefone_tutor:
+                    attrs['telefone_contato'] = telefone_tutor
+                else:
+                    raise serializers.ValidationError({
+                        "telefone_contato": "É necessário um número de contato para cadastrar o animal."
+                    })
 
             # Cota de 5 animais ativos para usuários comuns
             tipo_usuario = getattr(user, 'tipo', 'PF')
@@ -62,5 +84,10 @@ class AnimaisSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         "Limite atingido: usuários comuns podem manter no máximo 5 anúncios ativos simultaneamente."
                     )
+
+        if 'telefone_contato' in attrs and not attrs['telefone_contato']:
+            raise serializers.ValidationError({
+                "telefone_contato": "É necessário um número de contato para cadastrar o animal."
+            })
 
         return attrs

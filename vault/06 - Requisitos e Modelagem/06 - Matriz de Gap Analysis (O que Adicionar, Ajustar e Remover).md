@@ -28,10 +28,10 @@ Este documento apresenta a análise de divergências entre a base de código do 
 
 | Recurso / Item a Ajustar | Situação Anterior | Como Deve Ficar Conforme as Novas Diretrizes | Prioridade |
 | :--- | :--- | :--- | :---: |
-| **Contato nos Cards de Animais** | Campo de texto livre (`contato = models.CharField`) digitado em cada animal. | **FK Direta com Usuário Tutor**: O contato do anúncio vem de `animal.tutor.telefone`. Ao alterar no perfil, todos os anúncios do tutor atualizam automaticamente. | 🔴 Alta |
+| **Contato nos Cards de Animais** | Campo de texto livre (`contato = models.CharField`) digitado em cada animal. | **Telefone Obrigatório com DDD**: O anúncio exige número válido com DDD. O front bloqueia submissões inválidas com popup antes da chamada de rota. O backend garante o campo e herda do tutor caso omitido. | 🔴 Alta |
 | **Cadastro Inicial de Usuário** | Exigia dados de pessoa física/jurídica completos. | Aceitar `email`, `senha`, `confirmação_de_senha` e `telefone` (opcional). Demais dados são preenchidos no perfil ou fluxos específicos. | 🔴 Alta |
 | **Filtros e Visualização de Animais** | Telas e endpoints fragmentados entre adoção e desaparecidos em apps distintos. | Vitrine com filtros ou abas unificadas para "Adoção" e "Animais Perdidos" consumindo a mesma tabela `animais_animal`. | 🔴 Alta |
-| **Navegação do Header (Navbar)** | Exibia links descontinuados. | Incluir link "Meu Perfil" para usuário logado, exibir status do WhatsApp e remover referências a posts. | 🟡 Média |
+| **Navegação do Header (Navbar)** | Exibia links descontinuados. | Incluir link "Meu Perfil" para usuário logado, exibir status do WhatsApp e remover referências a posts e comunidade. | 🟡 Média |
 
 ---
 
@@ -39,7 +39,7 @@ Este documento apresenta a análise de divergências entre a base de código do 
 
 | Item a Remover / Descontinuar | Onde Estava | Motivo da Remoção / O que Fazer | Prioridade |
 | :--- | :--- | :--- | :---: |
-| **Função Completa de Posts** | `comunidade/models.py` (`Post`), `comunidade/views.py`, frontend | **Abandonado por completo**: O mural livre de postagens de usuários foi descontinuado do produto. | 🔴 Alta |
+| **Módulo Completo de Comunidade & Notícias** | `comunidade/`, `config/urls.py`, `settings.py`, `communityService.js`, `pages/community/` | **Abandonado por completo**: O mural livre de postagens de usuários e notícias foi descontinuado do produto. Rotas retornam HTTP 404. | 🔴 Alta |
 | **Tabela Local `ValidacaoWhatsapp`** | Proposta anterior / models | **Removida**: O controle de OTP e envio via WhatsApp é gerenciado pelo Twilio Verify, sem necessidade de tabela local de PINs. | 🔴 Alta |
 | **Tabela Separada `AnimalDesaparecido`** | `comunidade/models.py` | **Unificada**: Migrada para `animais_animal` com `tipo_servico='PERDIDO'`. | 🔴 Alta |
 | **Formulário de Interesse em Adoção** | `adocoes/models.py`, `frontend/pages/adoption/` | **Descontinuado**: Adoção é feita por contato direto com o tutor via WhatsApp. Questionário interno descartado. | 🔴 Alta |

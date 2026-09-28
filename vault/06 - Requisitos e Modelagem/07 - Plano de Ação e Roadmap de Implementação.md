@@ -24,68 +24,64 @@ Este documento estrutura o plano de execução técnica das mudanças do **Best 
 ## 🎯 Fases de Implementação Manual (Passo a Passo)
 
 ### 🧱 Fase 1: Backend — Modelagem e Migrações (`animais/models.py`)
-*Objetivo: Preparar o modelo `Animal` para armazenar a UF do Enum e suportar contato flexível.*
-- [ ] **1.1 Enum de Estados no Model:**
+*Objetivo: Preparar o modelo `Animal` para armazenar a UF do Enum e contato obrigatório.*
+- [x] **1.1 Enum de Estados no Model:**
   - Criar `class Estado(models.TextChoices)` com as 27 siglas e nomes das UFs.
   - Adicionar campo `estado = models.CharField(max_length=2, choices=Estado.choices, default='SP', verbose_name="Estado (UF)")`.
-- [ ] **1.2 Campo de Contato Flexível:**
-  - Adicionar `telefone_contato = models.CharField(max_length=20, blank=True, null=True, verbose_name="Telefone de Contato do Anúncio")`.
+- [x] **1.2 Campo de Contato Obrigatório:**
+  - Adicionar `telefone_contato = models.CharField(max_length=20, default='', verbose_name="Telefone de contato do tutor")` como campo obrigatório.
   - Atualizar a property `@property def contato(self):` para retornar `self.telefone_contato or (self.tutor.telefone if self.tutor else "")`.
-- [ ] **1.3 Executar Migrações:**
-  - Executar no terminal: `python manage.py makemigrations animais` e `python manage.py migrate`.
-- [ ] **1.4 Teste da Fase 1:**
-  - Validar no `python manage.py shell` a criação de instância com UF e resolução de contato.
+- [x] **1.3 Executar Migrações:**
+  - Migrações `0002` e `0003` aplicadas com sucesso no app `animais`.
+- [x] **1.4 Descontinuação do App `comunidade`:**
+  - Removido `comunidade` de `INSTALLED_APPS` e `config/urls.py` (mural de notícias e posts encerrados).
 
 ---
 
 ### ⚙️ Fase 2: Backend — Serializer e Filtros da API (`animais/`)
-*Objetivo: Expor os novos campos na API e permitir filtro de busca por Estado.*
-- [ ] **2.1 Atualização de Campos no `AnimaisSerializer`:**
-  - Incluir `'estado'` e `'telefone_contato'` na lista `fields` de `AnimaisSerializer`.
-- [ ] **2.2 Flexibilização da Validação de Telefone:**
-  - Remover a trava anterior de Twilio no método `validate()`.
-  - Nova regra: O usuário autenticado deve ter telefone no cadastro do perfil (`tutor.telefone`) OU deve informar o `telefone_contato` no payload do anúncio.
-- [ ] **2.3 Filtro por Estado na View (`AnimaisViewSet`):**
-  - No método `get_queryset()` de `animais/views.py`, adicionar suporte ao query param `?estado=SP`:
-    ```python
-    estado = self.request.query_params.get('estado')
-    if estado:
-        queryset = queryset.filter(estado__iexact=estado)
-    ```
-- [ ] **2.4 Teste da Fase 2:**
-  - Testar criação de anúncio via endpoint e verificar se o filtro `?estado=...` responde corretamente.
+*Objetivo: Expor os novos campos na API, validar contato obrigatório e permitir filtro de busca por Estado.*
+- [x] **2.1 Atualização de Campos no `AnimaisSerializer`:**
+  - Incluir `'estado'`, `'telefone_contato'` e `'contato'` na lista `fields` e `read_only_fields`.
+- [x] **2.2 Validação de Contato:**
+  - Regra: O anúncio DEVE possuir telefone de contato com DDD. Caso não seja enviado no payload, é preenchido com o telefone validado do tutor, ou rejeitado com "É necessário um número de contato para cadastrar o animal.".
+- [x] **2.3 Filtro por Estado na View (`AnimaisViewSet`):**
+  - No método `get_queryset()` de `animais/views.py`, adicionar suporte ao query param `?estado=SP` e `?cidade=Campinas`.
+- [x] **2.4 Teste da Fase 2:**
+  - Validado via `python test_endpoints.py` (100% de sucesso nos 14 testes, incluindo 404 para comunidade).
 
 ---
 
 ### 🌐 Fase 3: Frontend — Serviço de Integração com o IBGE (`js/services/ibgeService.js`)
 *Objetivo: Criar um módulo JavaScript centralizado, leve e reutilizável para consultar estados e cidades sem onerar o banco.*
-- [ ] **3.1 Criação de `js/services/ibgeService.js`:**
-  - `getEstados()`: Consulta `https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome`.
-  - `getCidadesPorEstado(uf)`: Consulta `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios?orderBy=nome`.
-  - Implementar cache simples em memória (objeto JS) para evitar requisições repetidas ao mesmo estado durante a navegação.
-- [ ] **3.2 Importação nas Páginas:**
-  - Incluir `<script src="../../js/services/ibgeService.js"></script>` nos arquivos HTML necessários.
+- [x] **3.1 Criação de `js/services/ibgeService.js`:**
+  - Lista estática das 27 UFs brasileiras (`getEstados()`).
+  - `getCidadesPorEstado(uf)` com cache de 2 níveis (RAM + `sessionStorage`) e timeout com `AbortController`.
+  - Documentação atualizada no vault (`vault/01 - Frontend/03 - Serviços e Camada de API.md`).
+- [x] **3.2 Importação nas Páginas:**
+  - Incluído `<script src="../../js/services/ibgeService.js"></script>` em `animals/index.html` e `community/index.html`.
 
 ---
 
 ### 📝 Fase 4: Frontend — Formulários de Anúncio com IBGE e Contato Flexível
 *Objetivo: Eliminar campo de texto livre de cidade e aplicar cascata de seleção Estado $\rightarrow$ Cidade nos modais de publicação.*
-- [ ] **4.1 Modal de Adoção (`pages/animals/index.html` e `js/pages/animals.js`):**
-  - No HTML: Substituir input texto por `<select id="pet-estado">` e `<select id="pet-cidade" disabled>`.
-  - Adicionar campo de telefone inteligente: carrega o telefone do perfil se existente, ou exibe input obrigatório para digitação caso o usuário não tenha telefone.
-  - No JS: Ao abrir o modal, carregar UFs com `ibgeService.getEstados()`. No evento `change` do estado, carregar as cidades correspondentes e habilitar o select de cidades.
-- [ ] **4.2 Modal de Animal Perdido (`pages/community/index.html` e `js/pages/community.js`):**
-  - Mesma estrutura: selects em cascata Estado $\rightarrow$ Cidade via `ibgeService` e telefone inteligente.
+- [x] **4.1 Modal de Adoção (`pages/animals/index.html` e `js/pages/animals.js`):**
+  - No HTML: Grid com `<select id="pet-estado">` e input com `<datalist id="pet-cidades-list">` para busca digitável leve.
+  - Telefone inteligente com pré-carregamento do perfil.
+  - No JS: UFs preenchidas via `ibgeService.getEstados()`, cidades carregadas no `change` e desabilitadas até seleção da UF.
+- [x] **4.2 Modal de Animal Perdido (`pages/community/index.html` e `js/pages/community.js`):**
+  - Mesma estrutura: selects em cascata Estado $\rightarrow$ Cidade via `ibgeService` com `<datalist>` e telefone inteligente.
 
 ---
 
 ### 🔍 Fase 5: Frontend — Filtros Geográficos nas Vitrines
 *Objetivo: Permitir que visitantes filtrem os animais por Estado e Cidade de forma estruturada.*
-- [ ] **5.1 Dropdowns de Filtro nas Vitrines (`animals/index.html` e `community/index.html`):**
-  - Adicionar `<select id="filter-estado">` com opção "Todos os estados" e as UFs do IBGE.
-  - Adicionar `<select id="filter-cidade" disabled>` que lista as cidades ao escolher um estado.
-- [ ] **5.2 Integração com a Busca:**
-  - Ao mudar o Estado ou a Cidade, disparar a busca na API passando `?estado=UF&cidade=Nome`.
+- [x] **5.1 Dropdowns de Filtro nas Vitrines (`animals/index.html` e `animals.js`):**
+  - Adicionado `<select id="filter-estado">` com opção "Todos os estados" e as 27 UFs.
+  - Adicionado `<input id="filter-cidade" list="filter-cidades-list">` com autocompleção inteligente.
+- [x] **5.2 Integração com a Busca:**
+  - Ao alterar Estado ou Cidade, dispara a busca passando `?estado=UF&cidade=Nome`.
+  - Suporte implementado tanto para o backend Django real quanto para o mock no `animalService.js`.
+  - Formatação visual dos cards atualizada: `📍 Cidade - UF`.
 
 ---
 

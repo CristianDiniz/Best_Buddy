@@ -90,134 +90,135 @@ Confirmar PIN e redefinir senha.
 
 ## 2. Animais (`/api/animais/`)
 
-### `GET /animais/`
-Lista de animais disponíveis para adoção.
-- **Headers**: Nenhum obrigatório (público).
+### `GET /api/animais/`
+Lista unificada de animais para adoção e animais desaparecidos.
+- **Headers**: Nenhum obrigatório (acesso público `AllowAny`).
+- **Query Params Suportados**:
+  - `?tipo_servico=ADOCAO` ou `?tipo_servico=PERDIDO`
+  - `?estado=SP` (Sigla da UF)
+  - `?cidade=São Carlos`
+  - `?tipo_animal=CACHORRO` (`CACHORRO`, `GATO`, `OUTRO`)
+  - `?status=DISPONIVEL` (`DISPONIVEL`, `ADOTADO`, `PERDIDO`, `ENCONTRADO`, `INATIVO`)
+  - `?tutor_id=1` (para listar os anúncios pertencentes a um usuário)
 - **Response 200**:
   ```json
   [
     {
       "id": 1,
+      "tutor_id": 1,
+      "tutor_email": "usuario@bestbuddy.com",
+      "tutor_nome": "Ana Souza",
+      "contato": "(16) 99999-0000",
+      "tipo_servico": "ADOCAO",
+      "tipo_animal": "CACHORRO",
       "nome": "Max",
+      "estado": "SP",
+      "cidade": "São Carlos",
+      "telefone_contato": "(16) 99999-0000",
+      "descricao": "Dócil, adora brincar com bola.",
+      "imagem": null,
+      "status": "DISPONIVEL",
       "raca": "SRD",
       "sexo": "M",
       "idade_aproximada": "Adulto",
       "medicamento": "Não",
       "vacinacao": "Sim",
-      "contato": "(16) 99999-0001",
-      "descricao": "Dócil, adora brincar com bola.",
-      "imagem": null
+      "local": null,
+      "inativado_em": null,
+      "created_at": "2026-09-26T22:26:07Z",
+      "updated_at": "2026-09-26T22:26:07Z"
     }
   ]
   ```
 
 ---
 
-### `GET /animais/{id}/`
+### `GET /api/animais/{id}/`
 Detalhes de um animal específico.
 - **Response 200**: Objeto único com a mesma estrutura acima.
 - **Response 404**: `{"detail": "Não encontrado."}`
 
 ---
 
-### `POST /animais/`
-Cadastro de novo animal (ONGs / Protetores).
+### `POST /api/animais/`
+Publicação de anúncio de adoção ou reporte de animal perdido.
 - **Headers**: `Authorization: Bearer <access_token>`
-- **Request**:
+- **Request (Exemplo Adoção)**:
   ```json
   {
-    "nome": "Rex",
-    "raca": "Labrador",
+    "tipo_servico": "ADOCAO",
+    "tipo_animal": "CACHORRO",
+    "nome": "Caramelo",
+    "estado": "SP",
+    "cidade": "Campinas",
+    "telefone_contato": "(19) 98888-7777",
+    "descricao": "Pet muito carinhoso e dócil.",
+    "raca": "Vira-lata",
     "sexo": "M",
-    "idade_aproximada": "Filhote",
-    "medicamento": "Não",
-    "vacinacao": "Sim",
-    "contato": "(16) 99999-7777",
-    "descricao": "Muito alegre e dócil."
+    "idade_aproximada": "Filhote"
   }
   ```
-- **Response 201**: Animal criado com seu `id`.
+- **Regras de Negócio e Validações**:
+  - `telefone_contato`: Campo obrigatório (com DDD). Caso ausente, herda o telefone validado do tutor logado; se nenhum existir, rejeita com HTTP 400 (`"É necessário um número de contato para cadastrar o animal."`).
+  - Cota de 5 anúncios ativos para usuários comuns (PF).
+- **Response 201**: Registro criado com `id` e dados completos.
+
+---
+
+### `PATCH /api/animais/{id}/`
+Atualização de status do anúncio pelo tutor autenticado.
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Request**: `{"status": "ADOTADO"}` ou `{"status": "ENCONTRADO"}`
+- **Response 200**: Objeto atualizado.
+- **Response 403**: `{"detail": "Você não tem permissão para gerenciar este anúncio."}` (caso o usuário não seja o tutor).
+
+---
+
+### `DELETE /api/animais/{id}/`
+Exclusão de anúncio pelo tutor.
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Response 204**: Sem conteúdo.
+- **Response 403**: Proibido para usuários terceiros.
 
 ---
 
 ## 3. Adoção Direta (Contato via WhatsApp)
 
 > [!WARNING]
-> **Endpoint Descontinuado:** O endpoint `POST /adocoes/` e o modelo intermediário de propostas foram **descontinuados**.
-> O fluxo de adoção foi simplificado para contato direto entre interessado e tutor via WhatsApp (`https://wa.me/55...`). A conclusão da adoção é feita pelo tutor atualizando o status do pet diretamente em `PATCH /animais/{id}/` (`status: "ADOTADO"`).
-
-## 4. Comunidade (`/api/comunidade/`)
-
-### `GET /comunidade/noticias/`
-- **Response 200**:
-  ```json
-  [
-    {
-      "id": 1,
-      "titulo": "Campanha de Castração Gratuita",
-      "resumo": "Neste sábado na praça central.",
-      "created_at": "2026-09-01T10:00:00Z"
-    }
-  ]
-  ```
-
-### `GET /comunidade/posts/`
-- **Response 200**:
-  ```json
-  [
-    {
-      "id": 1,
-      "autor": "Carlos Lima",
-      "texto": "Agradeço a todos que compareceram à feirinha!",
-      "created_at": "2026-09-02T14:30:00Z"
-    }
-  ]
-  ```
-
-### `GET /comunidade/desaparecidos/`
-- **Response 200**:
-  ```json
-  [
-    {
-      "id": 1,
-      "nome": "Max",
-      "local": "Jardim Botânico, São Paulo, SP",
-      "contato": "(11) 91234-5678",
-      "descricao": "Sumiu durante um passeio, muito medroso.",
-      "created_at": "2026-09-03T09:00:00Z"
-    }
-  ]
-  ```
-
-### `POST /comunidade/desaparecidos/`
-- **Headers**: `Authorization: Bearer <access_token>` (exige login)
-- **Request**:
-  ```json
-  {
-    "nome": "Bela",
-    "local": "Parque SP, Araraquara, SP",
-    "cidade": "Araraquara",
-    "contato": "(16) 98888-1122",
-    "descricao": "Desapareceu após queima de fogos."
-  }
-  ```
-- **Response 201**: Item criado com `id` e `created_at`.
+> **Endpoint Descontinuado:** O endpoint `POST /adocoes/` foi descontinuado (retorna HTTP 404). O fluxo ocorre diretamente com o tutor via link do WhatsApp gerado a partir do `telefone_contato`.
 
 ---
 
-## 5. Validação de WhatsApp (`/api/animais/whatsapp/`)
+## 4. Comunidade e Notícias (`/api/comunidade/`) [DESCONTINUADO]
 
-### `POST /animais/whatsapp/solicitar-pin/`
-Dispara PIN de 6 dígitos para o número informado via WhatsApp.
-- **Headers**: `Authorization: Bearer <access_token>`
-- **Request**: `{"telefone": "(16) 99999-8888"}`
-- **Response 200**: `{"sucesso": true, "mensagem": "Código PIN enviado com sucesso via WhatsApp."}`
+> [!WARNING]
+> **Módulo Descontinuado:** Conforme decisão de produto, o mural livre de posts e o feed de notícias foram abandonados para simplificar o escopo e focar no contato direto via WhatsApp.
+> - `GET /api/comunidade/noticias/` $\rightarrow$ **HTTP 404 (Not Found)**
+> - `GET /api/comunidade/posts/` $\rightarrow$ **HTTP 404 (Not Found)**
+> - Os animais desaparecidos foram migrados para `/api/animais/?tipo_servico=PERDIDO`.
 
-### `POST /animais/whatsapp/verificar-pin/`
-Confirma o código digitado pelo tutor.
+---
+
+## 5. Validação de WhatsApp via Twilio (`/api/usuarios/whatsapp/`)
+
+### `POST /api/usuarios/whatsapp/enviar/`
+Dispara código SMS/WhatsApp de validação para o número informado.
 - **Headers**: `Authorization: Bearer <access_token>`
-- **Request**: `{"telefone": "(16) 99999-8888", "codigo_pin": "123456"}`
-- **Response 200**: `{"verificado": true, "token_validacao": "val_token_xyz"}`
+- **Request**: `{"telefone": "11988887777"}`
+- **Response 200**: `{"mensagem": "Código de verificação enviado."}`
+
+### `POST /api/usuarios/whatsapp/verificar/`
+Valida o código digitado pelo usuário e atualiza `telefone_validado = True`.
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Request**: `{"telefone": "11988887777", "codigo": "123456"}`
+- **Response 200**:
+  ```json
+  {
+    "mensagem": "Telefone verificado com sucesso!",
+    "telefone": "11988887777",
+    "telefone_validado": true
+  }
+  ```
 
 ---
 

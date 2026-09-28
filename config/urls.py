@@ -17,7 +17,6 @@ urlpatterns = [
 
     path('api/animais/', include('animais.urls')),
     path('api/usuarios/', include('usuarios.urls')),
-    path('api/comunidade/', include('comunidade.urls')),
 
     path('api/token/',
         CustomTokenObtainPairView.as_view(),

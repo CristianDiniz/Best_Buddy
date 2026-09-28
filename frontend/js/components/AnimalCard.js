@@ -51,7 +51,7 @@ function bbAnimalCardHtml(animal) {
         <div class="bb-animal-card__body">
           <div class="flex items-center justify-between mb-1">
             <span class="bb-animal-card__name font-bold text-base text-ink-100">${animal.nome || (isPerdido ? "Pet Perdido" : "Pet sem nome")}</span>
-            ${animal.cidade ? `<span class="text-xs text-ink-400">📍 ${animal.cidade}</span>` : ""}
+            ${animal.cidade ? `<span class="text-xs text-ink-400">📍 ${animal.cidade}${animal.estado ? ` - ${animal.estado}` : ''}</span>` : ""}
           </div>
           <span class="bb-animal-card__meta text-xs text-ink-300 block mb-0.5">
             ${animal.raca || "SRD"} · ${animal.idade_aproximada || "Idade não inf."} · ${sexoLabel}

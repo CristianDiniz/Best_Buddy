@@ -1,104 +1,130 @@
 # 🐶 Backend — App Animais
-tags: #backend #animais #models #serializers #bugfix
+tags: #backend #animais #models #serializers #ibge #tabela-unificada
 
-## 1. Modelagem Atual (`animais/models.py`)
+## 1. Modelagem Unificada (`animais/models.py`)
 
-O modelo atual está definido como:
+A tabela `animais_animal` centraliza tanto os animais disponíveis para **adoção** quanto os animais **perdidos/desaparecidos**, diferenciados pelo discriminador `tipo_servico`:
 
 ```python
 class Animal(models.Model):
+    class TipoServico(models.TextChoices):
+        ADOCAO = 'ADOCAO', 'Adoção'
+        PERDIDO = 'PERDIDO', 'Animal Perdido'
+
+    class TipoAnimal(models.TextChoices):
+        CACHORRO = 'CACHORRO', 'Cachorro'
+        GATO = 'GATO', 'Gato'
+        OUTRO = 'OUTRO', 'Outro'
+
     class SexoAnimal(models.TextChoices):
         MACHO = 'M', 'Macho'
         FEMEA = 'F', 'Fêmea'
         INDETERMINADO = 'I', 'Indeterminado'
-    sexo = models.CharField(max_length=1, choices=SexoAnimal)
 
     class IdadeAproximada(models.TextChoices):
-        FILHOTE = 'Filhote'
-        ADULTO = 'Adulto'
-        IDOSO = 'Idoso'
-    idade_aproximada = models.CharField(max_length=10, choices=IdadeAproximada)
+        FILHOTE = 'Filhote', 'Filhote'
+        ADULTO = 'Adulto', 'Adulto'
+        IDOSO = 'Idoso', 'Idoso'
 
-    class Medicamento(models.TextChoices):
-        SIM = 'Sim'
-        NAO = 'Não'
-        NAO_SABE = 'Nâo sei' # <-- Atenção ao acento circunflexo
-    medicamento = models.CharField(max_length=10, choices=Medicamento)
+    class StatusAnimal(models.TextChoices):
+        DISPONIVEL = 'DISPONIVEL', 'Disponível'
+        ADOTADO = 'ADOTADO', 'Adotado'
+        PERDIDO = 'PERDIDO', 'Perdido'
+        ENCONTRADO = 'ENCONTRADO', 'Encontrado'
+        INATIVO = 'INATIVO', 'Inativo'
 
-    class Vacina(models.TextChoices):
-        SIM = 'Sim'
-        NAO = 'Não'
-        NAO_SABE = 'Nâo sei' # <-- Atenção ao acento circunflexo
-    vacinacao = models.CharField(max_length=10, choices=Vacina)
+    class Estado(models.TextChoices):
+        AC = 'AC', 'Acre'
+        AL = 'AL', 'Alagoas'
+        AP = 'AP', 'Amapá'
+        AM = 'AM', 'Amazonas'
+        BA = 'BA', 'Bahia'
+        CE = 'CE', 'Ceará'
+        DF = 'DF', 'Distrito Federal'
+        ES = 'ES', 'Espírito Santo'
+        GO = 'GO', 'Goiás'
+        MA = 'MA', 'Maranhão'
+        MT = 'MT', 'Mato Grosso'
+        MS = 'MS', 'Mato Grosso do Sul'
+        MG = 'MG', 'Minas Gerais'
+        PA = 'PA', 'Pará'
+        PB = 'PB', 'Paraíba'
+        PR = 'PR', 'Paraná'
+        PE = 'PE', 'Pernambuco'
+        PI = 'PI', 'Piauí'
+        RJ = 'RJ', 'Rio de Janeiro'
+        RN = 'RN', 'Rio Grande do Norte'
+        RS = 'RS', 'Rio Grande do Sul'
+        RO = 'RO', 'Rondônia'
+        RR = 'RR', 'Roraima'
+        SC = 'SC', 'Santa Catarina'
+        SP = 'SP', 'São Paulo'
+        SE = 'SE', 'Sergipe'
+        TO = 'TO', 'Tocantins'
 
+    tutor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='animais', null=True, blank=True)
+    tipo_servico = models.CharField(max_length=10, choices=TipoServico.choices, default=TipoServico.ADOCAO)
+    tipo_animal = models.CharField(max_length=15, choices=TipoAnimal.choices, default=TipoAnimal.CACHORRO)
     nome = models.CharField(max_length=50, null=True, blank=True)
-    raca = models.CharField("raça", max_length=50, null=True, blank=True)
-    contato = models.CharField(max_length=15)
     
+    # Integração Geográfica
+    estado = models.CharField(max_length=2, choices=Estado.choices, default=Estado.SP)
+    cidade = models.CharField(max_length=100, default='')
+    
+    # Contato Obrigatório
+    telefone_contato = models.CharField(max_length=20, default='', verbose_name="Telefone de contato do tutor")
+
+    @property
+    def contato(self):
+        return self.telefone_contato or (self.tutor.telefone if self.tutor and hasattr(self.tutor, 'telefone') else "")
+
+    descricao = models.CharField(max_length=255, blank=True, null=True)
+    imagem = models.CharField(max_length=500, blank=True, null=True)
+    status = models.CharField(max_length=15, choices=StatusAnimal.choices, default=StatusAnimal.DISPONIVEL)
+
+    # Campos específicos de Adoção
+    raca = models.CharField(max_length=50, null=True, blank=True)
+    sexo = models.CharField(max_length=1, choices=SexoAnimal.choices, null=True, blank=True)
+    idade_aproximada = models.CharField(max_length=10, choices=IdadeAproximada.choices, null=True, blank=True)
+    medicamento = models.CharField(max_length=10, null=True, blank=True)
+    vacinacao = models.CharField(max_length=10, null=True, blank=True)
+
+    # Campos específicos de Animal Perdido
+    local = models.CharField(max_length=200, blank=True, null=True)
+
+    # Ciclo de vida
+    inativado_em = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 ```
 
 ---
 
-## 2. Diagnóstico de Falhas e Soluções Aplicadas [TODOS RESOLVIDOS]
+## 2. Serializer e Regras de Negócio (`animais/serializers.py`)
 
-### 🟢 1. Tabela no SQLite e Migrações [RESOLVIDO]
-- **Situação Anterior**: `sqlite3.OperationalError: no such table: animais_animal` devido a divergência entre `animais_animais` e `Animal`.
-- **Solução Aplicada**: Tabela renomeada para `animais_animal` no `db.sqlite3` e migração `animais.0002` aplicada.
-
----
-
-### 🟢 2. Serializer com campo `id` e metadados [RESOLVIDO]
-- **Solução Aplicada**: Em `animais/serializers.py`, o campo `'id'`, `'descricao'`, `'imagem'` e `'created_at'` foram incluídos:
-```python
-class AnimaisSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Animal
-        fields = [
-            'id', 'nome', 'raca', 'sexo', 'idade_aproximada',
-            'medicamento', 'vacinacao', 'contato', 'descricao',
-            'imagem', 'created_at'
-        ]
-        read_only_fields = ['id', 'created_at']
-```
-Com isso, o frontend consome `animal.id` e gera os links de detalhe e formulário de adoção sem erros.
+1. **Campos Expostos**:
+   `id`, `tutor_id`, `tutor_email`, `tutor_nome`, `contato` (read-only), `tipo_servico`, `tipo_animal`, `nome`, `estado`, `cidade`, `telefone_contato`, `descricao`, `imagem`, `status`, `raca`, `sexo`, `idade_aproximada`, `medicamento`, `vacinacao`, `local`, `inativado_em`, `created_at`, `updated_at`.
+2. **Contato Obrigatório**:
+   O serializer exige que todo pet anunciado contenha um `telefone_contato`. Caso o payload não o envie diretamente, ele herda automaticamente o `telefone` validado do tutor logado. Se nenhum dos dois existir, retorna o erro:
+   `"É necessário um número de contato para cadastrar o animal."`.
+3. **Cota de Anúncios Ativos (RF14)**:
+   Usuários comuns (Pessoa Física) podem manter no máximo 5 anúncios ativos simultaneamente (`status__in=['DISPONIVEL', 'PERDIDO']`). O 6º anúncio é bloqueado com status HTTP 400. Usuários do tipo `ONG` e superusuários não possuem limite.
 
 ---
 
-### 🟢 3. Campos Adicionados: `descricao` e `imagem` [RESOLVIDO]
-- **Solução Aplicada**: Adicionados os campos ao modelo `Animal`:
-```python
-descricao = models.TextField(blank=True, null=True, verbose_name="Descrição")
-imagem = models.CharField(max_length=500, blank=True, null=True, verbose_name="Foto / URL")
-```
-> [!NOTE]
-> Optou-se por `CharField` de 500 caracteres para `imagem` para armazenar diretamente URLs completas (ex.: Unsplash / CDN) e caminhos relativos de mídia estática sem dependência de extensões binárias do Pillow no Windows/Python 3.14.
+## 3. Endpoints e Filtros (`animais/views.py`)
 
----
-
-### 🟢 4. Permissões de Leitura Pública (`AllowAny`) [RESOLVIDO]
-- **Solução Aplicada**: Em `animais/views.py`:
-```python
-class AnimaisViewSet(generics.ListCreateAPIView):
-    queryset = Animal.objects.all().order_by('-created_at')
-    serializer_class = AnimaisSerializer
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
-```
-Visitantes podem agora listar e visualizar qualquer pet sem necessidade de token prévio.
-
----
-
-### 🟢 5. Padronização de Choices [RESOLVIDO]
-- Todos os campos de sim/não foram ajustados para a grafia padrão com til (`'Não sei'`).
-
----
-
-Veja também:
-- [[04 - App Adoções]]
-- [[02 - Diagnóstico dos Bugs Atuais]]
-- [[04 - Guia de Execução e Testes]]
+- **`GET /api/animais/`** (Público - `AllowAny`):
+  Filtros suportados via Query String:
+  - `?tipo_servico=ADOCAO` ou `?tipo_servico=PERDIDO`
+  - `?estado=SP`
+  - `?cidade=Campinas`
+  - `?tipo_animal=CACHORRO`
+  - `?status=DISPONIVEL`
+  - `?tutor_id=1` (para listar anúncios do usuário logado)
+- **`POST /api/animais/`** (Autenticado - `IsAuthenticated`):
+  Criação de novos anúncios com atribuição automática do `tutor=request.user`.
+- **`PATCH /api/animais/{id}/`** (Autenticado):
+  Permite ao tutor atualizar o status (ex: marcar como `ADOTADO` ou `ENCONTRADO`).
+- **`DELETE /api/animais/{id}/`** (Autenticado):
+  Exclusão do anúncio. Usuários que não sejam o tutor são bloqueados com HTTP 403 (*PermissionDenied*).

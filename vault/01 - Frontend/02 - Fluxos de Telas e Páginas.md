@@ -52,39 +52,48 @@ Este documento detalha o comportamento funcional de cada tela do frontend, inclu
 
 ---
 
-## 2. Telas Internas Autenticadas
-
-Todas as telas abaixo importam `js/utils/auth-guard.js`. Se o usuário não tiver token no `bbStorage`, é redirecionado para o login com a URL salva em `?next=`.
-
----
+## 2. Telas Internas e Vitrines
 
 ### `pages/home/index.html` & `home.js`
+- **Objetivo**: Página inicial da plataforma, apresentando o propósito e os pets disponíveis.
 - **Componentes**:
-  - `bbRenderHeroCarousel("#bb-hero")`: Carrossel informativo no topo.
-  - `#bb-news`: Lista de notícias da ONG carregadas via `communityService.listNews()`.
-  - `#bb-posts`: Feed da comunidade carregado via `communityService.listPosts()`.
-- **Comportamento**:
-  - Carregamentos paralelos e independentes com estados de loading (skeleton) e estado vazio customizados.
+  - `bbRenderHeroCarousel("#bb-hero")`: Carrossel informativo com chamadas para adoção e localização de pets perdidos.
+  - `#bb-home-pets`: Grade de destaque com até 4 animais disponíveis para adoção (`animalService.list({ tipo_servico: "ADOCAO" })`).
+  - Botão de atalho para a vitrine completa: "Ver todos os pets →".
+- **Decisão de Produto**:
+  - As antigas seções de notícias e posts da comunidade foram **descontinuadas/abandonadas** em prol do foco central na causa animal e contato direto via WhatsApp.
 
 ---
 
-### `pages/community/index.html` & `community.js`
-- **Componentes**:
-  - `#bb-posts`: Posts compartilhados pelos membros da comunidade.
-  - `#bb-missing`: Grade de animais desaparecidos com foto, último local visto, contato do tutor e data.
-  - `#bb-report-btn`: Botão "Reportar animal desaparecido".
-- **Comportamento Atual**:
-  - O reporte atualmente utiliza caixas `prompt()` do navegador para capturar `nome`, `local`, `contato` e `descricao` e chama `communityService.reportMissingAnimal()`.
-  - *Melhoria planejada*: Substituir os `prompts` por um modal estilizado em Tailwind.
+### `pages/community/index.html` (Descontinuado / Redirecionamento)
+> [!NOTE]
+> **Módulo Descontinuado:** Conforme decisão de produto, o mural livre de postagens de usuários e notícias foi abandonado. O reporte de animais desaparecidos foi unificado na página de animais.
+- Acessos a esta rota são imediatamente redirecionados via client-side para `/pages/animals/index.html#bb-lost-section`.
 
 ---
 
 ### `pages/animals/index.html` & `animals.js`
-- **Objetivo**: Catálogo completo dos animais prontos para adoção.
-- **Comportamento**:
-  - Carrega a lista com `animalService.list()`.
-  - Renderiza uma grade com `AnimalCard` (foto ou placeholder, nome, raça, sexo e idade).
-  - Cada card é clicável e direciona para `pages/animals/detail.html?id=<id>`.
+- **Objetivo**: Central unificada de animais para adoção responsável e animais desaparecidos.
+- **Vitrines Independentes na Mesma Página**:
+  - **🚨 Animais Desaparecidos** (`#bb-lost-section`): Cards com identificação visual de emergência, último local visto e contato do tutor.
+  - **🐾 Animais para Adoção** (`#bb-adopt-section`): Cards de pets disponíveis com foto, características, raça, idade e localização.
+- **Abas de Visualização**:
+  - "Todos os Pets": Exibe todos os animais cadastrados na plataforma.
+  - "Meus Anúncios": Filtra automaticamente pelos anúncios cadastrados pelo usuário autenticado (`tutor_id`).
+- **Filtros Geográficos Inteligentes com IBGE**:
+  - `<select id="filter-estado">`: Lista estática das 27 UFs brasileiras (sem chamada de rede).
+  - `<input id="filter-cidade" list="filter-cidades-list">`: Autocomplete leve via `<datalist>` carregado sob demanda da API do IBGE via `ibgeService.js` com cache de 2 níveis (RAM + `sessionStorage`).
+  - `<select id="filter-tipo-animal">`: Filtra por Cachorro, Gato ou Outro.
+- **Modal Unificado de Publicação (`#adopt-modal`)**:
+  - Botões de abertura: `+ Anunciar Pet para Adoção` e `+ Reportar Pet Perdido`.
+  - Seletor de Serviço (`#pet-servico`): Alterna entre Adoção e Animal Perdido, ajustando títulos e exibindo condicionalmente o campo `#wrap-pet-local` (Último local visto).
+  - Seleção em cascata Estado $\rightarrow$ Cidade com `<datalist>`.
+  - **Telefone de Contato Obrigatório (`#pet-telefone`)**:
+    - Aplica máscara automática brasileira `(XX) XXXXX-XXXX`.
+    - Pré-preenchido com o telefone do perfil caso o usuário logado possua.
+    - **Validação Bloqueante no Frontend**: Verifica se o DDD é válido (11 a 99) e se possui 10 ou 11 dígitos. Caso inválido, bloqueia o envio com `alert("É necessário um número de contato para cadastrar o animal.");`, impedindo a chamada de rota da API.
+- **Gerenciamento pelo Tutor**:
+  - Cards do próprio usuário logado exibem botão para concluir o anúncio ("Marcar como Adotado" ou "Marcar como Encontrado") e botão para excluir o anúncio.
 
 ---
 
@@ -93,22 +102,11 @@ Todas as telas abaixo importam `js/utils/auth-guard.js`. Se o usuário não tive
 - **Parâmetro de URL**: `?id=<id>`
 - **Exibição**:
   - Imagem do pet e tipo de animal (`Cachorro`, `Gato`, `Outro`).
-  - Badges informativos: Raça, Idade aproximada, Sexo formatado (Macho/Fêmea/Indeterminado) e Cidade.
+  - Badges informativos: Raça, Idade aproximada, Sexo formatado (Macho/Fêmea/Indeterminado) e Localização (`📍 Cidade - UF`).
   - Status de vacinação e uso de medicamentos contínuos.
-  - Descrição comportamental (até 255 caracteres).
-  - **Botão de Ação Primário**: **"Falar com o Tutor no WhatsApp"** (link direto para `https://wa.me/55...` com o número previamente validado por PIN durante o cadastro).
-  - **Botão Secundário**: **"Denunciar Card"** (exige que o usuário esteja autenticado e abre modal com Enum de motivos de infração).
-
----
-
-### `pages/animals/create.html` & `animal-create.js` (Novo Fluxo)
-- **Objetivo**: Cadastro de novo animal para adoção pelo tutor logado.
-- **Etapa 1 (Dados do Pet)**:
-  - Seleção de `tipo_animal` (Enum: Cachorro, Gato, Outro).
-  - Upload de foto, cidade, descrição (até 255 caracteres) e telefone celular com DDD.
-- **Etapa 2 (Validação de WhatsApp por PIN)**:
-  - Dispara código de 6 dígitos para o WhatsApp informado.
-  - Usuário digita o código PIN recebido para autorizar a publicação.
+  - Descrição comportamental / características.
+  - **Botão de Ação Primário**: **"Falar com o Tutor no WhatsApp"** (link direto para `https://wa.me/55...` com mensagem pré-formatada).
+  - **Botão Secundário**: **"Denunciar Card"** (para reporte de anúncios irregulares).
 
 ---
 

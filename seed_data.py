@@ -6,7 +6,6 @@ django.setup()
 
 from usuarios.models import Usuario, PessoaFisica
 from animais.models import Animal
-from comunidade.models import Noticia
 
 
 def seed():
@@ -87,16 +86,6 @@ def seed():
         )
     print(f"Total de animais na tabela unificada: {Animal.objects.count()} (Adoção: {Animal.objects.filter(tipo_servico='ADOCAO').count()}, Perdidos: {Animal.objects.filter(tipo_servico='PERDIDO').count()})")
 
-    # 4. Notícias
-    noticias_mock = [
-        {"titulo": "Campanha de Castração e Vacinação", "resumo": "Neste sábado no Parque Central, a partir das 9h. Vagas limitadas!", "conteudo": "Traga seu pet para a campanha municipal de castração gratuita."}
-    ]
-    for item in noticias_mock:
-        Noticia.objects.get_or_create(
-            titulo=item["titulo"],
-            defaults={"resumo": item["resumo"], "conteudo": item["conteudo"]}
-        )
-    print(f"Notícias inseridas: {Noticia.objects.count()}")
     print("Seed concluído com sucesso!")
 
 
