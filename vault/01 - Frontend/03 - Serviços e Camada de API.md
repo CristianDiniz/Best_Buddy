@@ -61,34 +61,42 @@ class BBApiError extends Error {
   - Limpa os tokens com `bbStorage.clearSession()` e redireciona para `login.html`.
 
 ### `animalService.js`
-- `list()`:
-  - Real: `GET /animais/` (lista de animais prontos para adoção).
+Serviço central de gestão e consulta da tabela unificada de animais:
+- `list(params)`:
+  - Consome `GET /animais/` com suporte a query params:
+    - `tipo_servico`: `"ADOCAO"` ou `"PERDIDO"`
+    - `estado`: sigla da UF (ex: `"SP"`)
+    - `cidade`: nome do município (ex: `"Campinas"`)
+    - `tipo_animal`: `"CACHORRO"`, `"GATO"`, `"OUTRO"`
+    - `tutor_id`: id do usuário tutor para a aba "Meus Anúncios"
 - `getById(id)`:
-  - Real: `GET /animais/{id}/` (ficha detalhada de um único pet).
+  - Consome `GET /animais/{id}/` (ficha detalhada de um único pet).
 - `create(payload)`:
-  - Real: `POST /animais/` (cadastro de novo animal).
+  - Consome `POST /animais/` (cadastro de anúncio com `telefone_contato` obrigatório com DDD).
+- `updateStatus(id, status)`:
+  - Consome `PATCH /animais/{id}/` para o tutor atualizar status (ex: `"ADOTADO"` ou `"ENCONTRADO"`).
+- `delete(id)`:
+  - Consome `DELETE /animais/{id}/` para o tutor excluir seu próprio anúncio.
 
-### `adoptionService.js`
-- `create(payload)`:
-  - Real: `POST /adocoes/`
-  - Payload esperado:
-    ```json
-    {
-      "animal_id": 1,
-      "nome_adotante": "Ana Souza",
-      "email_adotante": "ana@email.com",
-      "telefone_adotante": "(16) 99999-8888",
-      "ja_teve_animais": "Sim",
-      "ja_vacinado": "Sim",
-      "motivacao": "Gostaria de adotar para dar amor e carinho."
-    }
-    ```
+### `adoptionService.js` (Descontinuado)
+> [!WARNING]
+> **Descontinuado:** A intermediação burocrática de adoção foi desativada em favor do contato direto via WhatsApp.
 
-### `communityService.js`
-- `listNews()`: `GET /comunidade/noticias/`
-- `listPosts()`: `GET /comunidade/posts/`
-- `listMissingAnimals()`: `GET /comunidade/desaparecidos/`
-- `reportMissingAnimal(payload)`: `POST /comunidade/desaparecidos/`
+### `communityService.js` (Descontinuado / Removido)
+> [!WARNING]
+> **Descontinuado e Removido:** O módulo de comunidade e notícias foi abandonado. O fluxo de animais desaparecidos foi totalmente unificado em `animalService.js` utilizando `tipo_servico: "PERDIDO"`.
+
+### `ibgeService.js`
+Serviço desacoplado para consulta e normalização de dados geográficos sem onerar o banco de dados da aplicação:
+- **Lista Estática das 27 UFs (`getEstados()`):** Retorno síncrono e instantâneo (0ms) das 27 unidades federativas brasileiras, sem requisições HTTP desnecessárias.
+- **Validação Defensiva (`isUfValida(uf)`):** Valida se a sigla informada existe antes de disparar chamadas externas.
+- **Busca Sob Demanda (`getCidadesPorEstado(uf)`):**
+  - **Cache Nível 1 (RAM):** `_memoryCache` (Map) para resposta instantânea ao alternar estados na mesma tela.
+  - **Cache Nível 2 (Sessão):** `sessionStorage` (`bb_ibge_cidades_{UF}`) para manter dados entre trocas de páginas e recarregamentos (F5) sem gravar permanentemente no disco.
+  - **Cache Nível 3 (Rede):** Consulta `https://servicodados.ibge.gov.br/api/v1/localidades/estados/{UF}/municipios?orderBy=nome`.
+  - **Timeout Controlado:** 8 segundos via `AbortController` prevenindo bloqueios de UI em redes instáveis.
+  - **Normalização de Payload:** Redução de objetos complexos do IBGE para `{ id, nome }`, economizando ~85% de memória.
+- **Limpeza (`clearCache()`):** Esvazia o cache em memória e do `sessionStorage`.
 
 ---
 

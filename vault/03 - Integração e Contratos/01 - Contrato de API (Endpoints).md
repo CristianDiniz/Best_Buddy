@@ -90,141 +90,215 @@ Confirmar PIN e redefinir senha.
 
 ## 2. Animais (`/api/animais/`)
 
-### `GET /animais/`
-Lista de animais disponíveis para adoção.
-- **Headers**: Nenhum obrigatório (público).
+### `GET /api/animais/`
+Lista unificada de animais para adoção e animais desaparecidos.
+- **Headers**: Nenhum obrigatório (acesso público `AllowAny`).
+- **Query Params Suportados**:
+  - `?tipo_servico=ADOCAO` ou `?tipo_servico=PERDIDO`
+  - `?estado=SP` (Sigla da UF)
+  - `?cidade=São Carlos`
+  - `?tipo_animal=CACHORRO` (`CACHORRO`, `GATO`, `OUTRO`)
+  - `?status=DISPONIVEL` (`DISPONIVEL`, `ADOTADO`, `PERDIDO`, `ENCONTRADO`, `INATIVO`)
+  - `?tutor_id=1` (para listar os anúncios pertencentes a um usuário)
 - **Response 200**:
   ```json
   [
     {
       "id": 1,
+      "tutor_id": 1,
+      "tutor_email": "usuario@bestbuddy.com",
+      "tutor_nome": "Ana Souza",
+      "contato": "(16) 99999-0000",
+      "tipo_servico": "ADOCAO",
+      "tipo_animal": "CACHORRO",
       "nome": "Max",
+      "estado": "SP",
+      "cidade": "São Carlos",
+      "telefone_contato": "(16) 99999-0000",
+      "descricao": "Dócil, adora brincar com bola.",
+      "imagem": null,
+      "status": "DISPONIVEL",
       "raca": "SRD",
       "sexo": "M",
       "idade_aproximada": "Adulto",
       "medicamento": "Não",
       "vacinacao": "Sim",
-      "contato": "(16) 99999-0001",
-      "descricao": "Dócil, adora brincar com bola.",
-      "imagem": null
+      "local": null,
+      "inativado_em": null,
+      "created_at": "2026-09-26T22:26:07Z",
+      "updated_at": "2026-09-26T22:26:07Z"
     }
   ]
   ```
 
 ---
 
-### `GET /animais/{id}/`
+### `GET /api/animais/{id}/`
 Detalhes de um animal específico.
 - **Response 200**: Objeto único com a mesma estrutura acima.
 - **Response 404**: `{"detail": "Não encontrado."}`
 
 ---
 
-### `POST /animais/`
-Cadastro de novo animal (ONGs / Protetores).
+### `POST /api/animais/`
+Publicação de anúncio de adoção ou reporte de animal perdido.
 - **Headers**: `Authorization: Bearer <access_token>`
-- **Request**:
+- **Request (Exemplo Adoção)**:
   ```json
   {
-    "nome": "Rex",
-    "raca": "Labrador",
+    "tipo_servico": "ADOCAO",
+    "tipo_animal": "CACHORRO",
+    "nome": "Caramelo",
+    "estado": "SP",
+    "cidade": "Campinas",
+    "telefone_contato": "(19) 98888-7777",
+    "descricao": "Pet muito carinhoso e dócil.",
+    "raca": "Vira-lata",
     "sexo": "M",
-    "idade_aproximada": "Filhote",
-    "medicamento": "Não",
-    "vacinacao": "Sim",
-    "contato": "(16) 99999-7777",
-    "descricao": "Muito alegre e dócil."
+    "idade_aproximada": "Filhote"
   }
   ```
-- **Response 201**: Animal criado com seu `id`.
+- **Regras de Negócio e Validações**:
+  - `telefone_contato`: Campo obrigatório (com DDD). Caso ausente, herda o telefone validado do tutor logado; se nenhum existir, rejeita com HTTP 400 (`"É necessário um número de contato para cadastrar o animal."`).
+  - Cota de 5 anúncios ativos para usuários comuns (PF).
+- **Response 201**: Registro criado com `id` e dados completos.
 
 ---
 
-## 3. Adoção (`/api/adocoes/`)
+### `PATCH /api/animais/{id}/`
+Atualização de status do anúncio pelo tutor autenticado.
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Request**: `{"status": "ADOTADO"}` ou `{"status": "ENCONTRADO"}`
+- **Response 200**: Objeto atualizado.
+- **Response 403**: `{"detail": "Você não tem permissão para gerenciar este anúncio."}` (caso o usuário não seja o tutor).
 
-### `POST /adocoes/`
-Envio de solicitação de adoção.
-- **Headers**: `Authorization: Bearer <access_token>` (se logado).
+---
+
+### `DELETE /api/animais/{id}/`
+Exclusão de anúncio pelo tutor.
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Response 204**: Sem conteúdo.
+- **Response 403**: Proibido para usuários terceiros.
+
+---
+
+## 3. Adoção Direta (Contato via WhatsApp)
+
+> [!WARNING]
+> **Endpoint Descontinuado:** O endpoint `POST /adocoes/` foi descontinuado (retorna HTTP 404). O fluxo ocorre diretamente com o tutor via link do WhatsApp gerado a partir do `telefone_contato`.
+
+---
+
+## 4. Comunidade e Notícias (`/api/comunidade/`) [DESCONTINUADO]
+
+> [!WARNING]
+> **Módulo Descontinuado:** Conforme decisão de produto, o mural livre de posts e o feed de notícias foram abandonados para simplificar o escopo e focar no contato direto via WhatsApp.
+> - `GET /api/comunidade/noticias/` $\rightarrow$ **HTTP 404 (Not Found)**
+> - `GET /api/comunidade/posts/` $\rightarrow$ **HTTP 404 (Not Found)**
+> - Os animais desaparecidos foram migrados para `/api/animais/?tipo_servico=PERDIDO`.
+
+---
+
+## 5. Validação de WhatsApp via Twilio (`/api/usuarios/whatsapp/`)
+
+### `POST /api/usuarios/whatsapp/enviar/`
+Dispara código SMS/WhatsApp de validação para o número informado.
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Request**: `{"telefone": "11988887777"}`
+- **Response 200**: `{"mensagem": "Código de verificação enviado."}`
+
+### `POST /api/usuarios/whatsapp/verificar/`
+Valida o código digitado pelo usuário e atualiza `telefone_validado = True`.
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Request**: `{"telefone": "11988887777", "codigo": "123456"}`
+- **Response 200**:
+  ```json
+  {
+    "mensagem": "Telefone verificado com sucesso!",
+    "telefone": "11988887777",
+    "telefone_validado": true
+  }
+  ```
+
+---
+
+## 6. Denúncias (`/api/denuncias/`)
+
+### `POST /denuncias/`
+Registro de denúncia qualificada por usuário autenticado.
+- **Headers**: `Authorization: Bearer <access_token>` (obrigatório)
 - **Request**:
   ```json
   {
-    "animal_id": 1,
-    "nome_adotante": "Ana Souza",
-    "email_adotante": "ana@email.com",
-    "telefone_adotante": "(16) 99999-0001",
-    "ja_teve_animais": "Sim",
-    "ja_vacinado": "Sim",
-    "motivacao": "Amo animais e tenho espaço para cuidar com carinho."
+    "tipo_alvo": "ADOCAO",
+    "alvo_id": 1,
+    "motivo_categoria": "MAUS_TRATOS",
+    "justificativa_texto": "Animal apresenta sinais graves de desnutrição e abandono nas fotos."
   }
   ```
 - **Response 201**:
   ```json
   {
-    "id": 10,
-    "status": "A",
-    "animal_id": 1,
-    "nome_adotante": "Ana Souza",
-    "created_at": "2026-09-07T18:00:00Z"
+    "id": 5,
+    "status": "PENDENTE",
+    "motivo_categoria": "MAUS_TRATOS",
+    "created_at": "2026-09-15T20:00:00Z"
   }
   ```
+- **Response 401**: `{"detail": "Authentication credentials were not provided."}`
 
 ---
 
-## 4. Comunidade (`/api/comunidade/`)
+## 7. Serviços (`/api/servicos/`)
 
-### `GET /comunidade/noticias/`
-- **Response 200**:
-  ```json
-  [
-    {
-      "id": 1,
-      "titulo": "Campanha de Castração Gratuita",
-      "resumo": "Neste sábado na praça central.",
-      "created_at": "2026-09-01T10:00:00Z"
-    }
-  ]
-  ```
+### `GET /servicos/`
+Listagem pública de prestadores homologados.
+- **Query Params Suportados**: `?cidade=Araraquara&tipo_servico=veterinario`
+- **Response 200**: Lista de serviços com status `APROVADO`.
 
-### `GET /comunidade/posts/`
-- **Response 200**:
-  ```json
-  [
-    {
-      "id": 1,
-      "autor": "Carlos Lima",
-      "texto": "Agradeço a todos que compareceram à feirinha!",
-      "created_at": "2026-09-02T14:30:00Z"
-    }
-  ]
-  ```
-
-### `GET /comunidade/desaparecidos/`
-- **Response 200**:
-  ```json
-  [
-    {
-      "id": 1,
-      "nome": "Max",
-      "local": "Jardim Botânico, São Paulo, SP",
-      "contato": "(11) 91234-5678",
-      "descricao": "Sumiu durante um passeio, muito medroso.",
-      "created_at": "2026-09-03T09:00:00Z"
-    }
-  ]
-  ```
-
-### `POST /comunidade/desaparecidos/`
+### `POST /servicos/`
+Solicitação de inclusão de serviço profissional.
+- **Headers**: `Authorization: Bearer <access_token>`
 - **Request**:
   ```json
   {
-    "nome": "Bela",
-    "local": "Parque SP, Araraquara, SP",
-    "contato": "(16) 98888-1122",
-    "descricao": "Desapareceu após queima de fogos."
+    "tipo_cadastro": "PJ",
+    "nome": "Clínica Veterinária PetCare",
+    "tipos_servicos": ["veterinario", "internacao", "banho_tosa"],
+    "crmv": "SP-12345",
+    "horario_atendimento": "Segunda a Sábado, 08h às 18h",
+    "telefone": "(16) 3333-4444",
+    "aceita_whatsapp": true,
+    "cidades_atuacao": "Araraquara, Américo Brasiliense",
+    "informacoes_extras": "Atendimento 24h em emergências."
   }
   ```
-- **Response 201**: Item criado com `id` e `created_at`.
+- **Response 201**: Criado com status `PENDENTE` (aguarda moderação no Admin).
+
+---
+
+## 8. Solicitação de ONG (`/api/usuarios/solicitar-ong/`)
+
+### `POST /usuarios/solicitar-ong/`
+Submissão de pedido de upgrade institucional para cota ilimitada.
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Request**:
+  ```json
+  {
+    "cnpj": "12.345.678/0001-90",
+    "razao_social": "Associação Protetora dos Animais Vira-Lata",
+    "nome_contato": "Mariana Ribeiro",
+    "email_contato": "contato@viralata.org.br",
+    "telefone": "(16) 3333-9999",
+    "endereco": "Rua dos Resgatados, 100 - Araraquara/SP"
+  }
+  ```
+- **Response 201**: Pedido gravado com status `PENDENTE` para triagem da Staff.
+
+---
 
 Veja também:
 - [[02 - Matriz de Divergências (Front vs Back)]]
 - [[03 - Fluxo de Autenticação JWT]]
+- [[02 - Requisitos Funcionais]]
+- [[05 - Modelagem de Dados e Relacionamentos]]

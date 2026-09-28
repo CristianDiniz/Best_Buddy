@@ -6,11 +6,11 @@ function bbRenderHeroCarousel(targetSelector) {
   const slides = [
     {
       img: "../../assets/images/cachorroDeLado.jpg",
-      alt: "Cachorro de perfil — Comunidade Best Buddy",
-      title: "Faça parte da comunidade!",
-      desc: "Troque experiências, tire dúvidas e acompanhe as novidades de outros tutores e voluntários.",
-      cta: "Ver comunidade",
-      href: "/pages/community/index.html",
+      alt: "Cachorro de perfil — Pets Desaparecidos Best Buddy",
+      title: "Ajude a reencontrar pets perdidos!",
+      desc: "Encontrou um animalzinho ou perdeu seu companheiro? Conecte-se diretamente com a família.",
+      cta: "Ver pets perdidos",
+      href: "/pages/animals/index.html#bb-lost-section",
     },
     {
       img: "../../assets/images/cachorroComABocaAberta.jpg",
@@ -24,9 +24,9 @@ function bbRenderHeroCarousel(targetSelector) {
       img: "../../assets/images/cachorroCoberto.jpg",
       alt: "Cachorro enrolado em cobertor — Adote um animal",
       title: "Adote animais aqui!",
-      desc: "Dê uma segunda chance a quem mais precisa. Comece o processo de adoção agora mesmo.",
+      desc: "Dê uma segunda chance a quem mais precisa. Conheça nossos pets disponíveis para adoção.",
       cta: "Quero adotar",
-      href: "/pages/adoption/create.html",
+      href: "/pages/animals/index.html",
     },
   ];
 

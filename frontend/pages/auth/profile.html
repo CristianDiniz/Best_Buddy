@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Best Buddy — Editar Perfil</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="../../css/tailwind.build.css" />
+</head>
+<body>
+  <div class="bb-shell">
+    <div id="bb-nav"></div>
+
+    <main class="bb-main">
+      <div class="bb-container" style="max-width: 800px; margin: 0 auto;">
+        <h1 class="bb-page-title">Meu Perfil ⚙️</h1>
+        <p class="text-sm text-slate-400 mb-6">Gerencie suas informações pessoais, segurança e verificação de WhatsApp.</p>
+
+        <!-- Mensagens globais de feedback -->
+        <div id="profile-global-alert"></div>
+
+        <div class="grid gap-6">
+
+          <!-- CARD 1: Informações e Validação de WhatsApp -->
+          <section class="bb-card">
+            <h2 class="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
+              <span>📱</span> WhatsApp & Contato
+            </h2>
+            <p class="text-xs text-slate-400 mb-4">
+              Para anunciar animais (para adoção ou perdidos), é obrigatório ter o WhatsApp validado via Twilio. O número validado será o contato oficial de todos os seus anúncios.
+            </p>
+
+            <div class="flex flex-wrap items-center justify-between gap-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700/60 mb-4">
+              <div>
+                <span class="text-xs text-slate-400 block">Número de Telefone</span>
+                <strong id="user-display-phone" class="text-base text-slate-200">Não informado</strong>
+              </div>
+              <div id="user-whatsapp-badge">
+                <span class="px-2.5 py-1 text-xs rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                  ⚠️ Não validado
+                </span>
+              </div>
+            </div>
+
+            <div id="whatsapp-flow-container">
+              <!-- Passo 1: Digitar número e enviar código -->
+              <div id="whatsapp-step-1" class="grid sm:grid-cols-3 gap-3 items-end">
+                <div class="sm:col-span-2">
+                  <label class="bb-label" for="whatsapp-phone-input">Número com DDD (ex: 11999998888)</label>
+                  <input class="bb-input" type="tel" id="whatsapp-phone-input" placeholder="11999998888" />
+                </div>
+                <button class="bb-btn bb-btn--primary" id="btn-send-whatsapp-code" type="button">
+                  Enviar Código PIN
+                </button>
+              </div>
+
+              <!-- Passo 2: Digitar código recebido -->
+              <div id="whatsapp-step-2" class="hidden mt-4 p-4 bg-brand-500/10 border border-brand-500/30 rounded-lg">
+                <p class="text-xs text-brand-300 mb-3" id="whatsapp-step2-hint">
+                  Código de 6 dígitos enviado para seu WhatsApp! Digite abaixo para confirmar:
+                </p>
+                <div class="grid sm:grid-cols-3 gap-3 items-end">
+                  <div class="sm:col-span-2">
+                    <label class="bb-label" for="whatsapp-code-input">Código PIN de 6 dígitos</label>
+                    <input class="bb-input" type="text" id="whatsapp-code-input" placeholder="123456" maxlength="6" />
+                  </div>
+                  <button class="bb-btn bb-btn--accent" id="btn-verify-whatsapp-code" type="button">
+                    Confirmar WhatsApp
+                  </button>
+                </div>
+                <div class="mt-2 text-right">
+                  <button class="text-xs text-slate-400 hover:text-slate-200 underline" id="btn-resend-code" type="button">
+                    Não recebeu? Reenviar código
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- CARD 2: Alteração de E-mail -->
+          <section class="bb-card">
+            <h2 class="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
+              <span>✉️</span> Alterar E-mail Cadastrado
+            </h2>
+            <p class="text-xs text-slate-400 mb-4">
+              E-mail atual: <strong id="user-current-email" class="text-slate-200">carregando...</strong>. Para alterar, informe a senha atual para segurança. Um link/código de confirmação será enviado ao novo e-mail.
+            </p>
+
+            <form id="form-change-email" class="space-y-4">
+              <div>
+                <label class="bb-label" for="new-email">Novo E-mail</label>
+                <input class="bb-input" type="email" id="new-email" required placeholder="novo@email.com" />
+              </div>
+              <div>
+                <label class="bb-label" for="current-password-email">Sua Senha Atual (para confirmar)</label>
+                <input class="bb-input" type="password" id="current-password-email" required placeholder="Digite sua senha atual" />
+              </div>
+              <button class="bb-btn bb-btn--secondary" type="submit" id="btn-submit-change-email">
+                Solicitar Alteração de E-mail
+              </button>
+            </form>
+
+            <!-- Área de Confirmação do Token de E-mail -->
+            <div id="box-confirm-email" class="mt-4 p-4 bg-slate-800/60 rounded-lg border border-slate-700/60 hidden">
+              <h3 class="text-sm font-semibold text-slate-200 mb-2">Confirmar Novo E-mail</h3>
+              <p class="text-xs text-slate-400 mb-3">Insira o token de confirmação recebido em sua caixa postal:</p>
+              <div class="flex gap-2">
+                <input class="bb-input flex-1" type="text" id="email-confirmation-token" placeholder="Cole o token aqui" />
+                <button class="bb-btn bb-btn--primary" type="button" id="btn-confirm-email-token">Validar</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- CARD 3: Alteração de Senha -->
+          <section class="bb-card">
+            <h2 class="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
+              <span>🔒</span> Alterar Senha
+            </h2>
+            <p class="text-xs text-slate-400 mb-4">
+              Por segurança, informe sua senha atual antes de cadastrar uma nova.
+            </p>
+
+            <form id="form-change-password" class="space-y-4">
+              <div>
+                <label class="bb-label" for="current-password-pwd">Senha Atual</label>
+                <input class="bb-input" type="password" id="current-password-pwd" required placeholder="Senha atual" />
+              </div>
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="bb-label" for="new-password">Nova Senha</label>
+                  <input class="bb-input" type="password" id="new-password" required minlength="6" placeholder="Mínimo 6 caracteres" />
+                </div>
+                <div>
+                  <label class="bb-label" for="confirm-new-password">Confirmar Nova Senha</label>
+                  <input class="bb-input" type="password" id="confirm-new-password" required minlength="6" placeholder="Repita a nova senha" />
+                </div>
+              </div>
+              <button class="bb-btn bb-btn--secondary" type="submit" id="btn-submit-change-password">
+                Atualizar Senha
+              </button>
+            </form>
+          </section>
+
+        </div>
+      </div>
+    </main>
+
+    <div id="bb-footer"></div>
+  </div>
+
+  <script src="../../js/config.js"></script>
+  <script src="../../js/utils/storage.js"></script>
+  <script src="../../js/utils/auth-guard.js"></script>
+  <script src="../../js/mocks/mock-utils.js"></script>
+  <script src="../../js/mocks/mock-data.js"></script>
+  <script src="../../js/api/client.js"></script>
+  <script src="../../js/services/authService.js"></script>
+  <script src="../../js/utils/header-scroll.js"></script>
+  <script src="../../js/components/Navigation.js"></script>
+  <script src="../../js/components/Footer.js"></script>
+  <script src="../../js/components/NearbyOngsMap.js"></script>
+  <script src="../../js/pages/profile.js"></script>
+</body>
+</html>

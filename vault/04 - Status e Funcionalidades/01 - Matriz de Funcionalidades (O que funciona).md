@@ -9,20 +9,24 @@ Este documento é o inventário detalhado de todas as tarefas e funcionalidades 
 
 | Módulo / Funcionalidade          |  Front (Modo Mock)  |          Front (Modo Real)           |        Backend (Django REST)        |           Banco (SQLite / MySQL)            |
 | :------------------------------- | :-----------------: | :----------------------------------: | :---------------------------------: | :-----------------------------------------: |
+| Módulo / Funcionalidade          |  Front (Modo Mock)  |          Front (Modo Real)           |        Backend (Django REST)        |           Banco (SQLite / MySQL)            |
+| :------------------------------- | :-----------------: | :----------------------------------: | :---------------------------------: | :-----------------------------------------: |
 | **Login com Email e Senha**      |     🟢 Funciona     |  🟢 Funciona (`data.user` no header)  | 🟢 Funciona (`/api/token/` c/ user) |      🟢 Tabela `usuarios_usuario` ok        |
 | **Renovação de Token (Refresh)** |     🟢 Mockado      |         🟢 Pronto no client          | 🟢 Funciona (`/api/token/refresh/`) |            🟢 Tokens stateless              |
-| **Cadastro de Usuário (PF)**     |     🟢 Funciona     |         🟢 Funciona com CPF          |      🟢 Salva CPF/CNPJ com hash     | 🟢 Tabela `usuarios_pessoafisica` com CPF   |
-| **Recuperação de Senha (PIN)**   |     🟢 Funciona     |    🟡 Interface pronta (fallback)    |        🟡 Planejado p/ SMTP         |            🟡 Planejado p/ SMTP             |
+| **Cadastro de Usuário (PF)**     |     🟢 Funciona     |         🟢 Rápido sem CPF            |      🟢 Registro simplificado       | 🟢 Tabela `usuarios_usuario` sem fricção    |
+| **Recuperação de Senha (Token)** |     🟢 Funciona     |    🟢 Token assinado via email/API   |  🟢 Endpoints de recuperação prontos | 🟢 Validado via `test_endpoints.py`         |
 | **Guarda de Rotas (AuthGuard)**  |     🟢 Funciona     |             🟢 Funciona              |        🟢 `IsAuthenticated`         |                    N/A                      |
-| **Listagem de Animais**          |  🟢 6 animais fake  |          🟢 6 animais do DB          | 🟢 `GET /api/animais/` (`AllowAny`) |     🟢 Tabela `animais_animal` corrigida    |
+| **Listagem Unificada de Animais**|  🟢 Vitrine ativa   |   🟢 Filtros de Adoção e Perdidos    | 🟢 `GET /api/animais/` (`AllowAny`) |     🟢 Tabela unificada `animais_animal`    |
+| **Filtros Geográficos (IBGE)**   |     🟢 Funciona     |   🟢 27 UFs + Datalist de Cidades    | 🟢 Suporte a `?estado=` e `?cidade=`| 🟢 Campos `estado` e `cidade` no model      |
 | **Detalhes do Animal**           |     🟢 Funciona     |        🟢 Ficha completa c/ ID       | 🟢 `GET /api/animais/{id}/`         |       🟢 Com `descricao` e `imagem`         |
-| **Cadastro de Animal (POST)**    |    🟢 Em memória    |       🟢 POST autenticado ativo      |   🟢 Serializer com `id` e campos   |            🟢 Tabela alinhada               |
-| **Solicitação de Adoção**        |     🟢 Funciona     |      🟢 Sucesso (HTTP 201)           | 🟢 Model com FK `Animal` + adotante |    🟢 Tabela `adocoes_adocao` com FK        |
+| **Cadastro de Animal (POST)**    |     🟢 Funciona     |   🟢 Modal com validação de telefone |   🟢 Serializer com cota máx 5 pets | 🟢 Persistência unificada com tutor FK      |
+| **Contato Direto via WhatsApp**  |     🟢 Funciona     |  🟢 Link direto sem burocracia       | 🟢 `telefone_contato` obrigatório   | 🟢 Campo no model e fallback do tutor       |
+| **Gestão do Pet pelo Tutor**     |     🟢 Funciona     |   🟢 Concluir status e Excluir pet   | 🟢 PATCH status e DELETE tutor-only | 🟢 Proteção contra exclusão por terceiros   |
 | **Carrossel da Home**            |     🟢 Funciona     |        🟢 Funciona (Estático)        |                 N/A                 |                    N/A                      |
-| **Mural de Notícias**            |  🟢 1 notícia fake  |         🟢 1 notícia real            |   🟢 App `comunidade` ativo         |      🟢 Tabela `comunidade_noticia`         |
-| **Feed de Posts da Comunidade**  |   🟢 2 posts fake   |          🟢 2 posts reais            |   🟢 App `comunidade` ativo         |       🟢 Tabela `comunidade_post`           |
-| **Mural de Desaparecidos**       | 🟢 3 registros fake |        🟢 3 registros reais          |   🟢 App `comunidade` ativo         | 🟢 Tabela `comunidade_animaldesaparecido`   |
-| **Reportar Desaparecido**        |  🟢 Via `prompt()`  |        🟢 Envia POST à API real      |   🟢 POST em `/comunidade/`         |  🟢 Registro persistido no banco            |
+| **Mural de Notícias**            |  ❌ Descontinuado   |          ❌ Descontinuado            |   ❌ Abandonado (HTTP 404)          |       ❌ Tabela descontinuada               |
+| **Feed de Posts da Comunidade**  |  ❌ Descontinuado   |          ❌ Descontinuado            |   ❌ Abandonado (HTTP 404)          |       ❌ Tabela descontinuada               |
+| **Mural de Desaparecidos**       |     🟢 Funciona     | 🟢 Unificado em `animals/index.html` | 🟢 `GET /api/animais/?tipo=PERDIDO` | 🟢 Tabela unificada `animais_animal`        |
+| **Reportar Desaparecido**        |     🟢 Funciona     |   🟢 Modal unificado no frontend     |   🟢 POST em `/api/animais/`        |  🟢 Registro persistido no banco            |
 | **Logout**                       |  🟢 Limpa storage   |           🟢 Limpa storage           |           N/A (Stateless)           |                    N/A                      |
 
 ---
@@ -31,16 +35,17 @@ Este documento é o inventário detalhado de todas as tarefas e funcionalidades 
 
 1. **Design System & Responsividade**:
    - Layout responsivo para Desktop, Tablet e Mobile.
-   - Microanimações de entrada, foco e hover bem calibradas.
-   - Skeletons de loading em todas as listas de dados.
-2. **Formulários e Validação**:
-   - Validador genérico client-side com feedback inline por campo.
-   - Bloqueio de envio duplicado no formulário de adoção.
-   - Tratamento de erro 400/401/404 da API com toasts e feedback visual.
-3. **Navegação Autenticada**:
-   - Barra superior dinâmica com página ativa destacada, avatar com as iniciais do usuário logado e menu de logout.
-4. **Resiliência Desacoplada**:
-   - O modo mock (`USE_MOCKS: true`) permanece 100% disponível para testes offline e demonstrações.
+   - Skeletons de loading em todas as vitrines de dados.
+   - Microanimações e feedback visual consistente.
+2. **Integração com IBGE (`ibgeService.js`)**:
+   - Lista estática síncrona das 27 UFs brasileiras.
+   - Municípios carregados sob demanda em `<datalist>` com cache de 2 níveis (RAM + `sessionStorage`).
+3. **Formulários e Validação Estrita**:
+   - Validação client-side para o `telefone_contato` com DDD obrigatório. Se inválido, emite o popup `alert("É necessário um número de contato para cadastrar o animal.");` e interrompe o fluxo antes de chamar a rota.
+   - Máscara automática de telefone brasileiro `(XX) XXXXX-XXXX`.
+4. **Navegação Limpa**:
+   - Menu sem opções órfãs (apenas *Home*, *Animais* e *Meu Perfil*).
+   - Redirecionamento transparente da antiga rota de comunidade para a vitrine de animais perdidos.
 
 ---
 
@@ -48,16 +53,19 @@ Este documento é o inventário detalhado de todas as tarefas e funcionalidades 
 
 1. **Estrutura Base e Segurança**:
    - Django 6 e Django REST Framework com SimpleJWT.
-   - `django-cors-headers` configurado no topo dos middlewares.
-   - Suporte híbrido SQLite / MySQL via variável de ambiente `USE_MYSQL`.
-2. **Autenticação e Perfis**:
-   - Modelo `Usuario` com email único, perfis `PessoaFisica` (com CPF) e `PessoaJuridica`.
-   - `CustomTokenObtainPairSerializer` devolvendo tokens e o objeto `user` (`id`, `email`, `nome`, `tipo`).
-3. **Gestão de Animais e Adoções**:
-   - Modelo `Animal` com `descricao`, `imagem` e permissão pública de leitura.
-   - Modelo `Adocao` relacional com `ForeignKey` para o animal e questionário completo do adotante.
-4. **App Comunidade**:
-   - Notícias da ONG, Feed da Comunidade e Mural de Desaparecidos.
+   - Corsheaders configurado e permissões públicas refinadas (`AllowAny` para visualização, `IsAuthenticated` para anúncios).
+2. **Autenticação, Perfil e WhatsApp**:
+   - Registro rápido sem CPF.
+   - Validação de WhatsApp via Twilio (`/api/usuarios/whatsapp/enviar/` e `/verificar/`).
+   - Fluxo completo de recuperação de senha por token assinado (`/recuperar-senha/` e `/redefinir-senha/`).
+3. **Tabela Unificada de Animais (`animais_animal`)**:
+   - Discriminador `tipo_servico` (`ADOCAO` vs `PERDIDO`).
+   - `estado` (Enum 27 UFs) e `cidade` do IBGE.
+   - `telefone_contato` como campo obrigatório com fallback do tutor.
+   - Cota de no máximo 5 anúncios ativos para usuários comuns (PF).
+   - Exclusão e alteração de status restritas ao tutor criador.
+4. **Módulo de Comunidade e Notícias**:
+   - Descontinuado e removido das rotas (`config/urls.py`) e do `settings.py`, retornando HTTP 404.
 5. **Automação & Containerização**:
    - Dockerfile e docker-compose orquestrando Django, MySQL 8.0 e Nginx com migrações e seed automático na inicialização.
    - Suíte de testes `test_endpoints.py` validando 9/9 endpoints com sucesso.

@@ -31,7 +31,6 @@ bbRegisterForm.addEventListener("submit", async (event) => {
 
   const data = {
     nome: document.getElementById("nome").value.trim(),
-    cpf: document.getElementById("cpf").value.trim(),
     email: document.getElementById("email").value.trim(),
     telefone: document.getElementById("telefone").value.trim(),
     senha: document.getElementById("senha").value,
@@ -40,7 +39,6 @@ bbRegisterForm.addEventListener("submit", async (event) => {
 
   const errors = bbValidation.runRules(data, {
     nome: [{ test: bbValidation.isRequired, message: "Informe seu nome." }],
-    cpf: [{ test: bbValidation.isCPF, message: "CPF inválido." }],
     email: [
       { test: bbValidation.isRequired, message: "Informe seu email." },
       { test: bbValidation.isEmail, message: "Email inválido." },
@@ -62,7 +60,6 @@ bbRegisterForm.addEventListener("submit", async (event) => {
   try {
     await authService.register({
       nome: data.nome,
-      cpf: data.cpf,
       email: data.email,
       telefone: data.telefone,
       password: data.senha,

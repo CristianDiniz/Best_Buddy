@@ -32,6 +32,8 @@ class Usuario(AbstractUser):
 )
 
     email = models.EmailField(unique=True)
+    telefone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Telefone / WhatsApp")
+    telefone_validado = models.BooleanField(default=False, verbose_name="WhatsApp Validado")
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -52,7 +54,6 @@ class PessoaFisica(models.Model):
     )
 
     nome = models.CharField(max_length=100)
-    cpf = models.CharField(max_length=14, blank=True, null=True)
     telefone = models.CharField(max_length=15, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

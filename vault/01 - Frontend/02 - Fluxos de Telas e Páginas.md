@@ -52,39 +52,48 @@ Este documento detalha o comportamento funcional de cada tela do frontend, inclu
 
 ---
 
-## 2. Telas Internas Autenticadas
-
-Todas as telas abaixo importam `js/utils/auth-guard.js`. Se o usuário não tiver token no `bbStorage`, é redirecionado para o login com a URL salva em `?next=`.
-
----
+## 2. Telas Internas e Vitrines
 
 ### `pages/home/index.html` & `home.js`
+- **Objetivo**: Página inicial da plataforma, apresentando o propósito e os pets disponíveis.
 - **Componentes**:
-  - `bbRenderHeroCarousel("#bb-hero")`: Carrossel informativo no topo.
-  - `#bb-news`: Lista de notícias da ONG carregadas via `communityService.listNews()`.
-  - `#bb-posts`: Feed da comunidade carregado via `communityService.listPosts()`.
-- **Comportamento**:
-  - Carregamentos paralelos e independentes com estados de loading (skeleton) e estado vazio customizados.
+  - `bbRenderHeroCarousel("#bb-hero")`: Carrossel informativo com chamadas para adoção e localização de pets perdidos.
+  - `#bb-home-pets`: Grade de destaque com até 4 animais disponíveis para adoção (`animalService.list({ tipo_servico: "ADOCAO" })`).
+  - Botão de atalho para a vitrine completa: "Ver todos os pets →".
+- **Decisão de Produto**:
+  - As antigas seções de notícias e posts da comunidade foram **descontinuadas/abandonadas** em prol do foco central na causa animal e contato direto via WhatsApp.
 
 ---
 
-### `pages/community/index.html` & `community.js`
-- **Componentes**:
-  - `#bb-posts`: Posts compartilhados pelos membros da comunidade.
-  - `#bb-missing`: Grade de animais desaparecidos com foto, último local visto, contato do tutor e data.
-  - `#bb-report-btn`: Botão "Reportar animal desaparecido".
-- **Comportamento Atual**:
-  - O reporte atualmente utiliza caixas `prompt()` do navegador para capturar `nome`, `local`, `contato` e `descricao` e chama `communityService.reportMissingAnimal()`.
-  - *Melhoria planejada*: Substituir os `prompts` por um modal estilizado em Tailwind.
+### `pages/community/index.html` (Descontinuado / Redirecionamento)
+> [!NOTE]
+> **Módulo Descontinuado:** Conforme decisão de produto, o mural livre de postagens de usuários e notícias foi abandonado. O reporte de animais desaparecidos foi unificado na página de animais.
+- Acessos a esta rota são imediatamente redirecionados via client-side para `/pages/animals/index.html#bb-lost-section`.
 
 ---
 
 ### `pages/animals/index.html` & `animals.js`
-- **Objetivo**: Catálogo completo dos animais prontos para adoção.
-- **Comportamento**:
-  - Carrega a lista com `animalService.list()`.
-  - Renderiza uma grade com `AnimalCard` (foto ou placeholder, nome, raça, sexo e idade).
-  - Cada card é clicável e direciona para `pages/animals/detail.html?id=<id>`.
+- **Objetivo**: Central unificada de animais para adoção responsável e animais desaparecidos.
+- **Vitrines Independentes na Mesma Página**:
+  - **🚨 Animais Desaparecidos** (`#bb-lost-section`): Cards com identificação visual de emergência, último local visto e contato do tutor.
+  - **🐾 Animais para Adoção** (`#bb-adopt-section`): Cards de pets disponíveis com foto, características, raça, idade e localização.
+- **Abas de Visualização**:
+  - "Todos os Pets": Exibe todos os animais cadastrados na plataforma.
+  - "Meus Anúncios": Filtra automaticamente pelos anúncios cadastrados pelo usuário autenticado (`tutor_id`).
+- **Filtros Geográficos Inteligentes com IBGE**:
+  - `<select id="filter-estado">`: Lista estática das 27 UFs brasileiras (sem chamada de rede).
+  - `<input id="filter-cidade" list="filter-cidades-list">`: Autocomplete leve via `<datalist>` carregado sob demanda da API do IBGE via `ibgeService.js` com cache de 2 níveis (RAM + `sessionStorage`).
+  - `<select id="filter-tipo-animal">`: Filtra por Cachorro, Gato ou Outro.
+- **Modal Unificado de Publicação (`#adopt-modal`)**:
+  - Botões de abertura: `+ Anunciar Pet para Adoção` e `+ Reportar Pet Perdido`.
+  - Seletor de Serviço (`#pet-servico`): Alterna entre Adoção e Animal Perdido, ajustando títulos e exibindo condicionalmente o campo `#wrap-pet-local` (Último local visto).
+  - Seleção em cascata Estado $\rightarrow$ Cidade com `<datalist>`.
+  - **Telefone de Contato Obrigatório (`#pet-telefone`)**:
+    - Aplica máscara automática brasileira `(XX) XXXXX-XXXX`.
+    - Pré-preenchido com o telefone do perfil caso o usuário logado possua.
+    - **Validação Bloqueante no Frontend**: Verifica se o DDD é válido (11 a 99) e se possui 10 ou 11 dígitos. Caso inválido, bloqueia o envio com `alert("É necessário um número de contato para cadastrar o animal.");`, impedindo a chamada de rota da API.
+- **Gerenciamento pelo Tutor**:
+  - Cards do próprio usuário logado exibem botão para concluir o anúncio ("Marcar como Adotado" ou "Marcar como Encontrado") e botão para excluir o anúncio.
 
 ---
 
@@ -92,30 +101,22 @@ Todas as telas abaixo importam `js/utils/auth-guard.js`. Se o usuário não tive
 - **Objetivo**: Ficha técnica e perfil detalhado do animal escolhido.
 - **Parâmetro de URL**: `?id=<id>`
 - **Exibição**:
-  - Imagem do pet.
-  - Badges informativos: Raça, Idade aproximada e Sexo formatado (Macho/Fêmea/Indeterminado).
+  - Imagem do pet e tipo de animal (`Cachorro`, `Gato`, `Outro`).
+  - Badges informativos: Raça, Idade aproximada, Sexo formatado (Macho/Fêmea/Indeterminado) e Localização (`📍 Cidade - UF`).
   - Status de vacinação e uso de medicamentos contínuos.
-  - Descrição comportamental e história do resgate.
-  - Botão de ação primário: **"Quero adotar"**, que direciona para `/pages/adoption/create.html?animal_id=<id>`.
+  - Descrição comportamental / características.
+  - **Botão de Ação Primário**: **"Falar com o Tutor no WhatsApp"** (link direto para `https://wa.me/55...` com mensagem pré-formatada).
+  - **Botão Secundário**: **"Denunciar Card"** (para reporte de anúncios irregulares).
 
 ---
 
-### `pages/adoption/create.html` & `adoption.js`
-- **Objetivo**: Formulário de intenção de adoção responsável.
-- **Parâmetro de URL**: `?animal_id=<id>`
-- **Comportamento**:
-  1. Busca os dados do animal selecionado via `animalService.getById(animal_id)` e exibe um mini-card de resumo no topo.
-  2. Caso a página seja aberta sem `animal_id`, bloqueia o formulário e avisa o usuário para selecionar um pet primeiro.
-  3. **Campos do Formulário**:
-     - `nome_adotante` (obrigatório)
-     - `email_adotante` (obrigatório, formato email)
-     - `telefone_adotante` (obrigatório)
-     - Radios: `ja_teve_animais` (Sim/Não/Não sei)
-     - Radios: `ja_vacinado` (Sim/Não/Não sei)
-     - `motivacao` (Texto longo: "Conte um pouco sobre você e por que deseja adotar")
-  4. **Proteção Anti-duplicação**: Flag `bbHasSubmitted` impede múltiplos cliques enquanto a requisição está em andamento.
-  5. Ao submeter com sucesso, exibe banner verde e oculta o formulário.
+### `pages/adoption/create.html` (Descontinuado)
+> [!WARNING]
+> **Fluxo Descontinuado:** Conforme a especificação revisada em [[02 - Requisitos Funcionais#RF13 — Contato Direto para Adoção (Sem Formulário Intermediário)]], o questionário burocrático de aptidão foi removido. A negociação ocorre diretamente com o tutor via WhatsApp.
+
+---
 
 Veja também:
-- [[03 - Serviços e Camada de API]]
-- [[01 - Contrato de API (Endpoints)]]
+- [[02 - Requisitos Funcionais]]
+- [[05 - Modelagem de Dados e Relacionamentos]]
+- [[06 - Matriz de Gap Analysis (O que Adicionar, Ajustar e Remover)]]

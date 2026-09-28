@@ -26,11 +26,17 @@ bbRequestForm.addEventListener("submit", async (event) => {
   btn.innerHTML = '<span class="bb-btn__spinner" aria-hidden="true"></span> Enviando...';
 
   try {
-    await authService.requestPasswordReset(email);
+    const res = await authService.requestPasswordReset(email);
     bbResetEmail = email;
     bbRequestForm.style.display = "none";
     bbConfirmForm.style.display = "block";
-    bbFormAlert.innerHTML = `<div class="bb-alert bb-alert--success">PIN enviado! Confira sua caixa de entrada.</div>`;
+    let msg = "Instruções enviadas! Confira seu e-mail para obter o token de redefinição.";
+    if (res && res.token_dev) {
+      msg += ` <div class="mt-2 text-xs text-amber-300 font-mono break-all bg-black/40 p-2 rounded border border-amber-500/30"><strong>Token de teste:</strong> ${res.token_dev}</div>`;
+      const pinInput = document.getElementById("pin");
+      if (pinInput && !pinInput.value) pinInput.value = res.token_dev;
+    }
+    bbFormAlert.innerHTML = `<div class="bb-alert bb-alert--success">${msg}</div>`;
   } catch (err) {
     bbFormAlert.innerHTML = `<div class="bb-alert bb-alert--error">${err.message}</div>`;
   } finally {
