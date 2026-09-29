@@ -17,15 +17,15 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_pass"]
       interval: 5s
       timeout: 5s
-      retries: 10
-      start_period: 15s
+      retries: 15
+      start_period: 30s
 
   backend:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: bestbuddy_api
-    restart: unless-stopped
+    restart: "no"
     environment:
       - USE_MYSQL=True
       - DB_NAME=bestbuddy_db
@@ -48,7 +48,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: bestbuddy_front
-    restart: unless-stopped
+    restart: "no"
     ports:
       - "5500:80"
     volumes:

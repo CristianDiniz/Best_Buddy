@@ -2,11 +2,17 @@
 set -e
 
 if [ "$USE_MYSQL" = "True" ] || [ "$USE_MYSQL" = "true" ] || [ "$USE_MYSQL" = "1" ]; then
-    echo "Aguardando o banco de dados MySQL em $DB_HOST:$DB_PORT..."
-    while ! python -c "import socket; s = socket.socket(); s.settimeout(1); s.connect(('${DB_HOST:-db}', int('${DB_PORT:-3306}')))" 2>/dev/null; do
-        sleep 1
+    echo "Aguardando o banco de dados MySQL ($DB_HOST:$DB_PORT) estar pronto e aceitando conexões..."
+    while ! python -c "
+import os, django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+django.setup()
+from django.db import connection
+connection.cursor()
+" 2>/dev/null; do
+        sleep 2
     done
-    echo "MySQL pronto e acessível!"
+    echo "MySQL pronto, autenticado e acessível!"
 fi
 
 echo "Executando migrações..."
