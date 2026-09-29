@@ -2,7 +2,10 @@ function bbAnimalCardHtml(animal) {
   const isPerdido = animal.tipo_servico === "PERDIDO";
   const sexoLabel = animal.sexo === "M" ? "Macho" : animal.sexo === "F" ? "Fêmea" : "Indeterminado";
   const currentUser = typeof bbStorage !== "undefined" && bbStorage.getUser();
-  const isOwner = currentUser && animal.tutor_id && Number(currentUser.id) === Number(animal.tutor_id);
+  const isOwner = currentUser && (
+    (animal.tutor_id && currentUser.id && Number(currentUser.id) === Number(animal.tutor_id)) ||
+    (currentUser.email && animal.tutor_email && currentUser.email.toLowerCase() === animal.tutor_email.toLowerCase())
+  );
 
   let statusBadge = "";
   if (animal.status === "ADOTADO") {
@@ -26,12 +29,15 @@ function bbAnimalCardHtml(animal) {
     const targetStatus = isPerdido ? "ENCONTRADO" : "ADOTADO";
 
     ownerActionsHtml = `
-      <div class="mt-3 pt-3 border-t border-border/60 flex items-center justify-between gap-2" onclick="event.stopPropagation();">
+      <div class="bb-owner-actions mt-3 pt-3 border-t border-border/60 flex items-center justify-between gap-1.5 flex-wrap">
         ${!isFinished ? `
-          <button type="button" class="bb-btn bb-btn--xs bb-btn--primary flex-1 btn-finish-animal" data-id="${animal.id}" data-status="${targetStatus}">
+          <button type="button" class="bb-btn bb-btn--xs bb-btn--primary flex-1 min-w-[120px] btn-finish-animal" data-id="${animal.id}" data-status="${targetStatus}">
             ${finishBtnText}
           </button>
-        ` : `<span class="text-xs text-ink-400 font-medium">Anúncio concluído</span>`}
+        ` : `<span class="text-xs text-ink-400 font-medium py-1 px-2 rounded bg-surface-700/60">Anúncio concluído</span>`}
+        <button type="button" class="bb-btn bb-btn--xs bb-btn--secondary text-ink-200 hover:text-white btn-edit-animal" data-id="${animal.id}" title="Editar informações do animal">
+          ✏️ Editar
+        </button>
         <button type="button" class="bb-btn bb-btn--xs bb-btn--secondary text-rose-400 hover:text-rose-300 btn-delete-animal" data-id="${animal.id}" title="Excluir anúncio">
           🗑️
         </button>
@@ -40,7 +46,7 @@ function bbAnimalCardHtml(animal) {
   }
 
   return `
-    <div class="group bb-animal-card relative flex flex-col justify-between cursor-pointer ${isPerdido ? 'border-amber-500/30 hover:border-amber-500/60' : ''}" onclick="window.location.href='/pages/animals/detail.html?id=${animal.id}'">
+    <div class="group bb-animal-card relative flex flex-col justify-between cursor-pointer ${isPerdido ? 'border-amber-500/30 hover:border-amber-500/60' : ''}" data-card-id="${animal.id}">
       <div>
         <div class="bb-animal-card__image flex-col gap-1 relative overflow-hidden${animal.imagem ? "" : " bb-animal-card__image--empty"}">
           ${imageHtml}
