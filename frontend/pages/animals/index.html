@@ -73,6 +73,15 @@
                 </select>
               </div>
 
+              <div>
+                <select id="filter-tempo" class="bb-input text-xs md:text-sm py-2">
+                  <option value="">Qualquer tempo</option>
+                  <option value="recentes">⚡ Mais recentes</option>
+                  <option value="semana">📅 Última semana</option>
+                  <option value="mes">🗓️ Último mês</option>
+                </select>
+              </div>
+
               <button id="filter-apply-btn" type="button" class="bb-btn bb-btn--primary text-xs py-2 px-3">
                 Filtrar
               </button>
@@ -202,7 +211,12 @@
             </div>
             <div>
               <label class="bb-label" for="pet-idade">Idade Aproximada</label>
-              <input class="bb-input" type="text" id="pet-idade" placeholder="Ex: 1 ano, Filhote..." />
+              <select class="bb-input" id="pet-idade">
+                <option value="">Selecione a idade...</option>
+                <option value="Filhote">Filhote</option>
+                <option value="Adulto">Adulto</option>
+                <option value="Idoso">Idoso</option>
+              </select>
             </div>
           </div>
 
@@ -236,12 +250,33 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label class="bb-label" for="pet-vacinacao">Vacinação</label>
-              <input class="bb-input" type="text" id="pet-vacinacao" placeholder="Ex: V8 completa, Antirrábica..." />
+              <select class="bb-input" id="pet-vacinacao">
+                <option value="">Selecione...</option>
+                <option value="Sim">Vacinado (Sim)</option>
+                <option value="Não">Não vacinado</option>
+                <option value="Não sei">Não informado / Não sei</option>
+              </select>
             </div>
             <div>
               <label class="bb-label" for="pet-medicamento">Medicamentos / Cuidados (opcional)</label>
-              <input class="bb-input" type="text" id="pet-medicamento" placeholder="Ex: Nenhum, ou castrado..." />
+              <select class="bb-input" id="pet-medicamento">
+                <option value="">Selecione...</option>
+                <option value="Sim">Usa medicamentos contínuos (Sim)</option>
+                <option value="Não">Não necessita de medicamentos</option>
+                <option value="Não sei">Não informado / Não sei</option>
+              </select>
             </div>
+          </div>
+
+          <div id="wrap-pet-status" class="hidden">
+            <label class="bb-label" for="pet-status">Status do Anúncio</label>
+            <select class="bb-input" id="pet-status">
+              <option value="DISPONIVEL">🐾 Disponível para Adoção</option>
+              <option value="ADOTADO">✅ Adotado (Concluído)</option>
+              <option value="PERDIDO">🚨 Perdido / Desaparecido</option>
+              <option value="ENCONTRADO">🎉 Encontrado (Concluído)</option>
+              <option value="INATIVO">⏸️ Inativo</option>
+            </select>
           </div>
 
           <div>

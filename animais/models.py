@@ -106,10 +106,6 @@ class Animal(models.Model):
         default='',
         verbose_name="Telefone de contato do tutor"
     )
-
-    @property
-    def contato(self):
-        return self.telefone_contato or (self.tutor.telefone if self.tutor and hasattr(self.tutor, 'telefone') else "")
     descricao = models.CharField(max_length=255, blank=True, null=True, verbose_name="Descrição / Informações extras")
     imagem = models.CharField(max_length=500, blank=True, null=True, verbose_name="URL da Foto do animal")
     

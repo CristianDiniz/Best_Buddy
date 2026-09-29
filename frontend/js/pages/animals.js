@@ -19,6 +19,7 @@ const filterEstadoSelect = document.getElementById("filter-estado");
 const filterCidadeInput = document.getElementById("filter-cidade");
 const filterCidadesDatalist = document.getElementById("filter-cidades-list");
 const filterTipoAnimalSelect = document.getElementById("filter-tipo-animal");
+const filterTempoSelect = document.getElementById("filter-tempo");
 const filterApplyBtn = document.getElementById("filter-apply-btn");
 const filterClearBtn = document.getElementById("filter-clear-btn");
 
@@ -38,6 +39,9 @@ const petEstadoSelect = document.getElementById("pet-estado");
 const petCidadeInput = document.getElementById("pet-cidade");
 const petCidadesDatalist = document.getElementById("pet-cidades-list");
 const petPhoneInput = document.getElementById("pet-telefone");
+const wrapPetStatus = document.getElementById("wrap-pet-status");
+const petStatusSelect = document.getElementById("pet-status");
+let currentEditingAnimalId = null;
 
 // Estado
 const INITIAL_LIMIT = 4;
@@ -49,6 +53,7 @@ let activeTab = "all"; // "all" | "my"
 let filterEstado = "";
 let filterCidade = "";
 let filterTipoAnimal = "";
+let filterTempo = "";
 
 function renderLost() {
   bbLostCountEl.textContent = allLostAnimals.length;
@@ -113,6 +118,7 @@ async function bbLoadAnimals() {
   if (filterEstado) commonParams.estado = filterEstado;
   if (filterCidade) commonParams.cidade = filterCidade;
   if (filterTipoAnimal) commonParams.tipo_animal = filterTipoAnimal;
+  if (filterTempo) commonParams.tempo = filterTempo;
   if (activeTab === "my" && currentUser) commonParams.tutor_id = currentUser.id;
 
   try {
@@ -121,8 +127,22 @@ async function bbLoadAnimals() {
       animalService.list({ ...commonParams, tipo_servico: "ADOCAO" }),
     ]);
 
-    allLostAnimals = Array.isArray(lostList) ? lostList : [];
-    allAdoptAnimals = Array.isArray(adoptList) ? adoptList : [];
+    let rawLost = Array.isArray(lostList) ? lostList : [];
+    let rawAdopt = Array.isArray(adoptList) ? adoptList : [];
+
+    // Filtros de reforço no front-end para tempo
+    if (filterTempo === "semana") {
+      const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      rawLost = rawLost.filter((a) => !a.created_at || new Date(a.created_at).getTime() >= weekAgo);
+      rawAdopt = rawAdopt.filter((a) => !a.created_at || new Date(a.created_at).getTime() >= weekAgo);
+    } else if (filterTempo === "mes") {
+      const monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      rawLost = rawLost.filter((a) => !a.created_at || new Date(a.created_at).getTime() >= monthAgo);
+      rawAdopt = rawAdopt.filter((a) => !a.created_at || new Date(a.created_at).getTime() >= monthAgo);
+    }
+
+    allLostAnimals = rawLost;
+    allAdoptAnimals = rawAdopt;
 
     renderLost();
     renderAdopt();
@@ -151,11 +171,12 @@ bbAdoptToggleBtn.addEventListener("click", () => {
   renderAdopt();
 });
 
-// Ações de Filtro
+// Ações de Filtro (RF08)
 function applyFilters() {
   filterEstado = filterEstadoSelect ? filterEstadoSelect.value : "";
-  filterCidade = filterCidadeInput.value.trim();
-  filterTipoAnimal = filterTipoAnimalSelect.value;
+  filterCidade = filterCidadeInput ? filterCidadeInput.value.trim() : "";
+  filterTipoAnimal = filterTipoAnimalSelect ? filterTipoAnimalSelect.value : "";
+  filterTempo = filterTempoSelect ? filterTempoSelect.value : "";
   lostExpanded = false;
   adoptExpanded = false;
   bbLoadAnimals();
@@ -166,6 +187,7 @@ filterCidadeInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") applyFilters();
 });
 filterTipoAnimalSelect.addEventListener("change", applyFilters);
+if (filterTempoSelect) filterTempoSelect.addEventListener("change", applyFilters);
 
 if (filterEstadoSelect) {
   filterEstadoSelect.addEventListener("change", async () => {
@@ -194,12 +216,16 @@ if (filterEstadoSelect) {
 filterClearBtn.addEventListener("click", () => {
   if (filterEstadoSelect) filterEstadoSelect.value = "";
   if (filterCidadesDatalist) filterCidadesDatalist.innerHTML = "";
-  filterCidadeInput.value = "";
-  filterCidadeInput.placeholder = "🔍 Buscar por cidade...";
-  filterTipoAnimalSelect.value = "";
+  if (filterCidadeInput) {
+    filterCidadeInput.value = "";
+    filterCidadeInput.placeholder = "🔍 Buscar por cidade...";
+  }
+  if (filterTipoAnimalSelect) filterTipoAnimalSelect.value = "";
+  if (filterTempoSelect) filterTempoSelect.value = "";
   filterEstado = "";
   filterCidade = "";
   filterTipoAnimal = "";
+  filterTempo = "";
   lostExpanded = false;
   adoptExpanded = false;
   bbLoadAnimals();
@@ -287,8 +313,11 @@ async function openAdoptModal(defaultService = "ADOCAO") {
     return;
   }
 
+  currentEditingAnimalId = null;
   modalAlertEl.innerHTML = "";
   formAdoptPet.reset();
+
+  if (wrapPetStatus) wrapPetStatus.classList.add("hidden");
 
   if (petServicoSelect) {
     petServicoSelect.value = defaultService;
@@ -318,7 +347,98 @@ async function openAdoptModal(defaultService = "ADOCAO") {
   adoptModal.classList.remove("hidden");
 }
 
+// Modal de Edição de Anúncio de Animal
+async function openEditPetModal(animal) {
+  if (!bbStorage.isAuthenticated()) {
+    window.location.href = `/pages/auth/login.html?next=${encodeURIComponent(window.location.pathname)}`;
+    return;
+  }
+
+  currentEditingAnimalId = animal.id;
+  modalAlertEl.innerHTML = "";
+  formAdoptPet.reset();
+
+  const modalHeading = document.querySelector("#adopt-modal h2");
+  const modalDesc = document.getElementById("modal-adopt-desc");
+  if (modalHeading) modalHeading.innerHTML = `<span>✏️</span> Editar Anúncio do Pet`;
+  if (modalDesc) modalDesc.textContent = "Atualize os dados e o status do anúncio do seu animal.";
+  if (modalSubmitBtn) modalSubmitBtn.textContent = "Salvar Alterações";
+
+  if (wrapPetStatus) wrapPetStatus.classList.remove("hidden");
+  if (petStatusSelect) petStatusSelect.value = animal.status || "DISPONIVEL";
+
+  if (petServicoSelect) {
+    petServicoSelect.value = animal.tipo_servico || "ADOCAO";
+    updateModalServiceUI(animal.tipo_servico || "ADOCAO");
+    if (modalHeading) modalHeading.innerHTML = `<span>✏️</span> Editar Anúncio do Pet`;
+    if (modalSubmitBtn) modalSubmitBtn.textContent = "Salvar Alterações";
+  }
+
+  // Preenche dados do animal no formulário
+  const nomeEl = document.getElementById("pet-nome");
+  if (nomeEl) nomeEl.value = animal.nome || "";
+
+  const tipoEl = document.getElementById("pet-tipo");
+  if (tipoEl) tipoEl.value = animal.tipo_animal || "CACHORRO";
+
+  const sexoEl = document.getElementById("pet-sexo");
+  if (sexoEl) sexoEl.value = animal.sexo || "M";
+
+  const racaEl = document.getElementById("pet-raca");
+  if (racaEl) racaEl.value = animal.raca || "";
+
+  const idadeEl = document.getElementById("pet-idade");
+  if (idadeEl) idadeEl.value = animal.idade_aproximada || "";
+
+  const vacinaEl = document.getElementById("pet-vacinacao");
+  if (vacinaEl) vacinaEl.value = animal.vacinacao || "";
+
+  const medEl = document.getElementById("pet-medicamento");
+  if (medEl) medEl.value = animal.medicamento || "";
+
+  const descEl = document.getElementById("pet-descricao");
+  if (descEl) descEl.value = animal.descricao || "";
+
+  const imgEl = document.getElementById("pet-imagem");
+  if (imgEl) imgEl.value = animal.imagem || "";
+
+  if (animal.local && petLocalInput) petLocalInput.value = animal.local;
+
+  const phoneInput = document.getElementById("pet-telefone");
+  if (phoneInput) {
+    phoneInput.value = animal.telefone_contato || "";
+    phoneInput.dispatchEvent(new Event("input"));
+  }
+
+  // Preenche Estado e Cidade
+  if (petEstadoSelect && animal.estado) {
+    petEstadoSelect.value = animal.estado;
+    try {
+      const cidades = await ibgeService.getCidadesPorEstado(animal.estado);
+      if (petCidadesDatalist) {
+        petCidadesDatalist.innerHTML = cidades.map((c) => `<option value="${c.nome}">`).join("");
+      }
+      if (petCidadeInput) {
+        petCidadeInput.disabled = false;
+        petCidadeInput.value = animal.cidade || "";
+      }
+    } catch (_) {
+      if (petCidadeInput) {
+        petCidadeInput.disabled = false;
+        petCidadeInput.value = animal.cidade || "";
+      }
+    }
+  } else if (petCidadeInput) {
+    petCidadeInput.disabled = false;
+    petCidadeInput.value = animal.cidade || "";
+  }
+
+  adoptModal.classList.remove("hidden");
+}
+
 function closeAdoptModal() {
+  currentEditingAnimalId = null;
+  if (wrapPetStatus) wrapPetStatus.classList.add("hidden");
   adoptModal.classList.add("hidden");
 }
 
@@ -376,6 +496,7 @@ formAdoptPet.addEventListener("submit", async (e) => {
   e.preventDefault();
   modalAlertEl.innerHTML = "";
 
+  const isEdit = Boolean(currentEditingAnimalId);
   const servico = (document.getElementById("pet-servico")?.value || "ADOCAO");
   const phoneInput = document.getElementById("pet-telefone");
   const rawPhone = phoneInput ? phoneInput.value.trim() : "";
@@ -410,9 +531,13 @@ formAdoptPet.addEventListener("submit", async (e) => {
     return;
   }
 
+  const statusVal = isEdit
+    ? (document.getElementById("pet-status")?.value || (servico === "PERDIDO" ? "PERDIDO" : "DISPONIVEL"))
+    : (servico === "PERDIDO" ? "PERDIDO" : "DISPONIVEL");
+
   const payload = {
     tipo_servico: servico,
-    status: servico === "PERDIDO" ? "PERDIDO" : "DISPONIVEL",
+    status: statusVal,
     nome: document.getElementById("pet-nome").value.trim(),
     tipo_animal: document.getElementById("pet-tipo").value,
     sexo: document.getElementById("pet-sexo").value,
@@ -429,11 +554,18 @@ formAdoptPet.addEventListener("submit", async (e) => {
   };
 
   modalSubmitBtn.disabled = true;
-  modalSubmitBtn.innerHTML = '<span class="bb-btn__spinner" aria-hidden="true"></span> Publicando...';
+  modalSubmitBtn.innerHTML = isEdit
+    ? '<span class="bb-btn__spinner" aria-hidden="true"></span> Salvando alterações...'
+    : '<span class="bb-btn__spinner" aria-hidden="true"></span> Publicando...';
 
   try {
-    await animalService.create(payload);
-    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--success">Animal anunciado com sucesso!</div>`;
+    if (isEdit) {
+      await animalService.update(currentEditingAnimalId, payload);
+      modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--success">Anúncio do pet atualizado com sucesso!</div>`;
+    } else {
+      await animalService.create(payload);
+      modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--success">Animal anunciado com sucesso!</div>`;
+    }
     setTimeout(() => {
       closeAdoptModal();
       bbLoadAnimals();
@@ -442,15 +574,17 @@ formAdoptPet.addEventListener("submit", async (e) => {
     modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">${err.message}</div>`;
   } finally {
     modalSubmitBtn.disabled = false;
-    modalSubmitBtn.textContent = servico === "PERDIDO" ? "Publicar Animal Perdido" : "Publicar Anúncio";
+    modalSubmitBtn.textContent = isEdit
+      ? "Salvar Alterações"
+      : (servico === "PERDIDO" ? "Publicar Animal Perdido" : "Publicar Anúncio");
   }
 });
 
-// Ações do Dono no Card (Concluir status e Excluir)
+// Ações do Dono no Card (Concluir status, Editar e Excluir) + Navegação
 document.addEventListener("click", async (e) => {
+  // 1. Finalizar Anúncio (Marcar como Adotado ou Encontrado)
   const finishBtn = e.target.closest(".btn-finish-animal");
   if (finishBtn) {
-    e.stopPropagation();
     const id = finishBtn.dataset.id;
     const targetStatus = finishBtn.dataset.status;
     const confirmMsg = targetStatus === "ENCONTRADO"
@@ -470,9 +604,29 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
+  // 2. Editar Informações do Pet
+  const editBtn = e.target.closest(".btn-edit-animal");
+  if (editBtn) {
+    const id = editBtn.dataset.id;
+    const allPets = [...allLostAnimals, ...allAdoptAnimals];
+    let animal = allPets.find((a) => String(a.id) === String(id));
+    if (!animal) {
+      try {
+        animal = await animalService.getById(id);
+      } catch (err) {
+        alert("Não foi possível carregar os dados para edição: " + err.message);
+        return;
+      }
+    }
+    if (animal) {
+      openEditPetModal(animal);
+    }
+    return;
+  }
+
+  // 3. Excluir Anúncio do Pet
   const deleteBtn = e.target.closest(".btn-delete-animal");
   if (deleteBtn) {
-    e.stopPropagation();
     const id = deleteBtn.dataset.id;
     if (!confirm("Tem certeza que deseja excluir permanentemente este anúncio?")) return;
 
@@ -484,8 +638,34 @@ document.addEventListener("click", async (e) => {
       alert("Erro ao excluir anúncio: " + err.message);
       deleteBtn.disabled = false;
     }
+    return;
+  }
+
+  // 4. Clique geral no card (Navegação para página de detalhes)
+  const card = e.target.closest(".bb-animal-card");
+  if (card && !e.target.closest(".bb-owner-actions")) {
+    const cardId = card.dataset.cardId;
+    if (cardId) {
+      window.location.href = `/pages/animals/detail.html?id=${cardId}`;
+    }
   }
 });
+
+// Suporte para abrir edição direto via URL query param: ?edit=<id>
+async function checkUrlParams() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const editId = urlParams.get("edit");
+  if (editId) {
+    try {
+      const animal = await animalService.getById(editId);
+      if (animal) {
+        openEditPetModal(animal);
+      }
+    } catch (err) {
+      console.warn("Erro ao abrir pet via URL param:", err);
+    }
+  }
+}
 
 // Inicialização dos selects do IBGE
 function initIbgeUI() {
@@ -503,4 +683,4 @@ function initIbgeUI() {
 
 // Carregamento inicial
 initIbgeUI();
-bbLoadAnimals();
+bbLoadAnimals().then(() => checkUrlParams());

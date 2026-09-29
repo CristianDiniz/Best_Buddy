@@ -34,7 +34,30 @@ const bbStorage = {
 
   getUser() {
     const raw = localStorage.getItem(BB_STORAGE_KEYS.USER);
-    return raw ? JSON.parse(raw) : null;
+    let user = raw ? JSON.parse(raw) : null;
+    if (user && !user.id) {
+      const token = this.getAccessToken();
+      if (token) {
+        try {
+          const parts = token.split(".");
+          if (parts.length === 3) {
+            const base64Url = parts[1];
+            const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+            const payload = JSON.parse(decodeURIComponent(
+              atob(base64)
+                .split("")
+                .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+                .join("")
+            ));
+            if (payload.user_id) {
+              user.id = payload.user_id;
+              this.setUser(user);
+            }
+          }
+        } catch (_) {}
+      }
+    }
+    return user;
   },
 
   setUser(user) {

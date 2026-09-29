@@ -11,6 +11,17 @@ const animalService = {
       if (params.cidade) {
         items = items.filter((a) => (a.cidade || "").toLowerCase().includes(params.cidade.toLowerCase()));
       }
+      if (params.tipo_animal) {
+        items = items.filter((a) => (a.tipo_animal || "").toUpperCase() === params.tipo_animal.toUpperCase());
+      }
+      if (params.tempo) {
+        const now = Date.now();
+        const maxAgeMs = params.tempo === "semana" ? 7 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
+        items = items.filter((a) => {
+          if (!a.created_at) return true;
+          return (now - new Date(a.created_at).getTime()) <= maxAgeMs;
+        });
+      }
       return bbMockDelay(items);
     }
     const query = new URLSearchParams(params).toString();

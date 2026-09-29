@@ -37,8 +37,8 @@ function bbRenderHeroCarousel(targetSelector) {
     <div class="bb-hero" id="bb-hero-carousel">
       <div class="bb-hero__track">
         ${slides
-          .map(
-            (slide, i) => `
+      .map(
+        (slide, i) => `
           <div class="bb-hero__slide${i === 0 ? " is-active" : ""}" data-index="${i}">
             <img class="bb-hero__img" src="${slide.img}" alt="${slide.alt}" />
             <div class="bb-hero__overlay" aria-hidden="true"></div>
@@ -48,8 +48,8 @@ function bbRenderHeroCarousel(targetSelector) {
               <a class="bb-btn bb-btn--primary" href="${slide.href}">${slide.cta}</a>
             </div>
           </div>`
-          )
-          .join("")}
+      )
+      .join("")}
       </div>
 
       <button class="bb-hero__arrow bb-hero__arrow--prev" type="button" aria-label="Slide anterior">‹</button>
@@ -57,10 +57,10 @@ function bbRenderHeroCarousel(targetSelector) {
 
       <div class="bb-hero__dots">
         ${slides
-          .map(
-            (_, i) => `<button class="bb-hero__dot${i === 0 ? " is-active" : ""}" type="button" data-index="${i}" aria-label="Ir para slide ${i + 1}"></button>`
-          )
-          .join("")}
+      .map(
+        (_, i) => `<button class="bb-hero__dot${i === 0 ? " is-active" : ""}" type="button" data-index="${i}" aria-label="Ir para slide ${i + 1}"></button>`
+      )
+      .join("")}
       </div>
     </div>
   `;

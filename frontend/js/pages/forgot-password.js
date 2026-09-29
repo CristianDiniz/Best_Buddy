@@ -1,5 +1,9 @@
+// RF03: Redireciona para Home se já estiver logado
+if (typeof bbStorage !== "undefined" && bbStorage.isAuthenticated()) {
+  window.location.href = "/pages/home/index.html";
+}
+
 bbRenderAuthHeader("#bb-header");
-bbRenderFooter("#bb-footer");
 
 const bbRequestForm = document.getElementById("bb-request-form");
 const bbConfirmForm = document.getElementById("bb-confirm-form");

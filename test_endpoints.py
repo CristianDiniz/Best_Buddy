@@ -150,11 +150,12 @@ def run_tests():
     }
     res_create = client_tutor.post('/api/animais/', payload_pet, format='json')
     assert res_create.status_code == 201, f"Falha ao criar pet: {res_create.data}"
-    # Verifica se o contato veio da FK do tutor automaticamente
+    # Verifica se o contato veio da FK do tutor automaticamente no campo telefone_contato e no alias contato
+    assert res_create.data['telefone_contato'] == '(11) 97777-6666', f"Telefone de contato incorreto: {res_create.data['telefone_contato']}"
     assert res_create.data['contato'] == '(11) 97777-6666', f"Contato incorreto: {res_create.data['contato']}"
     assert res_create.data['tutor_email'] == 'tutor_validado@teste.com'
     assert 'tutor_nome' in res_create.data, "Falta tutor_nome"
-    print(f"OK! Pet criado #{res_create.data['id']}. Tutor: {res_create.data['tutor_nome']} | Contato via FK: {res_create.data['contato']}")
+    print(f"OK! Pet criado #{res_create.data['id']}. Tutor: {res_create.data['tutor_nome']} | Contato direto: {res_create.data['telefone_contato']}")
 
     # 8. Teste de Cota: Usuário com >= 5 animais ativos é barrado
     print("\n8. Testando enforcement de cota (máx 5 para comum) ...")

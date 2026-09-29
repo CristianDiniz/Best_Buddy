@@ -7,11 +7,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="../../css/tailwind.build.css" />
 </head>
-<body>
+<body class="overflow-x-hidden">
   <div class="bb-auth-shell">
-    <div id="bb-header"></div>
+    <!-- Vídeo em Background em Loop -->
+    <div class="bb-auth-video-bg" aria-hidden="true">
+      <video class="bb-auth-video" autoplay loop muted playsinline preload="auto">
+        <source src="../../assets/images/videoAnimesLogin.mp4" type="video/mp4" />
+      </video>
+      <div class="bb-auth-video-overlay"></div>
+    </div>
 
-    <main class="bb-container">
+    <!-- Header com Logo Arredondado -->
+    <div id="bb-header" class="relative z-10 w-full"></div>
+
+    <!-- Conteúdo Centralizado / Pop-up do Formulário -->
+    <main class="bb-container flex justify-center items-center flex-1 relative z-10 my-auto py-6">
       <div class="bb-card bb-auth-card">
         <h1 class="bb-auth-subtitle">Entre na sua conta</h1>
 
@@ -51,7 +61,9 @@
       </div>
     </main>
 
-    <div id="bb-footer"></div>
+    <footer class="bb-auth-footer-simple">
+      © Best Buddy — Todos os direitos reservados
+    </footer>
   </div>
 
   <script src="../../js/config.js"></script>
@@ -61,10 +73,7 @@
   <script src="../../js/mocks/mock-data.js"></script>
   <script src="../../js/api/client.js"></script>
   <script src="../../js/services/authService.js"></script>
-  <script src="../../js/utils/header-scroll.js"></script>
   <script src="../../js/components/AuthHeader.js"></script>
-  <script src="../../js/components/Footer.js"></script>
-  <script src="../../js/components/NearbyOngsMap.js"></script>
   <script src="../../js/pages/login.js"></script>
 </body>
 </html>

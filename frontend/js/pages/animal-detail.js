@@ -60,6 +60,33 @@ async function bbLoadDetail() {
           Tutor aguardando validação de contato telefônico.
          </p>`;
 
+    const currentUser = typeof bbStorage !== "undefined" && bbStorage.getUser();
+    const isOwner = currentUser && (
+      (animal.tutor_id && currentUser.id && Number(currentUser.id) === Number(animal.tutor_id)) ||
+      (currentUser.email && animal.tutor_email && currentUser.email.toLowerCase() === animal.tutor_email.toLowerCase())
+    );
+
+    const ownerBarHtml = isOwner
+      ? `
+        <div class="mt-4 p-4 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-between gap-3 flex-wrap">
+          <div class="flex items-center gap-2">
+            <span class="text-base">⭐</span>
+            <span class="text-sm font-semibold text-brand-300">Este anúncio foi publicado por você!</span>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <a href="/pages/animals/index.html?edit=${animal.id}" class="bb-btn bb-btn--xs bb-btn--primary">
+              ✏️ Editar Anúncio
+            </a>
+            ${animal.status !== "ADOTADO" && animal.status !== "ENCONTRADO" ? `
+              <button type="button" class="bb-btn bb-btn--xs bb-btn--secondary btn-detail-finish" data-id="${animal.id}" data-status="${isPerdido ? 'ENCONTRADO' : 'ADOTADO'}">
+                ${isPerdido ? '🎉 Marcar Encontrado' : '✅ Marcar Adotado'}
+              </button>
+            ` : `<span class="text-xs text-ink-400 font-medium py-1 px-2 rounded bg-surface-700/60">Anúncio concluído</span>`}
+          </div>
+        </div>
+      `
+      : "";
+
     bbDetailEl.innerHTML = `
       <div class="bb-card animate-scale-in grid grid-cols-1 md:grid-cols-[320px_1fr] gap-6">
         <div class="bb-animal-card__image rounded-lg aspect-square flex-col gap-1${animal.imagem ? "" : " bb-animal-card__image--empty"}">${imageHtml}</div>
@@ -84,10 +111,32 @@ async function bbLoadDetail() {
           
           <p class="mt-4 mb-2 text-ink-300 leading-relaxed text-sm">${animal.descricao || "Sem descrição informada."}</p>
           
+          ${ownerBarHtml}
           ${contactHtml}
         </div>
       </div>
     `;
+
+    const detailFinishBtn = document.querySelector(".btn-detail-finish");
+    if (detailFinishBtn) {
+      detailFinishBtn.addEventListener("click", async () => {
+        const id = detailFinishBtn.dataset.id;
+        const targetStatus = detailFinishBtn.dataset.status;
+        const confirmMsg = targetStatus === "ENCONTRADO"
+          ? "Deseja marcar este pet como ENCONTRADO? O anúncio será dado como concluído."
+          : "Deseja marcar este pet como ADOTADO? O anúncio será dado como concluído.";
+        if (!confirm(confirmMsg)) return;
+
+        detailFinishBtn.disabled = true;
+        try {
+          await animalService.update(id, { status: targetStatus });
+          bbLoadDetail();
+        } catch (err) {
+          alert("Erro ao atualizar anúncio: " + err.message);
+          detailFinishBtn.disabled = false;
+        }
+      });
+    }
   } catch (err) {
     bbDetailEl.innerHTML = typeof bbStateHtml === "function"
       ? bbStateHtml({ title: "Animal não encontrado.", description: err.message, isError: true })

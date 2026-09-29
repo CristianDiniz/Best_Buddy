@@ -16,7 +16,7 @@ class AnimaisSerializer(serializers.ModelSerializer):
             return obj.tutor.perfil_pj.nome_fantasia or obj.tutor.perfil_pj.razao_social or "ONG"
         return obj.tutor.email.split('@')[0]
 
-    contato = serializers.CharField(read_only=True)
+    contato = serializers.CharField(source='telefone_contato', read_only=True)
     telefone_contato = serializers.CharField(
         max_length=20,
         required=False,
