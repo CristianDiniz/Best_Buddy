@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Best Buddy — Home</title>
+  <title>Best Buddy — Adoção e Proteção Animal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="../../css/tailwind.build.css" />
+  <link rel="stylesheet" href="../../css/logo-loop.css" />
 </head>
 <body>
   <div class="bb-shell">
@@ -13,20 +14,123 @@
 
     <main class="bb-main">
       <div class="bb-container">
+        <!-- Carrossel de Destaques (Hero) -->
         <div id="bb-hero"></div>
 
-        <section class="mb-12">
+        <!-- Faixa Cilíndrica com Animação em Loop da Logo Best Buddy -->
+        <section class="my-8 md:my-10 w-full" aria-label="Espaço da marca">
+          <div class="w-full bg-white rounded-2xl md:rounded-3xl py-7 px-8 shadow-[0_4px_20px_rgba(30,60,110,0.06)] flex items-center justify-center min-h-[105px] relative overflow-hidden" id="bb-brand-animation-slot">
+            <div class="bb-logo" role="img" aria-label="Best Buddy">
+              <div class="bb-paws" aria-hidden="true">
+                <div class="bb-paw bb-pa"><i class="bb-ring"></i><svg viewBox="0 0 40 40"><use href="#bb-paw"/></svg></div>
+                <div class="bb-paw bb-pb"><i class="bb-ring"></i><svg viewBox="0 0 40 40"><use href="#bb-paw"/></svg></div>
+              </div>
+              <div class="bb-word bb-best" aria-hidden="true">
+                <span class="bb-l" style="--i:0">B</span><span class="bb-l" style="--i:1">e</span><span class="bb-l" style="--i:2">s</span><span class="bb-l" style="--i:3">t</span>
+              </div>
+              <div class="bb-word bb-buddy" aria-hidden="true">
+                <span class="bb-l" style="--i:4">B</span><span class="bb-l" style="--i:5">u</span><span class="bb-l" style="--i:6">d</span><span class="bb-l" style="--i:7">d</span><span class="bb-l" style="--i:8">y</span>
+              </div>
+            </div>
+
+            <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+              <defs>
+                <g id="bb-paw">
+                  <path d="M20 20c-5.5 0-10 5.2-10 9.6 0 3.2 2.2 5.4 5.4 5.4 2.2 0 3.3-1.2 4.6-1.2s2.4 1.2 4.6 1.2c3.2 0 5.4-2.2 5.4-5.4 0-4.4-4.5-9.6-10-9.6z"/>
+                  <ellipse class="bb-toe" style="--k:0" cx="7.5" cy="18" rx="3.6" ry="4.9" transform="rotate(-25 7.5 18)"/>
+                  <ellipse class="bb-toe" style="--k:1" cx="15" cy="9.5" rx="3.7" ry="5.1"/>
+                  <ellipse class="bb-toe" style="--k:2" cx="25" cy="9.5" rx="3.7" ry="5.1"/>
+                  <ellipse class="bb-toe" style="--k:3" cx="32.5" cy="18" rx="3.6" ry="4.9" transform="rotate(25 32.5 18)"/>
+                </g>
+              </defs>
+            </svg>
+          </div>
+        </section>
+
+        <!-- Seção: Pets esperando por um lar -->
+        <section class="bb-pets-section">
           <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
             <div>
-              <h2 class="bb-section-title mb-0">🐾 Pets esperando por um lar</h2>
-              <p class="text-xs text-ink-300">Conheça alguns dos companheiros disponíveis para adoção responsável.</p>
+              <h2 class="text-xl md:text-2xl font-bold text-[#1e293b] flex items-center gap-2 mb-1">
+                <span>🐾</span> Pets esperando por um lar
+              </h2>
+              <p class="text-xs text-[#64748b]">Conheça alguns dos companheiros disponíveis para adoção responsável.</p>
             </div>
-            <a href="/pages/animals/index.html" class="bb-btn bb-btn--secondary bb-btn--sm">
+            <a href="/pages/animals/index.html" class="text-xs font-semibold text-[#2f80ed] hover:text-[#1a6edb] hover:underline flex items-center gap-1 transition-colors">
               Ver todos os pets →
             </a>
           </div>
-          <div id="bb-home-pets" class="bb-grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"></div>
+
+          <!-- Filtros rápidos por categoria (Todos, Cães, Gatos) -->
+          <div class="flex items-center gap-2 mb-6 flex-wrap" id="bb-home-filters">
+            <button type="button" data-filter="ALL" class="bb-filter-pill active px-4 py-2 rounded-full text-xs font-semibold transition-all bg-[#2f80ed] text-white shadow-sm flex items-center gap-1.5 cursor-pointer">
+              <span>🐾</span> Todos
+            </button>
+            <button type="button" data-filter="CACHORRO" class="bb-filter-pill px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white border border-border text-ink-300 hover:text-ink-100 hover:border-[#2f80ed] flex items-center gap-1.5 cursor-pointer">
+              <span>🐶</span> Cães
+            </button>
+            <button type="button" data-filter="GATO" class="bb-filter-pill px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white border border-border text-ink-300 hover:text-ink-100 hover:border-[#2f80ed] flex items-center gap-1.5 cursor-pointer">
+              <span>🐱</span> Gatos
+            </button>
+          </div>
+
+          <!-- Grid de Cards de Pets -->
+          <div id="bb-home-pets"></div>
         </section>
+
+        <!-- Seção: Como funciona a adoção? -->
+        <section class="bb-steps-section" aria-label="Como funciona a adoção">
+          <div class="text-center mb-12 md:mb-16">
+            <h2 class="text-2xl md:text-3xl font-extrabold text-[#1e293b] mb-2">Como funciona a adoção?</h2>
+            <p class="text-sm text-[#64748b]">Processo simples, transparente e cheio de amor.</p>
+          </div>
+
+          <div class="bb-steps-grid">
+            <!-- Passo 1 -->
+            <div class="bb-step-card">
+              <span class="bb-step-card__number">1</span>
+              <div class="bb-step-card__icon-wrap">
+                <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="21" cy="21" r="13" stroke="#1e293b" stroke-width="3.5" fill="#e0f2fe"/>
+                  <path d="M31 31L42 42" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <h3 class="bb-step-card__title">Escolha um pet</h3>
+              <p class="bb-step-card__desc">Navegue pelos animais disponíveis e encontre seu companheiro ideal.</p>
+            </div>
+
+            <!-- Passo 2 -->
+            <div class="bb-step-card">
+              <span class="bb-step-card__number">2</span>
+              <div class="bb-step-card__icon-wrap">
+                <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="10" y="8" width="28" height="34" rx="4" fill="#ffffff" stroke="#1e293b" stroke-width="3"/>
+                  <rect x="17" y="4" width="14" height="7" rx="2" fill="#e2e8f0" stroke="#1e293b" stroke-width="3"/>
+                  <path d="M17 18H31M17 24H31M17 30H25" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <h3 class="bb-step-card__title">Preencha o formulário</h3>
+              <p class="bb-step-card__desc">Envie suas informações e passe pela avaliação de adoção.</p>
+            </div>
+
+            <!-- Passo 3 -->
+            <div class="bb-step-card">
+              <span class="bb-step-card__number">3</span>
+              <div class="bb-step-card__icon-wrap">
+                <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 22L24 8L40 22" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12 19V38C12 39.1 12.9 40 14 40H34C35.1 40 36 39.1 36 38V19" stroke="#1e293b" stroke-width="3" fill="#ffffff"/>
+                  <rect x="20" y="26" width="8" height="14" rx="1" fill="#ef4444" stroke="#1e293b" stroke-width="2.5"/>
+                  <rect x="28" y="21" width="5" height="5" rx="1" fill="#38bdf8" stroke="#1e293b" stroke-width="2"/>
+                  <rect x="15" y="21" width="5" height="5" rx="1" fill="#38bdf8" stroke="#1e293b" stroke-width="2"/>
+                </svg>
+              </div>
+              <h3 class="bb-step-card__title">Leve para casa</h3>
+              <p class="bb-step-card__desc">Após aprovação, agende a busca e dê um lar cheio de amor.</p>
+            </div>
+          </div>
+        </section>
+
       </div>
     </main>
 
@@ -43,7 +147,6 @@
   <script src="../../js/utils/header-scroll.js"></script>
   <script src="../../js/components/Navigation.js"></script>
   <script src="../../js/components/Footer.js"></script>
-  <script src="../../js/components/NearbyOngsMap.js"></script>
   <script src="../../js/components/AnimalCard.js"></script>
   <script src="../../js/components/StateView.js"></script>
   <script src="../../js/components/HeroCarousel.js"></script>

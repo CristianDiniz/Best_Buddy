@@ -4,8 +4,8 @@
   "description": "Front-end estático (HTML/JS puro) do site de adoção Best Buddy, estilizado com Tailwind CSS.",
   "private": true,
   "scripts": {
-    "build:css": "tailwindcss -i ./css/src/input.css -o ./css/tailwind.build.css --minify",
-    "watch:css": "tailwindcss -i ./css/src/input.css -o ./css/tailwind.build.css --watch"
+    "build:css": "tailwindcss -i ./frontend/css/src/input.css -o ./frontend/css/tailwind.build.css --minify",
+    "watch:css": "tailwindcss -i ./frontend/css/src/input.css -o ./frontend/css/tailwind.build.css --watch"
   },
   "keywords": [],
   "author": "",

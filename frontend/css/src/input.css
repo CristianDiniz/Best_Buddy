@@ -220,25 +220,7 @@
 
   /* --- Botões --- */
   .bb-btn {
-    @apply relative isolate inline-flex items-center justify-center gap-2 overflow-hidden border-none rounded-lg px-6 py-3 font-body font-bold text-[0.9rem] cursor-pointer select-none transition-all duration-200 ease-out-expo active:scale-[0.97];
-  }
-
-  /* Conteúdo do botão (ícone/texto) sempre acima do gif de biscoitos */
-  .bb-btn > * {
-    @apply relative z-[2];
-  }
-
-  /* Camada do gif — a imagem só é declarada dentro do :hover, então o
-     navegador só busca/anima o gif quando o botão realmente é hoverado */
-  .bb-btn::after {
-    content: "";
-    @apply absolute inset-0 z-[1] opacity-0 pointer-events-none bg-center bg-cover;
-    transition: opacity 0.2s ease-out;
-  }
-
-  .bb-btn:hover:not(:disabled)::after {
-    opacity: 0.85;
-    background-image: url("../assets/images/biscoitos-caindo.gif");
+    @apply relative inline-flex items-center justify-center gap-2 overflow-hidden border-none rounded-lg px-6 py-3 font-body font-bold text-[0.9rem] cursor-pointer select-none transition-all duration-200 ease-out-expo active:scale-[0.97];
   }
 
   .bb-btn--primary {
@@ -468,4 +450,204 @@
   .bb-stagger > *:nth-child(7) { animation-delay: 360ms; }
   .bb-stagger > *:nth-child(8) { animation-delay: 420ms; }
   .bb-stagger > *:nth-child(n+9) { animation-delay: 480ms; }
+
+  #bb-home-pets { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 1.25rem; }
+  @media (min-width: 640px) { #bb-home-pets { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 768px) { #bb-home-pets { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 1024px) { #bb-home-pets { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (min-width: 1280px) { #bb-home-pets { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  .bb-filter-pill { transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; }
+  .bb-filter-pill:hover:not(.active) { border-color: #2f8ae0; color: #16233a; transform: translateY(-1px); }
+
+  /* --- Best Buddy Pet Card (Figma Style) --- */
+  .bb-pet-card {
+    background: #ffffff;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(30, 60, 110, 0.06);
+    border: 1px solid #edf2f7;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+  .bb-pet-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(30, 60, 110, 0.12);
+  }
+  .bb-pet-card__image-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: #f1f5f9;
+    overflow: hidden;
+  }
+  .bb-pet-card__badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+  }
+  .bb-pet-card__body {
+    padding: 1rem 1rem 0.5rem 1rem;
+  }
+  .bb-pet-card__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 2px 0;
+    line-height: 1.3;
+  }
+  .bb-pet-card:hover .bb-pet-card__title {
+    color: #2f80ed;
+  }
+  .bb-pet-card__subtitle {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 0 0 0.75rem 0;
+    font-weight: 400;
+  }
+  .bb-pet-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 0.5rem;
+  }
+  .bb-pet-tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: #ebf4ff;
+    color: #2f80ed;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid #dbeafe;
+  }
+  .bb-pet-tag--location {
+    background: #f8fafc;
+    color: #475569;
+    border-color: #e2e8f0;
+    font-weight: 500;
+  }
+  .bb-pet-card__footer {
+    padding: 0 1rem 1rem 1rem;
+  }
+  .bb-adopt-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    background-color: #2f80ed;
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.65rem 1rem;
+    border-radius: 0.75rem;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(47, 128, 237, 0.25);
+    transition: all 0.2s ease;
+  }
+  .bb-adopt-btn:hover {
+    background-color: #1a6edb;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(47, 128, 237, 0.35);
+  }
+  .bb-adopt-btn:active {
+    transform: scale(0.98);
+  }
+
+  /* --- Seções da Home com espaçamento amplo --- */
+  .bb-pets-section {
+    margin-bottom: 5rem;
+  }
+  @media (min-width: 768px) {
+    .bb-pets-section {
+      margin-bottom: 7rem;
+    }
+  }
+
+  .bb-steps-section {
+    margin-top: 5rem;
+    margin-bottom: 6rem;
+  }
+  @media (min-width: 768px) {
+    .bb-steps-section {
+      margin-top: 7rem;
+      margin-bottom: 8rem;
+    }
+  }
+
+  /* --- Como funciona a adoção (Balões / Steps do Figma) --- */
+  .bb-steps-grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+  }
+  @media (min-width: 768px) {
+    .bb-steps-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .bb-step-card {
+    background: #ffffff;
+    border-radius: 1.25rem;
+    padding: 2.25rem 1.75rem 2rem 1.75rem;
+    box-shadow: 0 4px 20px rgba(30, 60, 110, 0.05);
+    border: 1px solid #edf2f7;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    height: 100%;
+  }
+  .bb-step-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(30, 60, 110, 0.1);
+  }
+  .bb-step-card__number {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    width: 26px;
+    height: 26px;
+    border-radius: 9999px;
+    background: #2f80ed;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(47, 128, 237, 0.3);
+  }
+  .bb-step-card__icon-wrap {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+  }
+  .bb-step-card__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0.25rem 0 0.5rem 0;
+  }
+  .bb-step-card__desc {
+    font-size: 0.8125rem;
+    color: #64748b;
+    line-height: 1.55;
+    max-width: 260px;
+    margin: 0;
+  }
 }
+
+

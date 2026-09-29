@@ -81,24 +81,15 @@ class AlterarEmailView(APIView):
         if not request.user.check_password(senha_atual):
             return Response({"error": "A senha atual informada está incorreta."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Gera token assinado com validade
-        token = signing.dumps({"user_id": request.user.id, "novo_email": novo_email}, salt="alterar-email")
+        if Usuario.objects.filter(email__iexact=novo_email).exclude(pk=request.user.pk).exists():
+            return Response({"error": "Este email já está sendo utilizado por outro usuário."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Dispara email de revalidação
-        subject = "Confirmação de alteração de e-mail - Best Buddy"
-        message = (
-            f"Olá!\n\nVocê solicitou a alteração do seu e-mail para {novo_email}.\n"
-            f"Use o seguinte token de confirmação ou acerte a validação no sistema:\n\n{token}\n\n"
-            f"Se você não solicitou esta alteração, ignore este e-mail."
-        )
-        try:
-            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL if hasattr(settings, "DEFAULT_FROM_EMAIL") else "no-reply@bestbuddy.org", [novo_email], fail_silently=True)
-        except Exception:
-            pass
+        request.user.email = novo_email
+        request.user.save()
 
         return Response({
-            "message": f"Código de confirmação enviado para o e-mail {novo_email}.",
-            "token_dev": token
+            "message": "E-mail alterado com sucesso!",
+            "email": novo_email
         }, status=status.HTTP_200_OK)
 
 
@@ -148,6 +139,12 @@ class AlterarSenhaView(APIView):
         return Response({"message": "Senha alterada com sucesso!"}, status=status.HTTP_200_OK)
 
 
+try:
+    from twilio.rest import Client
+except ImportError:
+    Client = None
+
+
 class TwilioEnviarCodigoView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -162,12 +159,15 @@ class TwilioEnviarCodigoView(APIView):
             digits = "55" + digits
         formatted_whatsapp = f"whatsapp:+{digits}"
 
-        # Se houver credenciais reais de Twilio no settings, faz a chamada real
-        if settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_VERIFY_SERVICE_SID:
+        # Se houver credenciais reais de Twilio e a biblioteca estiver instalada, faz a chamada real
+        account_sid = getattr(settings, "TWILIO_ACCOUNT_SID", None)
+        auth_token = getattr(settings, "TWILIO_AUTH_TOKEN", None)
+        verify_sid = getattr(settings, "TWILIO_VERIFY_SERVICE_SID", None)
+
+        if Client and account_sid and auth_token and verify_sid:
             try:
-                from twilio.rest import Client
-                client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-                client.verify.v2.services(settings.TWILIO_VERIFY_SERVICE_SID).verifications.create(
+                client = Client(account_sid, auth_token)
+                client.verify.v2.services(verify_sid).verifications.create(
                     to=formatted_whatsapp,
                     channel="whatsapp"
                 )
@@ -194,16 +194,19 @@ class TwilioVerificarCodigoView(APIView):
 
         approved = False
 
-        if settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_VERIFY_SERVICE_SID:
+        account_sid = getattr(settings, "TWILIO_ACCOUNT_SID", None)
+        auth_token = getattr(settings, "TWILIO_AUTH_TOKEN", None)
+        verify_sid = getattr(settings, "TWILIO_VERIFY_SERVICE_SID", None)
+
+        if Client and account_sid and auth_token and verify_sid:
             try:
-                from twilio.rest import Client
                 digits = "".join(filter(str.isdigit, telefone))
                 if not digits.startswith("55"):
                     digits = "55" + digits
                 formatted_whatsapp = f"whatsapp:+{digits}"
 
-                client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-                check = client.verify.v2.services(settings.TWILIO_VERIFY_SERVICE_SID).verification_checks.create(
+                client = Client(account_sid, auth_token)
+                check = client.verify.v2.services(verify_sid).verification_checks.create(
                     to=formatted_whatsapp,
                     code=codigo
                 )
