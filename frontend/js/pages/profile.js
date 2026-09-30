@@ -34,6 +34,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         <span>${msg}</span>
       </div>
     `;
+    if (isSuccess) {
+      alertContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
     setTimeout(() => {
       alertContainer.innerHTML = "";
     }, 6000);
@@ -204,7 +207,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const btn = document.getElementById("btn-submit-change-email");
       btn.disabled = true;
-      btn.innerHTML = '<span class="bb-btn__spinner" aria-hidden="true"></span> Enviando solicitação...';
+      btn.innerHTML = '<span class="bb-btn__spinner" aria-hidden="true"></span> Atualizando e-mail...';
 
       try {
         const resp = await authService.alterarEmail({
@@ -212,16 +215,25 @@ document.addEventListener("DOMContentLoaded", async () => {
           senha_atual: currentPassword,
         });
 
-        showAlert(resp.message || "E-mail de confirmação enviado! Verifique sua caixa postal.");
-        boxConfirmEmail.classList.remove("hidden");
-        if (resp.token_dev && tokenInput) {
-          tokenInput.value = resp.token_dev;
+        const updatedEmail = resp.email || newEmail;
+        if (displayEmail) displayEmail.textContent = updatedEmail;
+
+        const u = bbStorage.getUser();
+        if (u) {
+          u.email = updatedEmail;
+          bbStorage.setUser(u);
         }
+
+        formEmail.reset();
+        if (boxConfirmEmail) boxConfirmEmail.classList.add("hidden");
+
+        showAlert(resp.message || "E-mail alterado com sucesso!");
       } catch (err) {
-        showAlert(err.error || err.message || "Erro ao solicitar alteração de e-mail. Verifique sua senha atual.", false);
+        const errMsg = err.payload?.error || err.payload?.detail || err.error || err.message || "A senha atual informada está incorreta.";
+        showFieldError("current-password-email", errMsg);
       } finally {
         btn.disabled = false;
-        btn.textContent = "Solicitar Alteração de E-mail";
+        btn.textContent = "Atualizar E-mail";
       }
     });
   }
@@ -230,7 +242,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     btnConfirmToken.addEventListener("click", async () => {
       const token = tokenInput ? tokenInput.value.trim() : "";
       if (!token) {
-        showAlert("Informe o token de confirmação.", false);
+        showFieldError("email-confirmation-token", "Informe o token de confirmação.");
         return;
       }
 
@@ -307,7 +319,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         showAlert(resp.message || "Senha atualizada com sucesso!");
         formPassword.reset();
       } catch (err) {
-        showAlert(err.error || err.message || "Erro ao atualizar senha. Verifique a senha atual.", false);
+        const errMsg = err.payload?.error || err.payload?.detail || err.error || err.message || "A senha atual informada está incorreta.";
+        showFieldError("current-password-pwd", errMsg);
       } finally {
         btn.disabled = false;
         btn.textContent = "Atualizar Senha";

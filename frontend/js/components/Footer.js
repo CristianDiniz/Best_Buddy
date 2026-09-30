@@ -1,39 +1,25 @@
 function bbRenderFooter(targetSelector) {
   const el = document.querySelector(targetSelector);
+  if (!el) return;
+
   el.innerHTML = `
-    <footer class="bb-footer">
-      <div class="bb-container bb-footer__grid">
-        <div>
-          <p class="text-ink-100 mb-3"><strong>ONGs de proteção animal perto de você</strong></p>
-          <div id="bb-ong-map" class="bb-footer__map">
-            <span class="relative z-10 text-sm px-4 text-center">📍 Buscando sua localização...</span>
-          </div>
+    <footer class="bb-footer" style="background-color: #0c2340 !important; color: #e2e8f0; width: 100%; padding: 1.75rem 0; margin-top: 4rem; border-top: 1px solid #1a3a60;">
+      <div class="bb-container" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-family: 'Baloo 2', 'Sora', sans-serif; font-size: 1.15rem; font-weight: 700; color: #ffffff;">
+          <span style="font-size: 1.3rem;">🐾</span>
+          <span>Best <span style="color: #6fb4ee;">Buddy</span></span>
         </div>
-        <div>
-          <p class="text-ink-100"><strong>Encontrou algum problema ou tem uma sugestão de melhoria no nosso site?</strong></p>
-          <p>Nossa ONG aceita qualquer doação para manter a plataforma no ar. Você pode ver nossas prestações de contas aqui.</p>
-          <form class="bb-footer__form" data-role="contact-form">
-            <div class="bb-field">
-              <input class="bb-input" name="nome" placeholder="Nome" />
-            </div>
-            <div class="bb-field">
-              <input class="bb-input" name="email" placeholder="Email" type="email" />
-            </div>
-            <div class="bb-field">
-              <input class="bb-input" name="assunto" placeholder="Digite qual o problema" />
-            </div>
-            <button class="bb-btn bb-btn--primary" type="submit">Enviar</button>
-          </form>
+
+        <div style="text-align: center; color: #94a3b8; font-size: 0.8rem;">
+          © 2026 Best Buddy — Adoção responsável com amor.
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1.5rem; font-size: 0.8rem;">
+          <a href="/pages/animals/index.html" style="color: #cbd5e1; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#cbd5e1'">Sobre nós</a>
+          <a href="/pages/animals/index.html" style="color: #cbd5e1; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#cbd5e1'">Contato</a>
+          <a href="/pages/animals/index.html" style="color: #cbd5e1; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#cbd5e1'">Política</a>
         </div>
       </div>
     </footer>
   `;
-
-  el.querySelector('[data-role="contact-form"]')?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    alert("Mensagem enviada! Nossa equipe entrará em contato em breve.");
-    e.target.reset();
-  });
-
-  bbRenderNearbyOngsMap("#bb-ong-map");
 }

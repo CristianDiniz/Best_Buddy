@@ -42,7 +42,12 @@ const authService = {
 
   async alterarEmail({ novo_email, senha_atual }) {
     if (window.BB_CONFIG && window.BB_CONFIG.USE_MOCKS) {
-      return bbMockDelay({ message: "Código de confirmação enviado." });
+      if (senha_atual !== BB_MOCK_CREDENTIALS.password) {
+        return bbMockError("A senha atual informada está incorreta.", 400);
+      }
+      BB_MOCK_USER.email = novo_email;
+      BB_MOCK_CREDENTIALS.email = novo_email;
+      return bbMockDelay({ message: "E-mail alterado com sucesso!", email: novo_email });
     }
     return bbClient.post("/usuarios/alterar-email/", { novo_email, senha_atual });
   },
@@ -56,6 +61,9 @@ const authService = {
 
   async alterarSenha({ senha_atual, nova_senha, confirmar_nova_senha }) {
     if (window.BB_CONFIG && window.BB_CONFIG.USE_MOCKS) {
+      if (senha_atual !== BB_MOCK_CREDENTIALS.password) {
+        return bbMockError("A senha atual informada está incorreta.", 400);
+      }
       return bbMockDelay({ message: "Senha alterada com sucesso!" });
     }
     return bbClient.post("/usuarios/alterar-senha/", {

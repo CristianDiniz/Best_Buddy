@@ -18,11 +18,13 @@ class BBApiError extends Error {
  */
 function bbExtractErrorMessage(data, fallback) {
   if (!data) return fallback;
+  if (typeof data.error === "string") return data.error;
   if (typeof data.detail === "string") return data.detail;
+  if (typeof data.message === "string") return data.message;
   if (typeof data === "object") {
     const parts = Object.entries(data).map(([field, msgs]) => {
       const text = Array.isArray(msgs) ? msgs.join(" ") : String(msgs);
-      return field === "non_field_errors" ? text : `${field}: ${text}`;
+      return field === "non_field_errors" || field === "error" || field === "detail" ? text : `${field}: ${text}`;
     });
     if (parts.length) return parts.join(" | ");
   }
