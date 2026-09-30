@@ -13,13 +13,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   const displayPhone = document.getElementById("user-display-phone");
   const displayTipo = document.getElementById("user-display-tipo");
 
-  // Elementos de edição de foto e nome
+  // Elementos de edição de foto, nome e telefone
   const editNameInput = document.getElementById("edit-profile-name");
+  const editPhoneInput = document.getElementById("edit-profile-phone");
   const avatarInput = document.getElementById("input-profile-avatar");
   const avatarImg = document.getElementById("profile-avatar-img");
   const avatarInitials = document.getElementById("profile-avatar-initials");
   const btnRemoveAvatar = document.getElementById("btn-remove-avatar");
   const formBasicProfile = document.getElementById("form-edit-basic-profile");
+
+  // Elementos de validação de WhatsApp
+  const phoneStatusBadge = document.getElementById("user-phone-status-badge");
+  const boxVerifyWhatsapp = document.getElementById("box-verify-whatsapp");
+  const btnSendWhatsappCode = document.getElementById("btn-send-whatsapp-code");
+  const boxCodeWhatsapp = document.getElementById("box-code-whatsapp");
+  const whatsappCodeInput = document.getElementById("whatsapp-confirmation-code");
+  const btnVerifyWhatsappCode = document.getElementById("btn-verify-whatsapp-code");
+  const whatsappVerifyError = document.getElementById("whatsapp-verify-error");
 
   let currentAvatarData = null;
 
@@ -78,19 +88,57 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  function updatePhoneUI(telefone, isValidated) {
+    const formatted = telefone ? bbValidation.formatPhone(telefone) : "";
+    if (displayPhone) {
+      displayPhone.textContent = formatted || "Não informado";
+    }
+    if (phoneStatusBadge) {
+      if (!telefone) {
+        phoneStatusBadge.classList.add("hidden");
+      } else if (isValidated) {
+        phoneStatusBadge.className = "text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
+        phoneStatusBadge.textContent = "Verificado";
+        phoneStatusBadge.classList.remove("hidden");
+      } else {
+        phoneStatusBadge.className = "text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30";
+        phoneStatusBadge.textContent = "Não validado";
+        phoneStatusBadge.classList.remove("hidden");
+      }
+    }
+    if (boxVerifyWhatsapp) {
+      if (telefone && !isValidated) {
+        boxVerifyWhatsapp.classList.remove("hidden");
+      } else {
+        boxVerifyWhatsapp.classList.add("hidden");
+      }
+    }
+  }
+
+  // Máscara de telefone
+  if (editPhoneInput) {
+    editPhoneInput.addEventListener("input", (e) => {
+      e.target.value = bbValidation.formatPhone(e.target.value);
+    });
+  }
+
   // 2. Carrega perfil atual
   let currentProfile = null;
   try {
     currentProfile = await authService.getProfile();
     const storedUser = bbStorage.getUser() || {};
     const effectiveName = currentProfile.nome || storedUser.nome || currentProfile.email?.split("@")[0] || "Usuário";
+    const effectivePhone = currentProfile.telefone || storedUser.telefone || "";
+    const isValidated = Boolean(currentProfile.telefone_validado ?? storedUser.telefone_validado);
 
     if (displayName) displayName.textContent = effectiveName;
     if (displayEmail) displayEmail.textContent = currentProfile.email || "";
-    if (displayPhone) displayPhone.textContent = currentProfile.telefone ? bbValidation.formatPhone(currentProfile.telefone) : "Não informado";
     if (displayTipo) displayTipo.textContent = currentProfile.tipo === "PJ" ? "Pessoa Jurídica (ONG / Clínica)" : "Pessoa Física";
 
+    updatePhoneUI(effectivePhone, isValidated);
+
     if (editNameInput) editNameInput.value = effectiveName;
+    if (editPhoneInput) editPhoneInput.value = effectivePhone ? bbValidation.formatPhone(effectivePhone) : "";
 
     // Carrega avatar do storage se existente
     updateAvatarPreview(storedUser.avatar, effectiveName);
@@ -131,15 +179,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // 4. Salvar Alterações de Nome e Foto
+  // 4. Salvar Alterações de Nome, Telefone e Foto
   if (formBasicProfile) {
     formBasicProfile.addEventListener("submit", async (e) => {
       e.preventDefault();
       clearErrors();
 
       const newName = editNameInput.value.trim();
+      const newPhone = editPhoneInput ? editPhoneInput.value.trim() : "";
+
       if (!bbValidation.isRequired(newName)) {
         showFieldError("edit-profile-name", "Informe seu nome completo.");
+        return;
+      }
+
+      if (newPhone && !bbValidation.isPhone(newPhone)) {
+        showFieldError("edit-profile-phone", "Informe um telefone válido com DDD (ex: (11) 99999-9999) ou deixe em branco.");
         return;
       }
 
@@ -148,27 +203,120 @@ document.addEventListener("DOMContentLoaded", async () => {
       btn.innerHTML = '<span class="bb-btn__spinner" aria-hidden="true"></span> Salvando...';
 
       try {
-        await authService.updateProfile({ nome: newName });
+        const resp = await authService.updateProfile({
+          nome: newName,
+          telefone: newPhone,
+        });
 
         // Atualiza a sessão local
         const user = bbStorage.getUser() || {};
         user.nome = newName;
+        user.telefone = newPhone;
         user.avatar = currentAvatarData;
+        if (resp && typeof resp.telefone_validado !== "undefined") {
+          user.telefone_validado = resp.telefone_validado;
+        }
         bbStorage.setUser(user);
 
         if (displayName) displayName.textContent = newName;
+        updatePhoneUI(newPhone, user.telefone_validado);
 
         // Re-renderiza a navegação superior para refletir a nova foto e nome imediatamente
         if (typeof bbRenderNavigation === "function") {
           bbRenderNavigation("#bb-nav", "profile");
         }
 
-        showAlert("Dados do perfil e foto atualizados com sucesso!");
+        showAlert("Dados do perfil atualizados com sucesso!");
       } catch (err) {
         showAlert(err.error || err.message || "Erro ao atualizar dados do perfil.", false);
       } finally {
         btn.disabled = false;
         btn.textContent = "Salvar Dados do Perfil";
+      }
+    });
+  }
+
+  // Validação de WhatsApp via código com limitador de cliques (Anti-Spam)
+  let whatsappLimiter = null;
+  if (btnSendWhatsappCode) {
+    whatsappLimiter = typeof bbClickLimiter !== "undefined"
+      ? bbClickLimiter.attach(btnSendWhatsappCode, {
+          storageKey: "whatsapp_send_code",
+          blockedText: "Aguarde {s}s para reenviar",
+          onUnlocked: () => {
+            if (btnSendWhatsappCode) btnSendWhatsappCode.textContent = "Reenviar Código";
+          }
+        })
+      : null;
+
+    btnSendWhatsappCode.addEventListener("click", async () => {
+      if (whatsappLimiter && whatsappLimiter.isBlocked()) {
+        return;
+      }
+
+      const user = bbStorage.getUser() || {};
+      const telefone = editPhoneInput?.value?.trim() || user.telefone;
+      if (!telefone) {
+        showAlert("Informe e salve um número de telefone antes de validar.", false);
+        return;
+      }
+      if (whatsappVerifyError) whatsappVerifyError.textContent = "";
+      btnSendWhatsappCode.disabled = true;
+      btnSendWhatsappCode.innerHTML = '<span class="bb-btn__spinner" aria-hidden="true"></span> Enviando...';
+
+      try {
+        const resp = await authService.enviarCodigoWhatsApp(telefone);
+        if (boxCodeWhatsapp) boxCodeWhatsapp.classList.remove("hidden");
+        showAlert(resp.message || "Código enviado via WhatsApp!");
+
+        if (whatsappLimiter) {
+          whatsappLimiter.recordClick();
+          whatsappLimiter.setOriginalText("Reenviar Código");
+        }
+      } catch (err) {
+        if (whatsappVerifyError) {
+          whatsappVerifyError.textContent = err.payload?.error || err.error || err.message || "Erro ao enviar código.";
+        }
+      } finally {
+        if (!whatsappLimiter || !whatsappLimiter.isBlocked()) {
+          btnSendWhatsappCode.disabled = false;
+          btnSendWhatsappCode.textContent = "Reenviar Código";
+        }
+      }
+    });
+  }
+
+  if (btnVerifyWhatsappCode) {
+    btnVerifyWhatsappCode.addEventListener("click", async () => {
+      const user = bbStorage.getUser() || {};
+      const telefone = editPhoneInput?.value?.trim() || user.telefone;
+      const codigo = whatsappCodeInput?.value?.trim();
+
+      if (!codigo) {
+        if (whatsappVerifyError) whatsappVerifyError.textContent = "Digite o código recebido.";
+        return;
+      }
+
+      btnVerifyWhatsappCode.disabled = true;
+      btnVerifyWhatsappCode.innerHTML = '<span class="bb-btn__spinner" aria-hidden="true"></span> Validando...';
+
+      try {
+        const resp = await authService.verificarCodigoWhatsApp({ telefone, codigo });
+        showAlert(resp.message || "WhatsApp verificado com sucesso!");
+
+        user.telefone_validado = true;
+        bbStorage.setUser(user);
+        updatePhoneUI(telefone, true);
+        if (whatsappLimiter) whatsappLimiter.reset();
+        if (boxCodeWhatsapp) boxCodeWhatsapp.classList.add("hidden");
+        if (whatsappCodeInput) whatsappCodeInput.value = "";
+      } catch (err) {
+        if (whatsappVerifyError) {
+          whatsappVerifyError.textContent = err.payload?.error || err.error || err.message || "Código inválido.";
+        }
+      } finally {
+        btnVerifyWhatsappCode.disabled = false;
+        btnVerifyWhatsappCode.textContent = "Validar";
       }
     });
   }

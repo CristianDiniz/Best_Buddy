@@ -35,7 +35,10 @@ const authService = {
 
   async updateProfile(payload) {
     if (window.BB_CONFIG && window.BB_CONFIG.USE_MOCKS) {
-      return bbMockDelay(payload);
+      if (typeof BB_MOCK_USER !== "undefined") {
+        Object.assign(BB_MOCK_USER, payload);
+      }
+      return bbMockDelay({ ...(typeof BB_MOCK_USER !== "undefined" ? BB_MOCK_USER : {}), ...payload });
     }
     return bbClient.patch("/usuarios/perfil/", payload);
   },

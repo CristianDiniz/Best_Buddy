@@ -137,6 +137,10 @@ async function bbLoadDetail() {
         }
       });
     }
+
+    if (typeof bbClickLimiter !== "undefined") {
+      bbClickLimiter.autoProtectAll();
+    }
   } catch (err) {
     bbDetailEl.innerHTML = typeof bbStateHtml === "function"
       ? bbStateHtml({ title: "Animal não encontrado.", description: err.message, isError: true })

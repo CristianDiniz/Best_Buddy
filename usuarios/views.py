@@ -58,13 +58,34 @@ class PerfilView(APIView):
     def patch(self, request):
         user = request.user
         nome = request.data.get("nome")
+        telefone = request.data.get("telefone")
+
         if nome is not None:
+            nome = str(nome).strip()
             if user.tipo == "PF" and hasattr(user, "perfil_pf"):
                 user.perfil_pf.nome = nome
                 user.perfil_pf.save()
             elif user.tipo == "PJ" and hasattr(user, "perfil_pj"):
                 user.perfil_pj.nome_fantasia = nome
                 user.perfil_pj.save()
+
+        if telefone is not None:
+            telefone_limpo = str(telefone).strip()
+            if telefone_limpo != (user.telefone or ""):
+                user.telefone = telefone_limpo
+                user.telefone_validado = False
+                user.save()
+            else:
+                user.telefone = telefone_limpo
+                user.save()
+
+            if user.tipo == "PF" and hasattr(user, "perfil_pf"):
+                user.perfil_pf.telefone = telefone_limpo[:15]
+                user.perfil_pf.save()
+            elif user.tipo == "PJ" and hasattr(user, "perfil_pj"):
+                user.perfil_pj.telefone = telefone_limpo[:15]
+                user.perfil_pj.save()
+
         return self.get(request)
 
 
