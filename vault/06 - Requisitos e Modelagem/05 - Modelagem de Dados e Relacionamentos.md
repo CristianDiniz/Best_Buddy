@@ -66,13 +66,13 @@ erDiagram
         string estado "Sigla UF Enum (2 caracteres, ex: SP)"
         string telefone_contato "Opcional (se vazio, herda tutor.telefone)"
         string descricao "Max 255 chars"
-        string imagem "URL ou foto do animal"
+        string imagem "Arquivo de foto (upload JPEG/PNG ate 5MB)"
         string status "DISPONIVEL, ADOTADO, PERDIDO, ENCONTRADO, INATIVO"
         string raca "Opcional (Adoção)"
         string sexo "M, F, I (Adoção)"
         string idade_aproximada "Filhote, Adulto, Idoso (Adoção)"
         string medicamento "Sim, Nao, Nao sei (Adoção)"
-        string vacinacao "Sim, Nao, Nao sei (Adoção)"
+        string castrado "Sim, Nao, Em andamento (Adoção)"
         string local "Ponto de referencia visto (Perdido)"
         datetime inativado_em "Data de inativacao (ciclo 90 dias)"
         datetime created_at "Base do ciclo de vida"
@@ -170,7 +170,7 @@ erDiagram
   - `cidade` (VARCHAR(100), NOT NULL): Cidade para filtros de busca.
   - `estado` (VARCHAR(2), NOT NULL, DEFAULT 'SP', CHOICES: 27 UFs): Sigla da Unidade Federativa para filtros combinados.
   - `descricao` (VARCHAR(255), BLANK/NULL): Informações limitadas a 255 caracteres.
-  - `imagem` (VARCHAR(500), BLANK/NULL): URL ou foto do pet.
+  - `imagem` (ImageField, upload_to='animais/', BLANK/NULL): Arquivo de foto real (validado para JPG/PNG e tamanho máx de 5 MB).
   - `status` (VARCHAR(15), DEFAULT 'DISPONIVEL'):
     - Para Adoção: `DISPONIVEL`, `ADOTADO`, `INATIVO`.
     - Para Perdido: `PERDIDO`, `ENCONTRADO`, `INATIVO`.
@@ -178,7 +178,7 @@ erDiagram
   - `sexo` (VARCHAR(1), CHOICES: 'M', 'F', 'I', BLANK/NULL): Sexo do animal.
   - `idade_aproximada` (VARCHAR(15), CHOICES: 'Filhote', 'Adulto', 'Idoso', BLANK/NULL).
   - `medicamento` (VARCHAR(10), CHOICES: 'Sim', 'Não', 'Não sei', BLANK/NULL).
-  - `vacinacao` (VARCHAR(10), CHOICES: 'Sim', 'Não', 'Não sei', BLANK/NULL).
+  - `castrado` (VARCHAR(50), CHOICES: 'Sim', 'Não', 'Em andamento', BLANK/NULL): Status de castração do animal.
   - `local` (VARCHAR(200), BLANK/NULL): Último local visto / ponto de referência (utilizado em animais perdidos).
   - `inativado_em` (DATETIME, NULL, BLANK): Data da inativação automática (regra dos 90 dias).
   - `created_at` (DATETIME, auto_now_add): Base de cálculo de expiração.

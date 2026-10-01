@@ -9,13 +9,13 @@ function bbAnimalCardHtml(animal) {
 
   let statusBadge = "";
   if (animal.status === "ADOTADO") {
-    statusBadge = `<span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white shadow-sm">✅ Adotado</span>`;
+    statusBadge = `<span class="bb-status-badge bb-status-badge--adotado">✅ Adotado</span>`;
   } else if (animal.status === "ENCONTRADO") {
-    statusBadge = `<span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-sm">🎉 Encontrado</span>`;
+    statusBadge = `<span class="bb-status-badge bb-status-badge--encontrado">🎉 Encontrado</span>`;
   } else if (isPerdido) {
-    statusBadge = `<span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-white shadow-sm">🚨 Desaparecido</span>`;
+    statusBadge = `<span class="bb-status-badge bb-status-badge--perdido">🚨 Desaparecido</span>`;
   } else {
-    statusBadge = `<span class="px-3 py-1 rounded-full text-xs font-bold bg-[#2f80ed] text-white shadow-sm">Para Adoção</span>`;
+    statusBadge = `<span class="bb-status-badge bb-status-badge--adocao">🐾 Para Adoção</span>`;
   }
 
   const imageHtml = animal.imagem

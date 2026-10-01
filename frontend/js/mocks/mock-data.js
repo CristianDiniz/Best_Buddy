@@ -29,7 +29,7 @@ const BB_MOCK_ANIMALS = [
     estado: "SP",
     telefone_contato: "(16) 99999-0001",
     medicamento: "Não",
-    vacinacao: "Sim",
+    castrado: "Sim",
     descricao: "Super brincalhão, adora correr e convive muito bem com crianças.",
     status: "DISPONIVEL",
     imagem: "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=600&q=80"
@@ -47,7 +47,7 @@ const BB_MOCK_ANIMALS = [
     estado: "SP",
     telefone_contato: "(11) 98888-0002",
     medicamento: "Não",
-    vacinacao: "Sim",
+    castrado: "Sim",
     descricao: "Porte pequeno, calma e carinhosa, perfeita para apartamento.",
     status: "DISPONIVEL",
     imagem: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80"
@@ -65,7 +65,7 @@ const BB_MOCK_ANIMALS = [
     estado: "SP",
     telefone_contato: "(19) 97777-0003",
     medicamento: "Não",
-    vacinacao: "Sim",
+    castrado: "Sim",
     descricao: "Gato amoroso, castrado, adora um carinho e dormir ao sol.",
     status: "DISPONIVEL",
     imagem: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=600&q=80"
@@ -83,7 +83,7 @@ const BB_MOCK_ANIMALS = [
     estado: "SP",
     telefone_contato: "(16) 96666-0004",
     medicamento: "Sim",
-    vacinacao: "Sim",
+    castrado: "Sim",
     descricao: "Tranquila e manhosa, pelagem macia e bem cuidada.",
     status: "DISPONIVEL",
     imagem: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=600&q=80"
@@ -101,7 +101,7 @@ const BB_MOCK_ANIMALS = [
     estado: "SP",
     telefone_contato: "(16) 95555-0005",
     medicamento: "Não",
-    vacinacao: "Sim",
+    castrado: "Sim",
     descricao: "Alegre, companheiro para caminhadas e muito sociável.",
     status: "DISPONIVEL",
     imagem: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=600&q=80"
@@ -119,7 +119,7 @@ const BB_MOCK_ANIMALS = [
     estado: "SP",
     telefone_contato: "(16) 94444-0006",
     medicamento: "Não",
-    vacinacao: "Não",
+    castrado: "Não",
     descricao: "Filhotinha resgatada, cheia de energia e muito carinhosa.",
     status: "DISPONIVEL",
     imagem: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&w=600&q=80"

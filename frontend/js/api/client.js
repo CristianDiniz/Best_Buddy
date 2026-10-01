@@ -73,7 +73,12 @@ const bbClient = {
   },
 
   async request(path, { method = "GET", body, auth = true, isRetry = false } = {}) {
-    const headers = { "Content-Type": "application/json" };
+    const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+    const headers = {};
+    if (!isFormData) {
+      headers["Content-Type"] = "application/json";
+    }
+
     if (auth && typeof bbStorage !== "undefined") {
       let token = bbStorage.getAccessToken();
 
@@ -98,7 +103,7 @@ const bbClient = {
       response = await fetch(`${window.BB_CONFIG.API_BASE_URL}${path}`, {
         method,
         headers,
-        body: body ? JSON.stringify(body) : undefined,
+        body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
       });
     } catch (networkError) {
       throw new BBApiError("Não foi possível conectar ao servidor.", 0, null);
