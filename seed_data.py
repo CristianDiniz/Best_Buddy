@@ -34,10 +34,10 @@ def seed():
 
     # 2. Animais de Adoção (Tabela Unificada)
     animais_adocao_mock = [
-        {"id": 1, "nome": "Max", "cidade": "São Carlos", "raca": "SRD", "sexo": "M", "idade_aproximada": "Adulto", "medicamento": "Não", "vacinacao": "Sim", "descricao": "Dócil, adora brincar com bola.", "imagem": None},
-        {"id": 2, "nome": "Luna", "cidade": "São Paulo", "raca": "Vira-lata caramelo", "sexo": "F", "idade_aproximada": "Filhote", "medicamento": "Não", "vacinacao": "Não", "descricao": "Muito brincalhona, ótima com crianças.", "imagem": None},
-        {"id": 3, "nome": "Thor", "cidade": "Campinas", "raca": "Pastor Alemão", "sexo": "M", "idade_aproximada": "Adulto", "medicamento": "Sim", "vacinacao": "Sim", "descricao": "Protetor, precisa de espaço para correr.", "imagem": None},
-        {"id": 4, "nome": "Nina", "cidade": "Ribeirão Preto", "raca": "SRD", "sexo": "F", "idade_aproximada": "Idoso", "medicamento": "Sim", "vacinacao": "Sim", "descricao": "Calma, ideal para apartamento.", "imagem": None},
+        {"id": 1, "nome": "Max", "cidade": "São Carlos", "raca": "SRD", "sexo": "M", "idade_aproximada": "Adulto", "medicamento": "Não", "castrado": "Sim", "descricao": "Dócil, adora brincar com bola.", "imagem": None},
+        {"id": 2, "nome": "Luna", "cidade": "São Paulo", "raca": "Vira-lata caramelo", "sexo": "F", "idade_aproximada": "Filhote", "medicamento": "Não", "castrado": "Não", "descricao": "Muito brincalhona, ótima com crianças.", "imagem": None},
+        {"id": 3, "nome": "Thor", "cidade": "Campinas", "raca": "Pastor Alemão", "sexo": "M", "idade_aproximada": "Adulto", "medicamento": "Sim", "castrado": "Sim", "descricao": "Protetor, precisa de espaço para correr.", "imagem": None},
+        {"id": 4, "nome": "Nina", "cidade": "Ribeirão Preto", "raca": "SRD", "sexo": "F", "idade_aproximada": "Idoso", "medicamento": "Sim", "castrado": "Sim", "descricao": "Calma, ideal para apartamento.", "imagem": None},
     ]
 
     for item in animais_adocao_mock:
@@ -55,7 +55,7 @@ def seed():
                 "sexo": item["sexo"],
                 "idade_aproximada": item["idade_aproximada"],
                 "medicamento": item["medicamento"],
-                "vacinacao": item["vacinacao"],
+                "castrado": item["castrado"],
                 "descricao": item["descricao"],
                 "imagem": item["imagem"],
                 "status": Animal.StatusAnimal.DISPONIVEL,

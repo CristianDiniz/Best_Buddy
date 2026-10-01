@@ -75,7 +75,13 @@ class Animal(models.Model):
     telefone_contato = models.CharField(max_length=20, default='', verbose_name="Telefone de contato do tutor")
 
     descricao = models.CharField(max_length=255, blank=True, null=True)
-    imagem = models.CharField(max_length=500, blank=True, null=True)
+    imagem = models.ImageField(
+        upload_to='animais/',
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']), validar_tamanho_imagem],
+        help_text="Foto do animal (JPEG/PNG até 5 MB)"
+    )
     status = models.CharField(max_length=15, choices=StatusAnimal.choices, default=StatusAnimal.DISPONIVEL)
 
     # Campos específicos de Adoção
@@ -83,7 +89,7 @@ class Animal(models.Model):
     sexo = models.CharField(max_length=1, choices=SexoAnimal.choices, null=True, blank=True)
     idade_aproximada = models.CharField(max_length=10, choices=IdadeAproximada.choices, null=True, blank=True)
     medicamento = models.CharField(max_length=10, null=True, blank=True)
-    vacinacao = models.CharField(max_length=10, null=True, blank=True)
+    castrado = models.CharField(max_length=50, null=True, blank=True, help_text="Status de castração (Sim, Não, Em andamento)")
 
     # Campos específicos de Animal Perdido
     local = models.CharField(max_length=200, blank=True, null=True)
@@ -99,11 +105,13 @@ class Animal(models.Model):
 ## 2. Serializer e Regras de Negócio (`animais/serializers.py`)
 
 1. **Campos Expostos**:
-   `id`, `tutor_id`, `tutor_email`, `tutor_nome`, `contato` (read-only), `tipo_servico`, `tipo_animal`, `nome`, `estado`, `cidade`, `telefone_contato`, `descricao`, `imagem`, `status`, `raca`, `sexo`, `idade_aproximada`, `medicamento`, `vacinacao`, `local`, `inativado_em`, `created_at`, `updated_at`.
-2. **Contato Obrigatório**:
+   `id`, `tutor_id`, `tutor_email`, `tutor_nome`, `contato` (read-only), `tipo_servico`, `tipo_animal`, `nome`, `estado`, `cidade`, `telefone_contato`, `descricao`, `imagem`, `status`, `raca`, `sexo`, `idade_aproximada`, `medicamento`, `castrado`, `local`, `inativado_em`, `created_at`, `updated_at`.
+2. **Upload de Imagem & Validações**:
+   Validação estrita de extensão (somente `.jpg`, `.jpeg`, `.png`) e tamanho máximo de 5 MB via `validate_imagem` e validators do model. O ViewSet suporta parsers `MultiPartParser`, `FormParser` e `JSONParser`.
+3. **Contato Obrigatório**:
    O serializer exige que todo pet anunciado contenha um `telefone_contato`. Caso o payload não o envie diretamente, ele herda automaticamente o `telefone` validado do tutor logado. Se nenhum dos dois existir, retorna o erro:
    `"É necessário um número de contato para cadastrar o animal."`.
-3. **Cota de Anúncios Ativos (RF14)**:
+4. **Cota de Anúncios Ativos (RF14)**:
    Usuários comuns (Pessoa Física) podem manter no máximo 5 anúncios ativos simultaneamente (`status__in=['DISPONIVEL', 'PERDIDO']`). O 6º anúncio é bloqueado com status HTTP 400. Usuários do tipo `ONG` e superusuários não possuem limite.
 
 ---

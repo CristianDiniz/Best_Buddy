@@ -1,10 +1,12 @@
 from rest_framework import generics, permissions, exceptions
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from .models import Animal
 from .serializers import AnimaisSerializer
 
 
 class AnimaisViewSet(generics.ListCreateAPIView):
     serializer_class = AnimaisSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_permissions(self):
         if self.request.method == 'GET':
@@ -28,7 +30,7 @@ class AnimaisViewSet(generics.ListCreateAPIView):
 
         cidade = self.request.query_params.get('cidade')
         if cidade:
-            queryset = queryset.filter(cidade__iexact=cidade)
+            queryset = queryset.filter(cidade__icontains=cidade.strip())
 
         status_param = self.request.query_params.get('status')
         if status_param:
@@ -57,6 +59,7 @@ class AnimaisViewSet(generics.ListCreateAPIView):
 class AnimaisDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Animal.objects.select_related('tutor').all()
     serializer_class = AnimaisSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_permissions(self):
         if self.request.method == 'GET':

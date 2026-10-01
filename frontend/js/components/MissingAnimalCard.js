@@ -17,7 +17,7 @@ function bbMissingAnimalCardHtml(item) {
           <span class="text-base">🚨</span>
           <strong class="text-slate-100">${item.nome || "Pet Desaparecido"}</strong>
         </div>
-        <span class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">Desaparecido</span>
+        <span class="bb-status-badge bb-status-badge--perdido">🚨 Desaparecido</span>
       </div>
       <p class="my-1 text-slate-300 text-sm">📍 ${localizacao}</p>
       <p class="mb-2 text-slate-200 text-sm">${item.descricao || "Sem descrição adicional."}</p>

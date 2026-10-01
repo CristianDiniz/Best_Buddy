@@ -17,18 +17,16 @@ Projetada com arquitetura desacoplada: possui uma **camada de Mocks** que permit
   - Carrossel de destaques institucional no topo.
   - Mural de notícias e comunicados da ONG com tratamento de loading/erro.
   - Feed de postagens da comunidade.
-- **Catálogo de Animais**:
-  - Grade de pets disponíveis para adoção com tags de raça, sexo e idade.
+- **Catálogo de Animais & Desaparecidos**:
+  - Grade de pets disponíveis para adoção e mural de animais desaparecidos com filtros de localização (IBGE).
+  - Badges de status em alto contraste (`.bb-status-badge`) com tipografia encorpada (`font-weight: 800`) e gradientes temáticos (vermelho de alerta para *Desaparecido*, azul para *Adoção*), legíveis sobre qualquer foto.
   - Skeletons animados (`.bb-skeleton`) para transições suaves de carregamento.
-  - Ficha técnica completa do pet (`detail.html?id=<id>`) com histórico de saúde, vacinas e botão de ação direta "Quero adotar".
-- **Fluxo de Adoção**:
-  - Formulário completo de solicitação de adoção com resumo do pet selecionado.
-  - Questionário de aptidão (experiência com pets, vacinação e motivação).
-  - Trava anti-duplicação (`bbHasSubmitted`) para evitar múltiplos envios acidentais.
-- **Comunidade & Animais Desaparecidos**:
-  - Feed de compartilhamentos dos membros da comunidade.
-  - Mural de animais desaparecidos com foto, último local visto e contato do tutor.
-  - Funcionalidade para reportar novo pet desaparecido.
+  - Ficha técnica completa do pet (`detail.html?id=<id>`) com detalhes de saúde, castração e botão de contato direto via WhatsApp.
+- **Formulário de Anúncio em Modal Popup**:
+  - Abertura imediata na tela do usuário como Popup responsivo (`.bb-modal`) com backdrop e botão "X" de fechar.
+  - Totalmente adaptado para dispositivos móveis, sem rolagem horizontal.
+  - **Upload Real de Imagens**: Seleção de arquivo via `<input type="file">`, visualização prévia da foto (thumbnail preview) e validação estrita (JPG/PNG até 5 MB).
+  - Informações do pet com status de **Castrado** (Sim, Não, Em andamento) e contato com máscara automática.
 - **Design System Responsivo**:
   - Estilizado com Tailwind CSS via classes semânticas `bb-*` compostas por `@apply`.
   - Microanimações fluidas e suporte nativo a `prefers-reduced-motion` para acessibilidade.

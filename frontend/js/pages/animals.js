@@ -43,6 +43,46 @@ const wrapPetStatus = document.getElementById("wrap-pet-status");
 const petStatusSelect = document.getElementById("pet-status");
 let currentEditingAnimalId = null;
 
+const petImageInput = document.getElementById("pet-imagem");
+const petImagePreviewWrap = document.getElementById("pet-imagem-preview-wrap");
+const petImagePreview = document.getElementById("pet-imagem-preview");
+const petImageFilename = document.getElementById("pet-imagem-filename");
+const petImageFilesize = document.getElementById("pet-imagem-filesize");
+const petImageClearBtn = document.getElementById("pet-imagem-clear-btn");
+
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png"];
+const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png"];
+
+function isValidImageType(file) {
+  if (!file) return false;
+  const mime = (file.type || "").toLowerCase();
+  const mimeValid = ALLOWED_IMAGE_TYPES.includes(mime);
+  const ext = "." + (file.name.split(".").pop() || "").toLowerCase();
+  const extValid = ALLOWED_IMAGE_EXTENSIONS.includes(ext);
+  return mimeValid || extValid;
+}
+
+function resetImageInput() {
+  if (petImageInput) petImageInput.value = "";
+  if (petImagePreviewWrap) {
+    petImagePreviewWrap.classList.add("hidden");
+    petImagePreviewWrap.style.display = "none";
+  }
+  if (petImagePreview) petImagePreview.src = "";
+  if (petImageFilename) petImageFilename.textContent = "";
+  if (petImageFilesize) petImageFilesize.textContent = "";
+}
+
+function setImagePreview(src, name, sizeText) {
+  if (!petImagePreviewWrap) return;
+  petImagePreview.src = src;
+  petImageFilename.textContent = name || "Foto do pet";
+  petImageFilesize.textContent = sizeText || "";
+  petImagePreviewWrap.classList.remove("hidden");
+  petImagePreviewWrap.style.display = "flex";
+}
+
 // Estado
 const INITIAL_LIMIT = 4;
 let allLostAnimals = [];
@@ -316,6 +356,7 @@ async function openAdoptModal(defaultService = "ADOCAO") {
   currentEditingAnimalId = null;
   modalAlertEl.innerHTML = "";
   formAdoptPet.reset();
+  resetImageInput();
 
   if (wrapPetStatus) wrapPetStatus.classList.add("hidden");
 
@@ -344,7 +385,8 @@ async function openAdoptModal(defaultService = "ADOCAO") {
     console.warn("Não foi possível carregar dados do perfil:", err);
   }
 
-  adoptModal.classList.remove("hidden");
+  if (adoptModal) adoptModal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
 }
 
 // Modal de Edição de Anúncio de Animal
@@ -390,8 +432,8 @@ async function openEditPetModal(animal) {
   const idadeEl = document.getElementById("pet-idade");
   if (idadeEl) idadeEl.value = animal.idade_aproximada || "";
 
-  const vacinaEl = document.getElementById("pet-vacinacao");
-  if (vacinaEl) vacinaEl.value = animal.vacinacao || "";
+  const castradoEl = document.getElementById("pet-castrado");
+  if (castradoEl) castradoEl.value = animal.castrado || "";
 
   const medEl = document.getElementById("pet-medicamento");
   if (medEl) medEl.value = animal.medicamento || "";
@@ -399,8 +441,10 @@ async function openEditPetModal(animal) {
   const descEl = document.getElementById("pet-descricao");
   if (descEl) descEl.value = animal.descricao || "";
 
-  const imgEl = document.getElementById("pet-imagem");
-  if (imgEl) imgEl.value = animal.imagem || "";
+  resetImageInput();
+  if (animal.imagem) {
+    setImagePreview(animal.imagem, "Foto cadastrada", "");
+  }
 
   if (animal.local && petLocalInput) petLocalInput.value = animal.local;
 
@@ -433,13 +477,16 @@ async function openEditPetModal(animal) {
     petCidadeInput.value = animal.cidade || "";
   }
 
-  adoptModal.classList.remove("hidden");
+  if (adoptModal) adoptModal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
 }
 
 function closeAdoptModal() {
   currentEditingAnimalId = null;
+  resetImageInput();
   if (wrapPetStatus) wrapPetStatus.classList.add("hidden");
-  adoptModal.classList.add("hidden");
+  if (adoptModal) adoptModal.classList.add("hidden");
+  document.body.style.overflow = "";
 }
 
 if (announceBtn) announceBtn.addEventListener("click", () => openAdoptModal("ADOCAO"));
@@ -449,11 +496,55 @@ document.querySelectorAll(".btn-trigger-adopt-modal").forEach((btn) => {
   btn.addEventListener("click", () => openAdoptModal("ADOCAO"));
 });
 
-modalCloseBtn.addEventListener("click", closeAdoptModal);
-modalCancelBtn.addEventListener("click", closeAdoptModal);
-adoptModal.addEventListener("click", (e) => {
-  if (e.target === adoptModal) closeAdoptModal();
+if (modalCloseBtn) modalCloseBtn.addEventListener("click", closeAdoptModal);
+if (modalCancelBtn) modalCancelBtn.addEventListener("click", closeAdoptModal);
+if (adoptModal) {
+  adoptModal.addEventListener("click", (e) => {
+    if (e.target === adoptModal) closeAdoptModal();
+  });
+}
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && adoptModal && !adoptModal.classList.contains("hidden")) {
+    closeAdoptModal();
+  }
 });
+
+if (petImageInput) {
+  petImageInput.addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    modalAlertEl.innerHTML = "";
+    if (!file) {
+      resetImageInput();
+      return;
+    }
+
+    if (!isValidImageType(file)) {
+      modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">Formato de arquivo inválido. Por favor, envie uma imagem nos formatos JPEG ou PNG (.jpg, .jpeg, .png).</div>`;
+      resetImageInput();
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">O arquivo selecionado tem ${sizeMB} MB. O tamanho máximo permitido é de 5 MB.</div>`;
+      resetImageInput();
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    const sizeKB = file.size > 1024 * 1024
+      ? `${(file.size / (1024 * 1024)).toFixed(2)} MB`
+      : `${(file.size / 1024).toFixed(1)} KB`;
+    setImagePreview(previewUrl, file.name, sizeKB);
+  });
+}
+
+if (petImageClearBtn) {
+  petImageClearBtn.addEventListener("click", () => {
+    resetImageInput();
+  });
+}
 
 if (petServicoSelect) {
   petServicoSelect.addEventListener("change", (e) => {
@@ -535,23 +626,67 @@ formAdoptPet.addEventListener("submit", async (e) => {
     ? (document.getElementById("pet-status")?.value || (servico === "PERDIDO" ? "PERDIDO" : "DISPONIVEL"))
     : (servico === "PERDIDO" ? "PERDIDO" : "DISPONIVEL");
 
-  const payload = {
-    tipo_servico: servico,
-    status: statusVal,
-    nome: document.getElementById("pet-nome").value.trim(),
-    tipo_animal: document.getElementById("pet-tipo").value,
-    sexo: document.getElementById("pet-sexo").value,
-    raca: document.getElementById("pet-raca").value.trim() || undefined,
-    idade_aproximada: document.getElementById("pet-idade").value.trim() || undefined,
-    estado,
-    cidade,
-    telefone_contato: rawPhone,
-    descricao: document.getElementById("pet-descricao").value.trim(),
-    vacinacao: document.getElementById("pet-vacinacao").value.trim() || undefined,
-    medicamento: document.getElementById("pet-medicamento").value.trim() || undefined,
-    local: servico === "PERDIDO" ? (document.getElementById("pet-local")?.value.trim() || undefined) : undefined,
-    imagem: document.getElementById("pet-imagem").value.trim() || undefined,
-  };
+  const selectedFile = petImageInput && petImageInput.files && petImageInput.files[0];
+  if (selectedFile) {
+    if (!isValidImageType(selectedFile)) {
+      modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">Formato de arquivo inválido. Apenas imagens JPEG ou PNG (.jpg, .jpeg, .png) são permitidas.</div>`;
+      petImageInput.focus();
+      return;
+    }
+    if (selectedFile.size > MAX_IMAGE_SIZE_BYTES) {
+      const sizeMB = (selectedFile.size / (1024 * 1024)).toFixed(2);
+      modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">O arquivo de imagem excede o tamanho máximo de 5 MB (${sizeMB} MB).</div>`;
+      petImageInput.focus();
+      return;
+    }
+  }
+
+  const nomeVal = document.getElementById("pet-nome").value.trim();
+  const tipoVal = document.getElementById("pet-tipo").value;
+  const sexoVal = document.getElementById("pet-sexo").value;
+  const racaVal = document.getElementById("pet-raca").value.trim();
+  const idadeVal = document.getElementById("pet-idade").value.trim();
+  const descVal = document.getElementById("pet-descricao").value.trim();
+  const castradoVal = document.getElementById("pet-castrado")?.value.trim();
+  const medVal = document.getElementById("pet-medicamento")?.value.trim();
+  const localVal = document.getElementById("pet-local")?.value.trim();
+
+  let payload;
+  if (selectedFile) {
+    payload = new FormData();
+    payload.append("tipo_servico", servico);
+    payload.append("status", statusVal);
+    payload.append("nome", nomeVal);
+    payload.append("tipo_animal", tipoVal);
+    payload.append("sexo", sexoVal);
+    if (racaVal) payload.append("raca", racaVal);
+    if (idadeVal) payload.append("idade_aproximada", idadeVal);
+    payload.append("estado", estado);
+    payload.append("cidade", cidade);
+    payload.append("telefone_contato", rawPhone);
+    payload.append("descricao", descVal);
+    if (castradoVal) payload.append("castrado", castradoVal);
+    if (medVal) payload.append("medicamento", medVal);
+    if (servico === "PERDIDO" && localVal) payload.append("local", localVal);
+    payload.append("imagem", selectedFile);
+  } else {
+    payload = {
+      tipo_servico: servico,
+      status: statusVal,
+      nome: nomeVal,
+      tipo_animal: tipoVal,
+      sexo: sexoVal,
+      raca: racaVal || undefined,
+      idade_aproximada: idadeVal || undefined,
+      estado,
+      cidade,
+      telefone_contato: rawPhone,
+      descricao: descVal,
+      castrado: castradoVal || undefined,
+      medicamento: medVal || undefined,
+      local: servico === "PERDIDO" ? (localVal || undefined) : undefined,
+    };
+  }
 
   modalSubmitBtn.disabled = true;
   modalSubmitBtn.innerHTML = isEdit

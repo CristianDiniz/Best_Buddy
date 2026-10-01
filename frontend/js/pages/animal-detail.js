@@ -93,8 +93,8 @@ async function bbLoadDetail() {
         <div>
           <div class="flex items-center justify-between mb-2">
             <h1 class="bb-page-title mb-0">${animal.nome || "Pet sem nome"}</h1>
-            <span class="text-xs px-2.5 py-1 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">
-              ${isPerdido ? "🚨 Animal Perdido" : "🐾 Para Adoção"}
+            <span class="bb-status-badge ${animal.status === 'ADOTADO' ? 'bb-status-badge--adotado' : animal.status === 'ENCONTRADO' ? 'bb-status-badge--encontrado' : isPerdido ? 'bb-status-badge--perdido' : 'bb-status-badge--adocao'}">
+              ${animal.status === 'ADOTADO' ? '✅ Adotado' : animal.status === 'ENCONTRADO' ? '🎉 Encontrado' : isPerdido ? '🚨 Desaparecido' : '🐾 Para Adoção'}
             </span>
           </div>
 
@@ -105,7 +105,7 @@ async function bbLoadDetail() {
             ${animal.sexo ? `<span class="px-3 py-1 rounded-full bg-surface-700 border border-border text-sm">${bbSexoLabel[animal.sexo] || animal.sexo}</span>` : ""}
           </p>
 
-          ${animal.vacinacao ? `<p class="mb-1 text-sm"><strong class="text-ink-100">Vacinação em dia:</strong> <span class="text-ink-300">${animal.vacinacao}</span></p>` : ""}
+          ${animal.castrado ? `<p class="mb-1 text-sm"><strong class="text-ink-100">Castrado:</strong> <span class="text-ink-300">${animal.castrado}</span></p>` : ""}
           ${animal.medicamento ? `<p class="mb-1 text-sm"><strong class="text-ink-100">Faz uso de medicamentos:</strong> <span class="text-ink-300">${animal.medicamento}</span></p>` : ""}
           ${animal.local ? `<p class="mb-1 text-sm"><strong class="text-ink-100">Último local visto:</strong> <span class="text-ink-300">${animal.local}</span></p>` : ""}
           

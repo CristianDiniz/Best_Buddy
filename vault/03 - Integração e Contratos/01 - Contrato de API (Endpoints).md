@@ -122,7 +122,7 @@ Lista unificada de animais para adoção e animais desaparecidos.
       "sexo": "M",
       "idade_aproximada": "Adulto",
       "medicamento": "Não",
-      "vacinacao": "Sim",
+      "castrado": "Sim",
       "local": null,
       "inativado_em": null,
       "created_at": "2026-09-26T22:26:07Z",
@@ -143,25 +143,26 @@ Detalhes de um animal específico.
 ### `POST /api/animais/`
 Publicação de anúncio de adoção ou reporte de animal perdido.
 - **Headers**: `Authorization: Bearer <access_token>`
-- **Request (Exemplo Adoção)**:
-  ```json
-  {
-    "tipo_servico": "ADOCAO",
-    "tipo_animal": "CACHORRO",
-    "nome": "Caramelo",
-    "estado": "SP",
-    "cidade": "Campinas",
-    "telefone_contato": "(19) 98888-7777",
-    "descricao": "Pet muito carinhoso e dócil.",
-    "raca": "Vira-lata",
-    "sexo": "M",
-    "idade_aproximada": "Filhote"
-  }
-  ```
+- **Content-Type**: Suporta `multipart/form-data` (recomendado para upload de foto) ou `application/json`.
+- **Request (Exemplo FormData / Adoção)**:
+  - `tipo_servico`: `"ADOCAO"`
+  - `tipo_animal`: `"CACHORRO"`
+  - `nome`: `"Caramelo"`
+  - `estado`: `"SP"`
+  - `cidade`: `"Campinas"`
+  - `telefone_contato`: `"(19) 98888-7777"`
+  - `descricao`: `"Pet muito carinhoso e dócil."`
+  - `raca`: `"Vira-lata"`
+  - `sexo`: `"M"`
+  - `idade_aproximada`: `"Filhote"`
+  - `castrado`: `"Sim"`
+  - `medicamento`: `"Não"`
+  - `imagem`: Arquivo binário de imagem (`.png`, `.jpg`, `.jpeg` de até 5 MB).
 - **Regras de Negócio e Validações**:
+  - `imagem`: Validação estrita de extensão (apenas JPEG e PNG) e tamanho máximo de 5 MB.
   - `telefone_contato`: Campo obrigatório (com DDD). Caso ausente, herda o telefone validado do tutor logado; se nenhum existir, rejeita com HTTP 400 (`"É necessário um número de contato para cadastrar o animal."`).
   - Cota de 5 anúncios ativos para usuários comuns (PF).
-- **Response 201**: Registro criado com `id` e dados completos.
+- **Response 201**: Registro criado com `id` e dados completos (incluindo URL da `imagem` persistida em `/media/animais/`).
 
 ---
 

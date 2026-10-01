@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Best Buddy — Encontre ou Ajude um Pet</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+  <link rel="alternate icon" type="image/x-icon" href="../../favicon.ico" />
+  <link rel="apple-touch-icon" href="../../apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="../../css/tailwind.build.css" />
 </head>
@@ -22,7 +25,7 @@
             </p>
           </div>
           <div class="flex flex-wrap items-center gap-3">
-            <button class="bb-btn bb-btn--secondary shrink-0 flex items-center gap-2" id="bb-report-lost-btn" type="button">
+            <button class="bb-btn bb-btn--amber shrink-0 flex items-center gap-2" id="bb-report-lost-btn" type="button">
               <span>🚨</span> + Reportar Pet Perdido
             </button>
             <button class="bb-btn bb-btn--primary shrink-0 flex items-center gap-2" id="bb-announce-pet-btn" type="button">
@@ -154,146 +157,165 @@
       </div>
     </main>
 
-    <!-- Modal para Anunciar Pet para Adoção -->
-    <div id="adopt-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-      <div class="bb-card max-w-xl w-full max-h-[92vh] overflow-y-auto bg-slate-900 border border-slate-700 shadow-2xl relative p-6">
-        <button id="modal-adopt-close-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-100 text-2xl font-bold" type="button">&times;</button>
-        <h2 class="text-lg font-bold text-slate-100 mb-1 flex items-center gap-2">
-          <span>🐾</span> Anunciar Pet para Adoção
-        </h2>
-        <p class="text-xs text-slate-400 mb-4" id="modal-adopt-desc">
-          Preencha os dados do animal. O telefone informado será o canal direto para interessados entrarem em contato via WhatsApp.
-        </p>
+    <!-- Modal para Anunciar Pet para Adoção / Pet Perdido -->
+    <div id="adopt-modal" class="bb-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-adopt-title">
+      <div class="bb-modal-dialog">
+        <!-- Botão X de Fechar no topo direito -->
+        <button id="modal-adopt-close-btn" class="bb-modal-close-btn" type="button" aria-label="Fechar popup">&times;</button>
 
-        <div id="modal-adopt-alert"></div>
+        <div class="bb-modal-header">
+          <h2 class="bb-modal-title" id="modal-adopt-title">
+            <span>🐾</span> Anunciar Pet para Adoção
+          </h2>
+          <p class="bb-modal-desc" id="modal-adopt-desc">
+            Preencha os dados do animal. O telefone informado será o canal direto para interessados entrarem em contato via WhatsApp.
+          </p>
+        </div>
 
-        <form id="form-adopt-pet" class="space-y-4">
-          <div>
-            <label class="bb-label" for="pet-servico">Finalidade do Anúncio *</label>
-            <select class="bb-input" id="pet-servico" required>
-              <option value="ADOCAO">🐾 Doação / Colocar para Adoção</option>
-              <option value="PERDIDO">🚨 Animal Perdido / Desaparecido</option>
-            </select>
-          </div>
+        <div class="bb-modal-body">
+          <div id="modal-adopt-alert"></div>
 
-          <div id="wrap-pet-local" class="hidden">
-            <label class="bb-label" for="pet-local">Último local visto / Ponto de referência *</label>
-            <input class="bb-input" type="text" id="pet-local" placeholder="Ex: Próximo à praça central, Bairro X, Rua Y..." />
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <form id="form-adopt-pet" class="space-y-4">
             <div>
-              <label class="bb-label" for="pet-nome">Nome do Pet *</label>
-              <input class="bb-input" type="text" id="pet-nome" required placeholder="Ex: Bob, Pipoca..." />
-            </div>
-            <div>
-              <label class="bb-label" for="pet-tipo">Tipo de Animal *</label>
-              <select class="bb-input" id="pet-tipo" required>
-                <option value="CACHORRO">Cachorro</option>
-                <option value="GATO">Gato</option>
-                <option value="OUTRO">Outro</option>
+              <label class="bb-label" for="pet-servico">Finalidade do Anúncio *</label>
+              <select class="bb-input" id="pet-servico" required>
+                <option value="ADOCAO">🐾 Doação / Colocar para Adoção</option>
+                <option value="PERDIDO">🚨 Animal Perdido / Desaparecido</option>
               </select>
             </div>
-          </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-              <label class="bb-label" for="pet-sexo">Sexo *</label>
-              <select class="bb-input" id="pet-sexo" required>
-                <option value="M">Macho</option>
-                <option value="F">Fêmea</option>
-                <option value="I">Indeterminado</option>
-              </select>
+            <div id="wrap-pet-local" class="hidden">
+              <label class="bb-label" for="pet-local">Último local visto / Ponto de referência *</label>
+              <input class="bb-input" type="text" id="pet-local" placeholder="Ex: Próximo à praça central, Bairro X, Rua Y..." />
             </div>
-            <div>
-              <label class="bb-label" for="pet-raca">Raça (opcional)</label>
-              <input class="bb-input" type="text" id="pet-raca" placeholder="Ex: SRD, Poodle..." />
-            </div>
-            <div>
-              <label class="bb-label" for="pet-idade">Idade Aproximada</label>
-              <select class="bb-input" id="pet-idade">
-                <option value="">Selecione a idade...</option>
-                <option value="Filhote">Filhote</option>
-                <option value="Adulto">Adulto</option>
-                <option value="Idoso">Idoso</option>
-              </select>
-            </div>
-          </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-              <label class="bb-label" for="pet-estado">Estado (UF) *</label>
-              <select id="pet-estado" class="bb-input" required>
-                <option value="">Selecione a UF...</option>
+            <div class="bb-modal-grid-2">
+              <div>
+                <label class="bb-label" for="pet-nome">Nome do Pet *</label>
+                <input class="bb-input" type="text" id="pet-nome" required placeholder="Ex: Bob, Pipoca..." />
+              </div>
+              <div>
+                <label class="bb-label" for="pet-tipo">Tipo de Animal *</label>
+                <select class="bb-input" id="pet-tipo" required>
+                  <option value="CACHORRO">Cachorro</option>
+                  <option value="GATO">Gato</option>
+                  <option value="OUTRO">Outro</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="bb-modal-grid-3">
+              <div>
+                <label class="bb-label" for="pet-sexo">Sexo *</label>
+                <select class="bb-input" id="pet-sexo" required>
+                  <option value="M">Macho</option>
+                  <option value="F">Fêmea</option>
+                  <option value="I">Indeterminado</option>
+                </select>
+              </div>
+              <div>
+                <label class="bb-label" for="pet-raca">Raça (opcional)</label>
+                <input class="bb-input" type="text" id="pet-raca" placeholder="Ex: SRD, Poodle..." />
+              </div>
+              <div>
+                <label class="bb-label" for="pet-idade">Idade Aproximada</label>
+                <select class="bb-input" id="pet-idade">
+                  <option value="">Selecione a idade...</option>
+                  <option value="Filhote">Filhote</option>
+                  <option value="Adulto">Adulto</option>
+                  <option value="Idoso">Idoso</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="bb-modal-grid-3">
+              <div>
+                <label class="bb-label" for="pet-estado">Estado (UF) *</label>
+                <select id="pet-estado" class="bb-input" required>
+                  <option value="">Selecione a UF...</option>
+                </select>
+              </div>
+              <div>
+                <label class="bb-label" for="pet-cidade">Cidade *</label>
+                <input
+                  class="bb-input"
+                  type="text"
+                  id="pet-cidade"
+                  list="pet-cidades-list"
+                  required
+                  disabled
+                  placeholder="Selecione a UF primeiro..."
+                  autocomplete="off"
+                />
+                <datalist id="pet-cidades-list"></datalist>
+              </div>
+              <div>
+                <label class="bb-label" for="pet-telefone">Telefone / WhatsApp com DDD *</label>
+                <input class="bb-input" type="tel" id="pet-telefone" required placeholder="Ex: (11) 99999-0000" maxlength="15" />
+              </div>
+            </div>
+
+            <div class="bb-modal-grid-2">
+              <div>
+                <label class="bb-label" for="pet-castrado">Castrado</label>
+                <select class="bb-input" id="pet-castrado">
+                  <option value="">Selecione...</option>
+                  <option value="Sim">Castrado (Sim)</option>
+                  <option value="Não">Não castrado</option>
+                  <option value="Não sei">Não informado / Não sei</option>
+                </select>
+              </div>
+              <div>
+                <label class="bb-label" for="pet-medicamento">Medicamentos / Cuidados</label>
+                <select class="bb-input" id="pet-medicamento">
+                  <option value="">Selecione...</option>
+                  <option value="Sim">Usa medicamentos contínuos (Sim)</option>
+                  <option value="Não">Não necessita de medicamentos</option>
+                  <option value="Não sei">Não informado / Não sei</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="wrap-pet-status" class="hidden">
+              <label class="bb-label" for="pet-status">Status do Anúncio</label>
+              <select class="bb-input" id="pet-status">
+                <option value="DISPONIVEL">🐾 Disponível para Adoção</option>
+                <option value="ADOTADO">✅ Adotado (Concluído)</option>
+                <option value="PERDIDO">🚨 Perdido / Desaparecido</option>
+                <option value="ENCONTRADO">🎉 Encontrado (Concluído)</option>
+                <option value="INATIVO">⏸️ Inativo</option>
               </select>
             </div>
+
             <div>
-              <label class="bb-label" for="pet-cidade">Cidade *</label>
+              <label class="bb-label" for="pet-descricao">Descrição / Temperamento * (máx 255 chars)</label>
+              <textarea class="bb-input" id="pet-descricao" rows="3" maxlength="255" required placeholder="Muito brincalhão, convive bem com outros animais e crianças..."></textarea>
+            </div>
+
+            <div>
+              <label class="bb-label" for="pet-imagem">Foto do Pet (JPEG ou PNG, máx 5MB)</label>
               <input
-                class="bb-input"
-                type="text"
-                id="pet-cidade"
-                list="pet-cidades-list"
-                required
-                disabled
-                placeholder="Selecione a UF primeiro..."
-                autocomplete="off"
+                class="bb-input cursor-pointer"
+                type="file"
+                id="pet-imagem"
+                accept=".jpg,.jpeg,.png,image/jpeg,image/png"
               />
-              <datalist id="pet-cidades-list"></datalist>
+              <div id="pet-imagem-preview-wrap" class="hidden" style="margin-top: 0.5rem; display: none; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; border: 1px solid #dfe5ef; border-radius: 0.5rem; background: #f8fafc;">
+                <img id="pet-imagem-preview" src="" alt="Prévia da foto" style="width: 3.5rem; height: 3.5rem; object-fit: cover; border-radius: 0.375rem; border: 1px solid #cbd5e1;" />
+                <div style="flex: 1; min-width: 0;">
+                  <p id="pet-imagem-filename" style="font-size: 0.75rem; font-weight: 600; color: #16233a; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
+                  <p id="pet-imagem-filesize" style="font-size: 0.7rem; color: #64748b; margin: 0.125rem 0 0 0;"></p>
+                </div>
+                <button type="button" id="pet-imagem-clear-btn" class="bb-btn bb-btn--secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; height: auto;" title="Remover imagem">✕ Remover</button>
+              </div>
             </div>
-            <div>
-              <label class="bb-label" for="pet-telefone">Telefone de Contato (WhatsApp com DDD) *</label>
-              <input class="bb-input" type="tel" id="pet-telefone" required placeholder="Ex: (11) 99999-0000" maxlength="15" />
+
+            <div class="bb-modal-footer">
+              <button class="bb-btn bb-btn--secondary" type="button" id="modal-adopt-cancel-btn">Cancelar</button>
+              <button class="bb-btn bb-btn--primary" type="submit" id="modal-adopt-submit-btn">Publicar Anúncio</button>
             </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label class="bb-label" for="pet-vacinacao">Vacinação</label>
-              <select class="bb-input" id="pet-vacinacao">
-                <option value="">Selecione...</option>
-                <option value="Sim">Vacinado (Sim)</option>
-                <option value="Não">Não vacinado</option>
-                <option value="Não sei">Não informado / Não sei</option>
-              </select>
-            </div>
-            <div>
-              <label class="bb-label" for="pet-medicamento">Medicamentos / Cuidados (opcional)</label>
-              <select class="bb-input" id="pet-medicamento">
-                <option value="">Selecione...</option>
-                <option value="Sim">Usa medicamentos contínuos (Sim)</option>
-                <option value="Não">Não necessita de medicamentos</option>
-                <option value="Não sei">Não informado / Não sei</option>
-              </select>
-            </div>
-          </div>
-
-          <div id="wrap-pet-status" class="hidden">
-            <label class="bb-label" for="pet-status">Status do Anúncio</label>
-            <select class="bb-input" id="pet-status">
-              <option value="DISPONIVEL">🐾 Disponível para Adoção</option>
-              <option value="ADOTADO">✅ Adotado (Concluído)</option>
-              <option value="PERDIDO">🚨 Perdido / Desaparecido</option>
-              <option value="ENCONTRADO">🎉 Encontrado (Concluído)</option>
-              <option value="INATIVO">⏸️ Inativo</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="bb-label" for="pet-descricao">Descrição / Temperamento * (máx 255 chars)</label>
-            <textarea class="bb-input" id="pet-descricao" rows="3" maxlength="255" required placeholder="Muito brincalhão, convive bem com outros animais e crianças..."></textarea>
-          </div>
-
-          <div>
-            <label class="bb-label" for="pet-imagem">URL da Foto do Pet (opcional)</label>
-            <input class="bb-input" type="url" id="pet-imagem" placeholder="https://..." />
-          </div>
-
-          <div class="flex justify-end gap-3 pt-3 border-t border-slate-700/60">
-            <button class="bb-btn bb-btn--secondary" type="button" id="modal-adopt-cancel-btn">Cancelar</button>
-            <button class="bb-btn bb-btn--primary" type="submit" id="modal-adopt-submit-btn">Publicar Anúncio</button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
 

@@ -46,7 +46,7 @@ class AnimaisSerializer(serializers.ModelSerializer):
             'sexo',
             'idade_aproximada',
             'medicamento',
-            'vacinacao',
+            'castrado',
             'local',
             'inativado_em',
             'created_at',
@@ -91,3 +91,14 @@ class AnimaisSerializer(serializers.ModelSerializer):
             })
 
         return attrs
+
+    def validate_imagem(self, value):
+        if value:
+            extensoes_permitidas = ['jpg', 'jpeg', 'png']
+            ext = value.name.split('.')[-1].lower()
+            if ext not in extensoes_permitidas:
+                raise serializers.ValidationError("Formato inválido. Apenas imagens JPEG e PNG são permitidas.")
+
+            if value.size > 5 * 1024 * 1024:
+                raise serializers.ValidationError("A imagem excede o tamanho máximo de 5 MB.")
+        return value

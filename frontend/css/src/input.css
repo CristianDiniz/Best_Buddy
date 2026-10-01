@@ -227,6 +227,10 @@
     @apply bg-gradient-to-r from-brand-400 to-brand-500 text-white shadow-[0_4px_14px_rgba(47,138,224,0.35)] hover:shadow-[0_6px_20px_rgba(47,138,224,0.5)] hover:-translate-y-0.5 hover:from-brand-300 hover:to-brand-400;
   }
 
+  .bb-btn--amber {
+    @apply bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-[0_4px_14px_rgba(245,158,11,0.35)] hover:shadow-[0_6px_20px_rgba(245,158,11,0.5)] hover:-translate-y-0.5 hover:from-amber-400 hover:to-amber-500 border-none;
+  }
+
   .bb-btn--secondary {
     @apply bg-transparent border border-border text-ink-100 hover:bg-surface-700 hover:border-border-light hover:-translate-y-0.5;
   }
@@ -241,6 +245,178 @@
 
   .bb-btn__spinner {
     @apply w-3.5 h-3.5 rounded-full border-2 border-black/25 border-t-white animate-spin-fast;
+  }
+
+  /* --- Sistema de Modal Popup --- */
+  .bb-modal-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: rgba(15, 23, 42, 0.75) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    z-index: 99999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 1rem !important;
+    box-sizing: border-box !important;
+    animation: bb-modal-fade-in 0.2s ease-out forwards;
+  }
+
+  .bb-modal-overlay.hidden,
+  .bb-modal-overlay[hidden] {
+    display: none !important;
+  }
+
+  .bb-modal-dialog {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 620px !important;
+    max-height: calc(100vh - 2.5rem) !important;
+    background: #ffffff !important;
+    border: 1px solid #dfe5ef !important;
+    border-radius: 1.25rem !important;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+    animation: bb-modal-pop-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    overflow: hidden !important;
+  }
+
+  .bb-modal-header {
+    padding: 1.25rem 1.5rem 1rem 1.5rem !important;
+    border-bottom: 1px solid #edf2f7 !important;
+    position: relative !important;
+    padding-right: 3.5rem !important;
+    background: #ffffff !important;
+  }
+
+  .bb-modal-title {
+    font-size: 1.25rem !important;
+    font-weight: 800 !important;
+    color: #16233a !important;
+    margin: 0 0 0.25rem 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    font-family: Sora, Segoe UI, system-ui, sans-serif !important;
+  }
+
+  .bb-modal-desc {
+    font-size: 0.8125rem !important;
+    color: #64748b !important;
+    margin: 0 !important;
+    line-height: 1.45 !important;
+  }
+
+  .bb-modal-close-btn {
+    position: absolute !important;
+    top: 1rem !important;
+    right: 1.25rem !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 9999px !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #64748b !important;
+    font-size: 1.35rem !important;
+    line-height: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    z-index: 10 !important;
+  }
+
+  .bb-modal-close-btn:hover {
+    background: #fee2e2 !important;
+    color: #ef4444 !important;
+    border-color: #fca5a5 !important;
+    transform: scale(1.08) !important;
+  }
+
+  .bb-modal-body {
+    padding: 1.25rem 1.5rem !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    box-sizing: border-box !important;
+    flex: 1 1 auto !important;
+  }
+
+  .bb-modal-grid-2 {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .bb-modal-grid-3 {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .bb-modal-footer {
+    margin-top: 1.25rem !important;
+    padding-top: 1rem !important;
+    border-top: 1px solid #edf2f7 !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 0.75rem !important;
+  }
+
+  @media (max-width: 640px) {
+    .bb-modal-overlay {
+      padding: 0.5rem !important;
+    }
+    .bb-modal-dialog {
+      max-height: 94vh !important;
+      border-radius: 1rem !important;
+    }
+    .bb-modal-header {
+      padding: 1rem 1rem 0.75rem 1rem !important;
+      padding-right: 3rem !important;
+    }
+    .bb-modal-body {
+      padding: 1rem !important;
+    }
+    .bb-modal-grid-2,
+    .bb-modal-grid-3 {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 0.75rem !important;
+    }
+    .bb-modal-footer {
+      flex-direction: column-reverse !important;
+      gap: 0.5rem !important;
+    }
+    .bb-modal-footer button {
+      width: 100% !important;
+    }
+  }
+
+  @keyframes bb-modal-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes bb-modal-pop-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
   }
 
   /* --- Títulos de seção --- */
@@ -647,6 +823,41 @@
     line-height: 1.55;
     max-width: 260px;
     margin: 0;
+  }
+
+  /* Badges de Status sobre a foto do card */
+  .bb-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    user-select: none;
+  }
+  .bb-status-badge--perdido {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border: 1px solid rgba(254, 202, 202, 0.5);
+  }
+  .bb-status-badge--adocao {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border: 1px solid rgba(191, 219, 254, 0.4);
+  }
+  .bb-status-badge--adotado {
+    background: linear-gradient(135deg, #10b981, #047857);
+    border: 1px solid rgba(167, 243, 208, 0.4);
+  }
+  .bb-status-badge--encontrado {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    border: 1px solid rgba(186, 230, 253, 0.4);
   }
 }
 

@@ -1,5 +1,13 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import FileExtensionValidator
+from django.core.exceptions import ValidationError
+
+
+def validar_tamanho_imagem(arquivo):
+    limite_mb = 5
+    if arquivo.size > limite_mb * 1024 * 1024:
+        raise ValidationError(f"O tamanho máximo da imagem é de {limite_mb} MB.")
 
 
 class Animal(models.Model):
@@ -27,7 +35,7 @@ class Animal(models.Model):
         NAO = 'Não', 'Não'
         NAO_SABE = 'Não sei', 'Não sei'
 
-    class Vacina(models.TextChoices):
+    class Castrado(models.TextChoices):
         SIM = 'Sim', 'Sim'
         NAO = 'Não', 'Não'
         NAO_SABE = 'Não sei', 'Não sei'
@@ -107,7 +115,16 @@ class Animal(models.Model):
         verbose_name="Telefone de contato do tutor"
     )
     descricao = models.CharField(max_length=255, blank=True, null=True, verbose_name="Descrição / Informações extras")
-    imagem = models.CharField(max_length=500, blank=True, null=True, verbose_name="URL da Foto do animal")
+    imagem = models.ImageField(
+        upload_to='animais/',
+        blank=True,
+        null=True,
+        verbose_name="Foto do animal",
+        validators=[
+            FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
+            validar_tamanho_imagem
+        ]
+    )
     
     status = models.CharField(
         max_length=15,
@@ -121,7 +138,7 @@ class Animal(models.Model):
     sexo = models.CharField(max_length=1, choices=SexoAnimal.choices, null=True, blank=True)
     idade_aproximada = models.CharField(max_length=10, choices=IdadeAproximada.choices, null=True, blank=True)
     medicamento = models.CharField(max_length=10, choices=Medicamento.choices, null=True, blank=True)
-    vacinacao = models.CharField(max_length=10, choices=Vacina.choices, null=True, blank=True)
+    castrado = models.CharField(max_length=10, choices=Castrado.choices, null=True, blank=True)
 
     # Campos específicos de animal perdido (opcional para adoção)
     local = models.CharField(max_length=200, blank=True, null=True, verbose_name="Último local visto / Ponto de referência")
