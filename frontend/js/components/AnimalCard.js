@@ -36,7 +36,7 @@ function bbAnimalCardHtml(animal) {
     const targetStatus = isPerdido ? "ENCONTRADO" : "ADOTADO";
 
     ownerActionsHtml = `
-      <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-1.5 flex-wrap">
+      <div class="bb-owner-actions mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-1.5 flex-wrap">
         ${!isFinished ? `
           <button type="button" class="bb-btn-primary-card flex-1 min-w-[110px] text-xs py-1.5 px-2.5 rounded-lg btn-finish-animal" data-id="${animal.id}" data-status="${targetStatus}">
             ${finishBtnText}
@@ -59,7 +59,7 @@ function bbAnimalCardHtml(animal) {
   ` : '';
 
   return `
-    <div class="bb-pet-card group" data-card-id="${animal.id}">
+    <div class="bb-pet-card bb-animal-card group" data-card-id="${animal.id}">
       <div class="bb-pet-card__header">
         <div class="bb-pet-card__image-wrap${animal.imagem ? "" : " bb-animal-card__image--empty"}">
           ${imageHtml}
