@@ -777,9 +777,16 @@ document.addEventListener("click", async (e) => {
   }
 
   // 4. Clique geral no card (Navegação para página de detalhes)
-  const card = e.target.closest(".bb-animal-card");
-  if (card && !e.target.closest(".bb-owner-actions")) {
-    const cardId = card.dataset.cardId;
+  const card = e.target.closest(".bb-pet-card, .bb-animal-card");
+  if (card) {
+    if (
+      e.target.closest("button") ||
+      e.target.closest("a") ||
+      e.target.closest(".bb-owner-actions")
+    ) {
+      return;
+    }
+    const cardId = card.dataset.cardId || card.getAttribute("data-card-id");
     if (cardId) {
       window.location.href = `/pages/animals/detail.html?id=${cardId}`;
     }
