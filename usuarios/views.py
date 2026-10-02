@@ -1,3 +1,4 @@
+import re
 from django.conf import settings
 from django.core import signing
 from django.core.mail import send_mail
@@ -70,8 +71,15 @@ class PerfilView(APIView):
                 user.perfil_pj.save()
 
         if telefone is not None:
-            telefone_limpo = str(telefone).strip()
-            if telefone_limpo != (user.telefone or ""):
+            telefone_limpo = re.sub(r'\D', '', str(telefone).strip()) or None
+            if telefone_limpo:
+                if Usuario.objects.filter(telefone=telefone_limpo).exclude(pk=user.pk).exists():
+                    return Response(
+                        {"error": "Este telefone já está sendo utilizado por outro usuário."},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+            if telefone_limpo != user.telefone:
                 user.telefone = telefone_limpo
                 user.telefone_validado = False
                 user.save()
@@ -80,10 +88,10 @@ class PerfilView(APIView):
                 user.save()
 
             if user.tipo == "PF" and hasattr(user, "perfil_pf"):
-                user.perfil_pf.telefone = telefone_limpo[:15]
+                user.perfil_pf.telefone = (telefone_limpo or "")[:15]
                 user.perfil_pf.save()
             elif user.tipo == "PJ" and hasattr(user, "perfil_pj"):
-                user.perfil_pj.telefone = telefone_limpo[:15]
+                user.perfil_pj.telefone = (telefone_limpo or "")[:15]
                 user.perfil_pj.save()
 
         return self.get(request)
@@ -105,12 +113,14 @@ class AlterarEmailView(APIView):
         if Usuario.objects.filter(email__iexact=novo_email).exclude(pk=request.user.pk).exists():
             return Response({"error": "Este email já está sendo utilizado por outro usuário."}, status=status.HTTP_400_BAD_REQUEST)
 
+        token = signing.dumps({"user_id": request.user.id, "novo_email": novo_email}, salt="alterar-email")
         request.user.email = novo_email
         request.user.save()
 
         return Response({
             "message": "E-mail alterado com sucesso!",
-            "email": novo_email
+            "email": novo_email,
+            "token_dev": token
         }, status=status.HTTP_200_OK)
 
 
@@ -328,3 +338,19 @@ class RedefinirSenhaView(APIView):
         user.save()
 
         return Response({"message": "Senha redefinida com sucesso! Você já pode entrar com a nova senha."}, status=status.HTTP_200_OK)
+
+class VerificarTelefoneView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        raw_phone = request.query_params.get("telefone", "")
+        digits = re.sub(r'\D', '', raw_phone)
+
+        if not digits:
+            return Response({"disponivel": True})
+            
+        existe = Usuario.objects.filter(telefone=digits).exists()
+        return Response({
+            "disponivel": not existe,
+            "message": "Este telefone já está em uso." if existe else "Telefone disponível."
+        })

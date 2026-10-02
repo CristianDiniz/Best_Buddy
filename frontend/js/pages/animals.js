@@ -373,13 +373,32 @@ async function openAdoptModal(defaultService = "ADOCAO") {
     petCidadesDatalist.innerHTML = "";
   }
 
-  // Pré-preenche o telefone de contato se o usuário já tiver no perfil (RF08)
+  // Carrega e vincula automaticamente o telefone da conta do tutor (sem digitação livre)
+  let currentProfilePhone = "";
+  const phoneWarning = document.getElementById("pet-telefone-warning");
+  if (phoneWarning) phoneWarning.classList.add("hidden");
+  if (petPhoneInput) {
+    petPhoneInput.value = "";
+    petPhoneInput.placeholder = "Carregando telefone do perfil...";
+  }
+
   try {
     const profile = await authService.getProfile();
-    const phoneInput = document.getElementById("pet-telefone");
-    if (phoneInput && profile && profile.telefone) {
-      phoneInput.value = profile.telefone;
-      phoneInput.dispatchEvent(new Event("input"));
+    currentProfilePhone = profile && profile.telefone ? String(profile.telefone).trim() : "";
+    if (petPhoneInput) {
+      if (currentProfilePhone) {
+        petPhoneInput.value = bbValidation.formatPhone(currentProfilePhone);
+        if (phoneWarning) phoneWarning.classList.add("hidden");
+        if (modalSubmitBtn) modalSubmitBtn.disabled = false;
+      } else {
+        petPhoneInput.value = "";
+        petPhoneInput.placeholder = "Nenhum telefone cadastrado no perfil";
+        if (phoneWarning) phoneWarning.classList.remove("hidden");
+        if (modalSubmitBtn) {
+          modalSubmitBtn.disabled = true;
+          modalSubmitBtn.textContent = "Cadastre seu telefone no perfil para anunciar";
+        }
+      }
     }
   } catch (err) {
     console.warn("Não foi possível carregar dados do perfil:", err);
@@ -448,10 +467,11 @@ async function openEditPetModal(animal) {
 
   if (animal.local && petLocalInput) petLocalInput.value = animal.local;
 
-  const phoneInput = document.getElementById("pet-telefone");
-  if (phoneInput) {
-    phoneInput.value = animal.telefone_contato || "";
-    phoneInput.dispatchEvent(new Event("input"));
+  const phoneWarningEdit = document.getElementById("pet-telefone-warning");
+  if (phoneWarningEdit) phoneWarningEdit.classList.add("hidden");
+  if (petPhoneInput) {
+    const phoneVal = animal.contato || animal.telefone_contato || currentProfilePhone || "";
+    petPhoneInput.value = phoneVal ? bbValidation.formatPhone(phoneVal) : "";
   }
 
   // Preenche Estado e Cidade
@@ -589,25 +609,19 @@ formAdoptPet.addEventListener("submit", async (e) => {
 
   const isEdit = Boolean(currentEditingAnimalId);
   const servico = (document.getElementById("pet-servico")?.value || "ADOCAO");
-  const phoneInput = document.getElementById("pet-telefone");
-  const rawPhone = phoneInput ? phoneInput.value.trim() : "";
-  const phoneDigits = rawPhone.replace(/\D/g, "");
+  // Validação: Contato vinculado automaticamente à conta do tutor (sem digitação livre)
+  let effectivePhone = "";
+  try {
+    const profile = await authService.getProfile();
+    effectivePhone = profile && profile.telefone ? String(profile.telefone).trim() : "";
+  } catch (_) {
+    effectivePhone = petPhoneInput ? petPhoneInput.value.trim() : "";
+  }
 
-  // 1. Validação estrita do Telefone de Contato (DDD + Número obrigatório)
-  const ddd = phoneDigits.slice(0, 2);
-  const isValidDDD = phoneDigits.length >= 2 && parseInt(ddd, 10) >= 11 && parseInt(ddd, 10) <= 99;
-  const isValidPhone = (phoneDigits.length === 10 || phoneDigits.length === 11) && isValidDDD;
-
-  if (!isValidPhone) {
-    const errorMsg = "É necessário um número de contato para cadastrar o animal.";
-    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error font-semibold">⚠️ ${errorMsg}</div>`;
-    alert(errorMsg);
-    if (phoneInput) {
-      phoneInput.focus();
-      phoneInput.classList.add("border-rose-500");
-      setTimeout(() => phoneInput.classList.remove("border-rose-500"), 3500);
-    }
-    return; // BLOQUEIA A CHAMADA DA ROTA
+  if (!effectivePhone && !isEdit) {
+    const errorMsg = "É necessário ter um telefone cadastrado na sua conta para anunciar um animal.";
+    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error font-semibold">⚠️ ${errorMsg} <a href="/pages/auth/profile.html" class="underline font-bold text-brand-300 ml-1">Cadastrar no Perfil →</a></div>`;
+    return;
   }
 
   const estado = (document.getElementById("pet-estado")?.value || "").trim().toUpperCase();
@@ -663,7 +677,7 @@ formAdoptPet.addEventListener("submit", async (e) => {
     if (idadeVal) payload.append("idade_aproximada", idadeVal);
     payload.append("estado", estado);
     payload.append("cidade", cidade);
-    payload.append("telefone_contato", rawPhone);
+    payload.append("telefone_contato", effectivePhone);
     payload.append("descricao", descVal);
     if (castradoVal) payload.append("castrado", castradoVal);
     if (medVal) payload.append("medicamento", medVal);
@@ -680,7 +694,7 @@ formAdoptPet.addEventListener("submit", async (e) => {
       idade_aproximada: idadeVal || undefined,
       estado,
       cidade,
-      telefone_contato: rawPhone,
+      telefone_contato: effectivePhone || undefined,
       descricao: descVal,
       castrado: castradoVal || undefined,
       medicamento: medVal || undefined,

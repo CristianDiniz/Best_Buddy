@@ -32,7 +32,7 @@ class Usuario(AbstractUser):
 )
 
     email = models.EmailField(unique=True)
-    telefone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Telefone / WhatsApp")
+    telefone = models.CharField(max_length=20, blank=True, null=True, unique=True, verbose_name="Telefone / WhatsApp")
     telefone_validado = models.BooleanField(default=False, verbose_name="WhatsApp Validado")
 
     USERNAME_FIELD = "email"

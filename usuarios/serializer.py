@@ -1,3 +1,4 @@
+import re
 from rest_framework import serializers
 from .models import Usuario, PessoaFisica, PessoaJuridica, Endereco
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -59,7 +60,7 @@ class RegisterUsuarioSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
     tipo = serializers.ChoiceField(choices=Usuario.TipoUsuario.choices, default="PF")
-    telefone = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    telefone = serializers.CharField(required=True, allow_blank=False, allow_null=True)
 
     # PF
     nome = serializers.CharField(required=False, allow_blank=True)
@@ -68,6 +69,20 @@ class RegisterUsuarioSerializer(serializers.Serializer):
     razao_social = serializers.CharField(required=False, allow_blank=True)
     cnpj = serializers.CharField(required=False, allow_blank=True)
 
+    def validate_telefone(self, value):
+        if not value:
+            return None
+        digits = re.sub(r'\D', '', value)
+        if len(digits) not in (10, 11):
+            raise serializers.ValidationError("Informe um número de telefone com DDD válido (10 ou 11 dígitos).")
+        
+        ddd = int(digits[:2])
+        if ddd < 11 or ddd > 99:
+            raise serializers.ValidationError("DDD inválido.")
+        if Usuario.objects.filter(telefone=digits).exists():
+            raise serializers.ValidationError("Este número de telefone já está cadastrado em outra conta.")
+        return digits
+
     def validate_email(self, value):
         if Usuario.objects.filter(email__iexact=value).exists():
             raise serializers.ValidationError("Este email já está cadastrado.")
@@ -75,7 +90,9 @@ class RegisterUsuarioSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         tipo = validated_data.get("tipo", "PF")
-        telefone_informado = validated_data.get("telefone", "").strip() or None
+        telefone_informado = validated_data.get("telefone")
+        if telefone_informado:
+            telefone_informado = re.sub(r'\D', '', str(telefone_informado).strip()) or None
 
         user = Usuario.objects.create_user(
             email=validated_data["email"],
@@ -89,7 +106,7 @@ class RegisterUsuarioSerializer(serializers.Serializer):
             PessoaFisica.objects.create(
                 usuario=user,
                 nome=validated_data.get("nome", ""),
-                telefone=validated_data.get("telefone", "")
+                telefone=telefone_informado or ""
             )
 
         elif tipo == "PJ":
@@ -97,7 +114,7 @@ class RegisterUsuarioSerializer(serializers.Serializer):
                 usuario=user,
                 razao_social=validated_data.get("razao_social", ""),
                 cnpj=validated_data.get("cnpj", ""),
-                telefone=validated_data.get("telefone", "")
+                telefone=telefone_informado or ""
             )
 
         refresh = RefreshToken.for_user(user)

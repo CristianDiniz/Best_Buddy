@@ -111,9 +111,17 @@ class Animal(models.Model):
     cidade = models.CharField(max_length=100, default='', verbose_name="Cidade")
     telefone_contato = models.CharField(
         max_length=20,
+        blank=True,
         default='',
-        verbose_name="Telefone de contato do tutor"
+        verbose_name="Telefone de contato do tutor (cache/fallback)"
     )
+
+    @property
+    def contato(self):
+        """Retorna dinamicamente o telefone atual do tutor vinculado via FK."""
+        if self.tutor and self.tutor.telefone:
+            return self.tutor.telefone
+        return self.telefone_contato or ""
     descricao = models.CharField(max_length=255, blank=True, null=True, verbose_name="Descrição / Informações extras")
     imagem = models.ImageField(
         upload_to='animais/',

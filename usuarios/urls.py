@@ -11,6 +11,7 @@ from .views import (
     RedefinirSenhaView,
     UsuariosView,
     UsuariosDetailView,
+    VerificarTelefoneView,
 )
 
 urlpatterns = [
@@ -25,4 +26,5 @@ urlpatterns = [
     path("whatsapp/verificar/", TwilioVerificarCodigoView.as_view(), name="whatsapp-verificar"),
     path("", UsuariosView.as_view(), name="usuarios-list"),
     path("<int:pk>/", UsuariosDetailView.as_view(), name="usuarios-detail"),
+    path("verificar-telefone/", VerificarTelefoneView.as_view(), name="verificar-telefone"),
 ]

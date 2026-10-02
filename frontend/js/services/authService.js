@@ -19,6 +19,38 @@ const authService = {
     return bbClient.post("/usuarios/register/", payload, { auth: false });
   },
 
+  async checkPhoneAvailability(telefone) {
+    const digits = (telefone || "").replace(/\D/g, "");
+    if (!digits) return { available: true };
+
+    if (window.BB_CONFIG && window.BB_CONFIG.USE_MOCKS) {
+      const mockPhone = (typeof BB_MOCK_USER !== "undefined" && BB_MOCK_USER.telefone ? BB_MOCK_USER.telefone : "").replace(/\D/g, "");
+      if (digits === mockPhone || digits === "11999998888" || digits === "11988887777") {
+        return bbMockDelay({ available: false, message: "Este telefone já está cadastrado em outra conta." });
+      }
+      return bbMockDelay({ available: true });
+    }
+
+    try {
+      const res = await bbClient.get(`/usuarios/verificar-telefone/?telefone=${encodeURIComponent(digits)}`, { auth: false });
+      const isAvailable = res.disponivel !== false && res.available !== false;
+      return {
+        available: isAvailable,
+        message: res.message || (isAvailable ? "" : "Este telefone já está cadastrado em outra conta."),
+      };
+    } catch (err) {
+      // Se a rota ainda não foi criada no backend (404), não bloqueia a interface no blur;
+      // a validação ocorrerá de forma segura no envio (POST /usuarios/register/)
+      if (err.status === 404) {
+        return { available: true };
+      }
+      if (err.status === 400 && err.payload && (err.payload.disponivel === false || err.payload.available === false)) {
+        return { available: false, message: err.payload.message || "Este telefone já está cadastrado em outra conta." };
+      }
+      return { available: true };
+    }
+  },
+
   async getProfile() {
     if (window.BB_CONFIG && window.BB_CONFIG.USE_MOCKS) {
       return bbMockDelay({
