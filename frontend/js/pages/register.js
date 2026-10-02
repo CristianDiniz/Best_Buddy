@@ -10,10 +10,47 @@ const bbSubmitBtn = document.getElementById("bb-submit-btn");
 const bbFormAlert = document.getElementById("bb-form-alert");
 const bbTelefoneInput = document.getElementById("telefone");
 
-// Máscara dinâmica para o campo de telefone opcional
+// Máscara dinâmica para o campo de telefone e validação ao perder o foco (blur)
+let isPhoneChecking = false;
+let phoneAlreadyInUse = false;
+
 if (bbTelefoneInput) {
   bbTelefoneInput.addEventListener("input", (e) => {
     e.target.value = bbValidation.formatPhone(e.target.value);
+    phoneAlreadyInUse = false;
+  });
+
+  bbTelefoneInput.addEventListener("blur", async () => {
+    const val = bbTelefoneInput.value.trim();
+    if (!val) {
+      bbShowFieldError("telefone", "Informe seu número de telefone.");
+      return;
+    }
+
+    if (!bbValidation.isValidBrazilianPhone(val)) {
+      bbShowFieldError("telefone", "Informe um telefone válido com DDD (ex: (11) 99999-9999).");
+      return;
+    }
+
+    // Se o formato é válido, checa se já está em uso
+    const errorEl = document.getElementById("telefone-error");
+    if (errorEl) errorEl.textContent = "";
+    bbTelefoneInput.classList.remove("bb-input--error");
+
+    isPhoneChecking = true;
+    try {
+      const check = await authService.checkPhoneAvailability(val);
+      if (check && check.available === false) {
+        phoneAlreadyInUse = true;
+        bbShowFieldError("telefone", check.message || "Este telefone já está cadastrado em outra conta.");
+      } else {
+        phoneAlreadyInUse = false;
+      }
+    } catch (_) {
+      // Ignora falhas temporárias de rede na checagem em tempo real
+    } finally {
+      isPhoneChecking = false;
+    }
   });
 }
 
@@ -56,7 +93,8 @@ bbRegisterForm.addEventListener("submit", async (event) => {
       { test: bbValidation.isEmail, message: "Email inválido." },
     ],
     telefone: [
-      { test: bbValidation.isPhone, message: "Informe um telefone válido com DDD (ex: (11) 99999-9999) ou deixe em branco." },
+      { test: bbValidation.isRequired, message: "Informe seu número de telefone." },
+      { test: bbValidation.isValidBrazilianPhone, message: "Informe um telefone válido com DDD (ex: (11) 99999-9999)." },
     ],
     senha: [{ test: (v) => bbValidation.minLength(v, 6), message: "Senha deve ter ao menos 6 caracteres." }],
     confirmar_senha: [
@@ -68,10 +106,34 @@ bbRegisterForm.addEventListener("submit", async (event) => {
     Object.entries(errors).forEach(([field, message]) =>
       bbShowFieldError(field.replace("_", "-"), message)
     );
+    const firstField = Object.keys(errors)[0].replace("_", "-");
+    const firstInput = document.getElementById(firstField);
+    if (firstInput) firstInput.focus();
+    return;
+  }
+
+  if (phoneAlreadyInUse) {
+    bbShowFieldError("telefone", "Este telefone já está cadastrado em outra conta.");
+    document.getElementById("telefone")?.focus();
     return;
   }
 
   bbSetLoading(true);
+
+  // Validação prévia de disponibilidade do telefone antes da submissão
+  try {
+    const check = await authService.checkPhoneAvailability(data.telefone);
+    if (check && check.available === false) {
+      phoneAlreadyInUse = true;
+      bbShowFieldError("telefone", check.message || "Este telefone já está cadastrado em outra conta.");
+      document.getElementById("telefone")?.focus();
+      bbSetLoading(false);
+      return;
+    }
+  } catch (_) {
+    // Prossiga se a rota de verificação não estiver disponível
+  }
+
   try {
     await authService.register({
       nome: data.nome,
@@ -83,6 +145,30 @@ bbRegisterForm.addEventListener("submit", async (event) => {
     bbFormAlert.innerHTML = `<div class="bb-alert bb-alert--success">Conta criada com sucesso! Redirecionando para o login...</div>`;
     setTimeout(() => (window.location.href = "login.html"), 1200);
   } catch (err) {
+    // Trata erros de campo retornados pelo backend (DRF)
+    let handledField = false;
+    if (err.payload && typeof err.payload === "object") {
+      if (err.payload.telefone) {
+        const msg = Array.isArray(err.payload.telefone) ? err.payload.telefone.join(" ") : String(err.payload.telefone);
+        bbShowFieldError("telefone", msg);
+        handledField = true;
+      }
+      if (err.payload.email) {
+        const msg = Array.isArray(err.payload.email) ? err.payload.email.join(" ") : String(err.payload.email);
+        bbShowFieldError("email", msg);
+        handledField = true;
+      }
+      if (err.payload.password) {
+        const msg = Array.isArray(err.payload.password) ? err.payload.password.join(" ") : String(err.payload.password);
+        bbShowFieldError("senha", msg);
+        handledField = true;
+      }
+    }
+
+    if (!handledField && err.message && err.message.toLowerCase().includes("telefone")) {
+      bbShowFieldError("telefone", err.message);
+    }
+
     bbFormAlert.innerHTML = `<div class="bb-alert bb-alert--error">${err.message}</div>`;
   } finally {
     bbSetLoading(false);

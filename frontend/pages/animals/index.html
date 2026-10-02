@@ -168,7 +168,7 @@
             <span>🐾</span> Anunciar Pet para Adoção
           </h2>
           <p class="bb-modal-desc" id="modal-adopt-desc">
-            Preencha os dados do animal. O telefone informado será o canal direto para interessados entrarem em contato via WhatsApp.
+            Preencha os dados do animal. O contato via WhatsApp será vinculado automaticamente ao telefone cadastrado em sua conta.
           </p>
         </div>
 
@@ -250,8 +250,26 @@
                 <datalist id="pet-cidades-list"></datalist>
               </div>
               <div>
-                <label class="bb-label" for="pet-telefone">Telefone / WhatsApp com DDD *</label>
-                <input class="bb-input" type="tel" id="pet-telefone" required placeholder="Ex: (11) 99999-0000" maxlength="15" />
+                <label class="bb-label flex items-center justify-between" for="pet-telefone">
+                  <span>Telefone / WhatsApp de Contato</span>
+                  <span class="text-xs text-brand-600 font-medium">🔒 Vinculado ao seu perfil</span>
+                </label>
+                <input
+                  class="bb-input bg-surface-800/40 cursor-not-allowed opacity-90 font-mono text-sm"
+                  type="tel"
+                  id="pet-telefone"
+                  readonly
+                  disabled
+                  placeholder="Carregando telefone do perfil..."
+                />
+                <p class="text-xs text-ink-300 mt-1">
+                  Contato vinculado ao seu perfil. Para alterá-lo, vá em
+                  <a href="/pages/auth/profile.html" class="text-brand-400 hover:underline">Meu Perfil</a>.
+                </p>
+                <div id="pet-telefone-warning" class="hidden mt-2 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs">
+                  ⚠️ <strong>Atenção:</strong> Você ainda não cadastrou um telefone na sua conta.
+                  <a href="/pages/auth/profile.html" class="underline font-bold text-amber-200 ml-1">Cadastrar no perfil →</a>
+                </div>
               </div>
             </div>
 

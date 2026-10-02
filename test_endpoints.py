@@ -16,6 +16,7 @@ def run_tests():
     # 0. Cadastro de Usuário sem CPF (Super rápido e sem fricção)
     print("\n0. Testando POST /api/usuarios/register/ (Sem CPF) ...")
     Usuario.objects.filter(email='novo_sem_cpf@teste.com').delete()
+    Usuario.objects.filter(telefone='11988887777').delete()
     res_reg = client.post('/api/usuarios/register/', {
         'nome': 'Novo Usuário',
         'email': 'novo_sem_cpf@teste.com',
@@ -27,10 +28,47 @@ def run_tests():
     assert 'access' in res_reg.data
     assert res_reg.data['user']['email'] == 'novo_sem_cpf@teste.com'
     print(f"OK! Usuário registrado sem CPF com sucesso: {res_reg.data['user']['email']}")
+
+    # 0.1 Testando Unicidade de Telefone no Registro
+    print("\n0.1 Testando Unicidade de Telefone no Registro ...")
+    res_dup = client.post('/api/usuarios/register/', {
+        'nome': 'Outro Usuário',
+        'email': 'outro_com_mesmo_tel@teste.com',
+        'password': 'password123',
+        'telefone': '11988887777',
+        'tipo': 'PF'
+    }, format='json')
+    assert res_dup.status_code == 400, "Deveria ter rejeitado cadastro com telefone duplicado"
+    print("OK! Telefone duplicado rejeitado com sucesso.")
+
+    # 0.2 Testando Endpoint de Verificação de Telefone
+    print("\n0.2 Testando GET /api/usuarios/verificar-telefone/ ...")
+    res_chk1 = client.get('/api/usuarios/verificar-telefone/?telefone=11988887777')
+    assert res_chk1.status_code == 200
+    assert res_chk1.data['disponivel'] is False, "Telefone 11988887777 deveria estar indisponivel"
+    
+    res_chk2 = client.get('/api/usuarios/verificar-telefone/?telefone=11911112222')
+    assert res_chk2.status_code == 200
+    assert res_chk2.data['disponivel'] is True, "Telefone 11911112222 deveria estar disponivel"
+    print("OK! Rota de verificação de telefone funcionando perfeitamente.")
+
     Usuario.objects.filter(email='novo_sem_cpf@teste.com').delete()
 
     # 1. Login e Token Customizado
     print("\n1. Testando POST /api/token/ ...")
+    u_base, _ = Usuario.objects.get_or_create(
+        email='usuario@bestbuddy.com',
+        defaults={
+            'tipo': 'PF',
+            'telefone': '(16) 99999-0000',
+            'telefone_validado': True,
+        }
+    )
+    u_base.set_password('123456')
+    u_base.telefone = '(16) 99999-0000'
+    u_base.telefone_validado = True
+    u_base.save()
+
     res = client.post('/api/token/', {'email': 'usuario@bestbuddy.com', 'password': '123456'}, format='json')
     print(f"Status: {res.status_code}")
     assert res.status_code == 200, f"Falha no login: {res.data}"
@@ -159,7 +197,21 @@ def run_tests():
 
     # 8. Teste de Cota: Usuário com >= 5 animais ativos é barrado
     print("\n8. Testando enforcement de cota (máx 5 para comum) ...")
-    # Tenta criar com user_id 14 que já possui 8 pets
+    pets_count = Animal.objects.filter(
+        tutor=u_base,
+        status__in=[Animal.StatusAnimal.DISPONIVEL, Animal.StatusAnimal.PERDIDO]
+    ).count()
+    for i in range(pets_count, 5):
+        Animal.objects.create(
+            tutor=u_base,
+            nome=f"Pet Cota {i}",
+            cidade="São Carlos",
+            tipo_animal="CACHORRO",
+            tipo_servico="ADOCAO",
+            status="DISPONIVEL",
+            telefone_contato="(16) 99999-0000"
+        )
+
     res_cota = client.post('/api/animais/', payload_pet, format='json')
     assert res_cota.status_code == 400
     assert "Limite atingido" in str(res_cota.data)

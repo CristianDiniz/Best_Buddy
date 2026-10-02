@@ -16,14 +16,17 @@ class AnimaisSerializer(serializers.ModelSerializer):
             return obj.tutor.perfil_pj.nome_fantasia or obj.tutor.perfil_pj.razao_social or "ONG"
         return obj.tutor.email.split('@')[0]
 
-    contato = serializers.CharField(source='telefone_contato', read_only=True)
+    contato = serializers.SerializerMethodField()
     telefone_contato = serializers.CharField(
         max_length=20,
         required=False,
-        error_messages={
-            "blank": "É necessário um número de contato para cadastrar o animal.",
-        }
+        allow_blank=True,
     )
+
+    def get_contato(self, obj):
+        if obj.tutor and obj.tutor.telefone:
+            return obj.tutor.telefone
+        return obj.telefone_contato or ""
 
     class Meta:
         model = Animal
@@ -62,16 +65,15 @@ class AnimaisSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Autenticação obrigatória para anunciar um animal.")
 
             telefone_contato = attrs.get('telefone_contato')
-            telefone_validado = getattr(user, 'telefone_validado', False)
             telefone_tutor = getattr(user, 'telefone', None)
 
-            if not telefone_contato:
-                if telefone_validado and telefone_tutor:
-                    attrs['telefone_contato'] = telefone_tutor
-                else:
-                    raise serializers.ValidationError({
-                        "telefone_contato": "É necessário um número de contato para cadastrar o animal."
-                    })
+            # O telefone de contato é herdado e vinculado diretamente à conta do tutor
+            if telefone_tutor:
+                attrs['telefone_contato'] = telefone_tutor
+            elif not telefone_contato:
+                raise serializers.ValidationError({
+                    "telefone_contato": "É necessário ter um número de contato cadastrado na sua conta para anunciar o animal."
+                })
 
             # Cota de 5 animais ativos para usuários comuns
             tipo_usuario = getattr(user, 'tipo', 'PF')
