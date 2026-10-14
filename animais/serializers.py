@@ -96,11 +96,11 @@ class AnimaisSerializer(serializers.ModelSerializer):
 
     def validate_imagem(self, value):
         if value:
-            extensoes_permitidas = ['jpg', 'jpeg', 'png']
+            extensoes_permitidas = ['jpg', 'jpeg', 'png', 'webp']
             ext = value.name.split('.')[-1].lower()
             if ext not in extensoes_permitidas:
-                raise serializers.ValidationError("Formato inválido. Apenas imagens JPEG e PNG são permitidas.")
+                raise serializers.ValidationError("Formato inválido. Apenas imagens JPEG, PNG e WebP são permitidas.")
 
-            if value.size > 5 * 1024 * 1024:
-                raise serializers.ValidationError("A imagem excede o tamanho máximo de 5 MB.")
+            if value.size > 15 * 1024 * 1024:
+                raise serializers.ValidationError("A imagem excede o tamanho máximo de 15 MB.")
         return value

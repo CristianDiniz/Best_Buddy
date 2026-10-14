@@ -15,13 +15,33 @@ def otimizar_imagem_animal(campo_imagem, max_dimensao=1080, qualidade=85):
     if not campo_imagem:
         return campo_imagem
 
-    # Abre a imagem a partir do arquivo enviado
-    img = Image.open(campo_imagem)
+    # 1. Abre a imagem a partir do arquivo enviado
+    try:
+        img = Image.open(campo_imagem)
+    except Exception:
+        # Se não for possível ler como imagem, devolve o objeto original
+        return campo_imagem
 
-    # 1. Trata orientação EXIF (fotos de smartphone)
+    nome_original = getattr(campo_imagem, 'name', '') or ''
+    tamanho_bytes = getattr(campo_imagem, 'size', 0) or 0
+    formato_imagem = (getattr(img, 'format', '') or '').upper()
+
+    # 2. FAST-PATH: Se já foi otimizada no front (WebP, <= 1MB e dimensões <= max_dimensao)
+    if (
+        formato_imagem == 'WEBP'
+        and tamanho_bytes <= 1024 * 1024
+        and img.width <= max_dimensao
+        and img.height <= max_dimensao
+    ):
+        if hasattr(campo_imagem, 'seek'):
+            campo_imagem.seek(0)
+        return campo_imagem
+
+    # 3. SLOW-PATH (Fallback para uploads via Admin, scripts ou arquivos não-otimizados):
+    # Trata orientação EXIF (fotos de smartphone)
     img = ImageOps.exif_transpose(img)
 
-    # 2. Trata modos de cores (evita quebra com transparência PNG ou CMYK)
+    # Trata modos de cores (evita quebra com transparência PNG ou CMYK)
     if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
         img = img.convert('RGBA')
     else:
