@@ -25,7 +25,7 @@ Projetada com arquitetura desacoplada: possui uma **camada de Mocks** que permit
 - **Formulário de Anúncio em Modal Popup**:
   - Abertura imediata na tela do usuário como Popup responsivo (`.bb-modal`) com backdrop e botão "X" de fechar.
   - Totalmente adaptado para dispositivos móveis, sem rolagem horizontal.
-  - **Upload Real de Imagens**: Seleção de arquivo via `<input type="file">`, visualização prévia da foto (thumbnail preview) e validação estrita (JPG/PNG até 5 MB).
+  - **Upload Inteligente e Otimização de Imagens (Canvas API & WebP)**: Seleção de arquivos de até **50 MB** com redução automática no navegador para formato **WebP (~150 KB)** via HTML5 Canvas em memória. Elimina consumo excessivo de dados móveis (economia de até 98% de banda), exibe preview em tempo real com indicador de economia e descarta metadados EXIF/GPS para total conformidade com a LGPD e privacidade do usuário.
   - Informações do pet com status de **Castrado** (Sim, Não, Em andamento) e contato com máscara automática.
 - **Design System Responsivo**:
   - Estilizado com Tailwind CSS via classes semânticas `bb-*` compostas por `@apply`.

@@ -13,6 +13,7 @@ O projeto é estruturado em uma arquitetura desacoplada e conteinerizada:
 - **Banco de Dados**: Suporte dual configurável via variável de ambiente:
   - **SQLite** (`db.sqlite3`): Pronto para testes rápidos e desenvolvimento local.
   - **MySQL 8.0**: Executado via container Docker na porta `3307` (mapeada para `3306` internamente).
+- **Otimização de Mídia em Dupla Camada (Performance & LGPD)**: Fotos de pets de até **50 MB** são redimensionadas no cliente via **HTML5 Canvas API** para **WebP (~150 KB)** antes do envio HTTP (economia de até 98% de banda e purga de dados EXIF/GPS para proteção de privacidade), com validação inteligente e Fast-Path com **Pillow** no backend Django.
 
 ---
 

@@ -79,8 +79,8 @@ class Animal(models.Model):
         upload_to='animais/',
         blank=True,
         null=True,
-        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']), validar_tamanho_imagem],
-        help_text="Foto do animal (JPEG/PNG até 5 MB)"
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'webp']), validar_tamanho_imagem],
+        help_text="Foto do animal (JPEG/PNG/WebP até 15 MB)"
     )
     status = models.CharField(max_length=15, choices=StatusAnimal.choices, default=StatusAnimal.DISPONIVEL)
 
@@ -107,7 +107,7 @@ class Animal(models.Model):
 1. **Campos Expostos**:
    `id`, `tutor_id`, `tutor_email`, `tutor_nome`, `contato` (read-only), `tipo_servico`, `tipo_animal`, `nome`, `estado`, `cidade`, `telefone_contato`, `descricao`, `imagem`, `status`, `raca`, `sexo`, `idade_aproximada`, `medicamento`, `castrado`, `local`, `inativado_em`, `created_at`, `updated_at`.
 2. **Upload de Imagem & Validações**:
-   Validação estrita de extensão (somente `.jpg`, `.jpeg`, `.png`) e tamanho máximo de 5 MB via `validate_imagem` e validators do model. O ViewSet suporta parsers `MultiPartParser`, `FormParser` e `JSONParser`.
+   Validação de extensão (`.jpg`, `.jpeg`, `.png`, `.webp`) e tamanho máximo de 15 MB via `validate_imagem` e validators do model. O ViewSet suporta parsers `MultiPartParser`, `FormParser` e `JSONParser`. Possui Fast-Path inteligente para WebP $\le$ 1 MB.
 3. **Contato Obrigatório**:
    O serializer exige que todo pet anunciado contenha um `telefone_contato`. Caso o payload não o envie diretamente, ele herda automaticamente o `telefone` validado do tutor logado. Se nenhum dos dois existir, retorna o erro:
    `"É necessário um número de contato para cadastrar o animal."`.
