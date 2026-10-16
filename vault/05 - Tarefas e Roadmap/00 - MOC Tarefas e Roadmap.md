@@ -29,6 +29,7 @@ O projeto passou por uma evolução arquitetural importante: **simplificação d
 | [[05 - Configuração e Uso do Docker]] | Orquestração com Docker Compose (Django + MySQL 8.0 + Nginx) | 🟢 Operacional |
 | [[06 - Guia de Alinhamento da Equipe e Novo Roadmap]] | Alinhamento de regras, histórico de sprints e novo roadmap (Sprints 4 e 5) | 🟡 Reestruturado |
 | [[07 - Otimizacao de Imagens (Pillow e WebP)]] | Arquitetura técnica de compressão de imagens (Canvas API + Pillow WebP) | 🟢 100% Concluído |
+| [[08 - Validacao de Imagens com IA (YOLOv8-nano)]] | Validação inteligente de fotos no cadastro para barrar imagens sem animais | 🟡 Especificado |
 
 ---
 
@@ -60,6 +61,8 @@ graph TD
         P4["Módulo de Denúncias de Anúncios Suspeitos"]
         P5["Credenciamento e Cota Ilimitada para Contas ONG"]
         P6["Configuração de Produção para SMTP e Twilio Oficial"]
+        P7["Auditoria de Direitos Autorais e Créditos das Imagens do Hero (CREDITS.md)"]
+        P8["Validador de Imagens com IA (YOLOv8-nano)"]
     end
 ```
 

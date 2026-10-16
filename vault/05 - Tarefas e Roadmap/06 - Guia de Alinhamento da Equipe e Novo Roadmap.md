@@ -156,6 +156,8 @@ erDiagram
 - [ ] **Backend:** Criar modelo `Denuncia` em `animais/models.py` e endpoint `POST /api/animais/{id}/denunciar/`.
 - [ ] **Frontend:** Adicionar botão *"🚨 Denunciar"* no card/detalhe com modal Tailwind e seleção de motivo.
 - [ ] **Backend:** Implementar privilégio de cota ilimitada de anúncios para contas de Pessoa Jurídica / ONGs homologadas.
+- [ ] **Backend / IA:** Implementar validador de fotos com YOLOv8-nano (`animais/ai_validator.py`) no `AnimalSerializer` para barrar uploads sem animais ou incompatíveis com o cadastro (conforme [[08 - Validacao de Imagens com IA (YOLOv8-nano)]]).
+- [ ] **Frontend / Compliance:** Auditoria e substituição das fotos do Hero Carousel (`assets/images`) por imagens com licença livre comprovada (Unsplash/Pexels) ou fotos reais, com criação de `frontend/assets/images/CREDITS.md` para conformidade jurídica.
 - [ ] **DevOps:** Configuração das variáveis de ambiente de produção no `.env` (Twilio oficial e servidor SMTP).
 
 ---

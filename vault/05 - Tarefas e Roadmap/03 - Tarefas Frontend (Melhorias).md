@@ -129,6 +129,19 @@ As tarefas a seguir compõem o próximo ciclo de desenvolvimento do frontend:
 
 ---
 
+### 📌 Tarefa F5: Revisão de Imagens Estáticas, Direitos Autorais e Créditos (`frontend/assets/images`)
+* **Contexto:** Auditoria de ativos identificou que as fotos estáticas do Hero Carousel (`cachorroDeLado.jpg`, `cachorroComABocaAberta.jpg` e `cachorroCoberto.jpg`) não possuem metadados de autoria ou rastreabilidade de licença registrados no repositório. Embora sejam aceitáveis para prototipagem/ambiente acadêmico, o lançamento em produção exige blindagem jurídica contra infração de copyright. (Nota: 3 SVGs não utilizados totalizando ~10,5 MB foram movidos para `vault/assets/` e adicionados ao `.gitignore`).
+* **Especificação da tarefa:**
+  1. **Substituição ou Homologação das Fotos:**
+     - Escolher fotos definitivas em bancos de imagens com licença livre para uso comercial irrestrito (ex: Unsplash License, Pexels License, CC0) ou adotar fotografias reais de animais atendidos pelas ONGs/iniciativa.
+     - Assegurar padrão técnico de Hero: resolução de 1600px de largura, formato JPEG/WebP leve (~150 KB – 250 KB) e proporção 3:2.
+  2. **Criação do Arquivo de Licenças e Créditos:**
+     - Criar `frontend/assets/images/CREDITS.md` catalogando todos os arquivos estáticos da pasta com: nome do arquivo, fonte original (URL), autor/fotógrafo e tipo de licença.
+  3. **Limpeza de Ativos Legados:**
+     - Avaliar se o arquivo `biscoitos-caindo.gif` (1,09 MB) terá destinação no frontend; caso contrário, excluí-lo ou arquivá-lo no vault para poupar tráfego e espaço.
+
+---
+
 ## 🔗 Próximas Notas Relacionadas
 - [[00 - MOC Tarefas e Roadmap]]
 - [[01 - Checklist de Correções Imediatas]]
