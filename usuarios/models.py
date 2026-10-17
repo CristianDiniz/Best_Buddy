@@ -27,9 +27,10 @@ class Usuario(AbstractUser):
     tipo = models.CharField(
         max_length=2,
         choices=TipoUsuario.choices,
+        default=TipoUsuario.PESSOA_FISICA,
         null=False,
         blank=False
-)
+    )
 
     email = models.EmailField(unique=True)
     telefone = models.CharField(max_length=20, blank=True, null=True, unique=True, verbose_name="Telefone / WhatsApp")
