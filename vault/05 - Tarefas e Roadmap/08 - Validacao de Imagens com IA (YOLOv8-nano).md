@@ -51,6 +51,46 @@ Para cada objeto detectado na foto, o modelo disponibiliza:
 3. `box.conf`: Confiança probabilística de 0.0 a 1.0 (ex: `0.94` = 94% de certeza).
 4. `box.xyxy`: Coordenadas retangulares `[x1, y1, x2, y2]` da posição do animal na imagem.
 
+### 2.5 Ecossistema de IA e Arquitetura Multi-Modelo
+
+A validação de imagens do Best Buddy é composta por dois modelos especializados operando concorrentemente via `ThreadPoolExecutor` sobre a CPU:
+
+1. **YOLOv8-nano (`ultralytics`)**:
+   - **Papel:** Visão computacional e detecção de objetos.
+   - **Objetivo:** Verificar a presença de cães (`dog`) e gatos (`cat`) na imagem e assegurar coerência com o formulário.
+   - **Pesos:** Armazenados em arquivo PyTorch `yolov8n.pt` (~6,2 MB).
+
+2. **OpenNSFW2 (`opennsfw2`)**:
+   - **Papel:** Moderação de conteúdo e segurança da comunidade.
+   - **Objetivo:** Identificar e barrar automaticamente imagens com nudez, pornografia, gore ou conteúdo adulto explícito (limiar de corte em 0.60).
+   - **Pesos:** Armazenados em formato Keras/HDF5 `open_nsfw_weights.h5`.
+
+3. **PyTorch (`torch`)**:
+   - **Papel:** Framework e motor de tensores/redes neurais unificado.
+   - **Unificação:** O Keras foi configurado com `KERAS_BACKEND=torch`, permitindo que ambos os modelos compartilhem o mesmo runtime em C++ na memória do container, sem duplicar dependências de frameworks pesados.
+
+4. **ONNX (`onnxruntime`)**:
+   - **Papel:** Formato aberto e universal de exportação de redes neurais.
+   - **Vantagem:** Permite converter pesos `.pt` para `.onnx` para rodar inferência ultra-leve via CPU sem carregar o PyTorch completo no ambiente.
+
+#### Tabela Comparativa de Componentes
+
+| Componente | O que é | Formato de Pesos | Função no Best Buddy |
+| :--- | :--- | :---: | :--- |
+| **YOLOv8-nano** | IA de Detecção de Objetos | `*.pt` | Identifica se há cão ou gato na foto |
+| **OpenNSFW2** | IA de Moderação e Segurança | `*.h5` | Bloqueia conteúdo adulto, gore e nudez |
+| **PyTorch** | Motor de Tensores e Deep Learning | - | Executa os cálculos matemáticos dos modelos na CPU |
+| **ONNX** | Formato Interoperável de Redes Neurais | `*.onnx` | Permite exportação e inferência leve com ONNX Runtime |
+
+### 2.6 Política de Versionamento no `.gitignore`
+
+Para manter o repositório Git enxuto, ágil e em conformidade com as boas práticas de engenharia de software e MLOps:
+
+* `*.pt`: Ignora arquivos de checkpoint e pesos do PyTorch baixados pelo YOLOv8 (`yolov8n.pt`).
+* `*.h5`: Ignora os arquivos de pesos do Keras/TensorFlow baixados pelo OpenNSFW2 (`open_nsfw_weights.h5`).
+* `*.onnx`: Garante que modelos compilados para o formato ONNX não sejam commitados.
+* `vault/assets/`: Ignora anexos binários, capturas de tela e mockups da documentação interna do Obsidian, mantendo apenas arquivos markdown `.md` versionados.
+
 ---
 
 ## 🎯 3. Matriz de Decisão e Regras de Negócio
@@ -242,12 +282,14 @@ Quando o backend responder com `400 Bad Request` contendo o campo `"imagem"`:
 
 ---
 
-## 📅 5. Integração com o Roadmap do Projeto
+## ✅ 6. Status da Implementação
 
-* **Sprint:** **Sprint 5** (*Moderação, Qualidade dos Dados e Conformidade*).
-* **Dependência:** Atua logo após a Camada 1 de compressão WebP do frontend (`image-compressor.js`) e antes do salvamento definitivo no banco de dados.
-* **Documentos Sincronizados no Vault:**
-  * [[00 - MOC Tarefas e Roadmap]]
-  * [[02 - Tarefas Backend (Django)]]
-  * [[06 - Guia de Alinhamento da Equipe e Novo Roadmap]]
-  * [[07 - Otimizacao de Imagens (Pillow e WebP)]]
+- [x] **Modelos de IA Integrados**: YOLOv8-nano (`yolov8n.pt`) + OpenNSFW2 (`open_nsfw_weights.h5`).
+- [x] **Execução Assíncrona / Concorrente**: `ThreadPoolExecutor(max_workers=2)` em [`animais/utils.py`](file:///animais/utils.py) para inferência simultânea.
+- [x] **Regra de Tolerância**: Aceita fotos com cão + gato ou pet com tutor, exigindo ausência estrita (>75% conf) para disparar mismatch.
+- [x] **SEO & GEO Compliance**: Mensagens de erro limpas sem caracteres de emojis.
+- [x] **Foto Obrigatória**: Obrigatória no cadastro (`POST`) e opcional em edição parcial (`PATCH`).
+- [x] **Docker Pronto**: `Dockerfile` configurado com `libgl1`, `libglib2.0-0` e `libgomp1`.
+- [x] **Migração Concluída**: `0003_alter_animal_imagem.py` gerada e aplicada.
+- [x] **Testes Automatizados**: 9 testes unitários em `animais/tests.py` e 14 cenários em `test_endpoints.py` aprovados com 100% de sucesso.
+

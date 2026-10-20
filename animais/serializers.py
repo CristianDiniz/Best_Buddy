@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Animal
+from .utils import validar_imagem_pet_e_seguranca
 
 
 class AnimaisSerializer(serializers.ModelSerializer):
@@ -92,7 +93,35 @@ class AnimaisSerializer(serializers.ModelSerializer):
                 "telefone_contato": "É necessário um número de contato para cadastrar o animal."
             })
 
+        # Validação de foto obrigatória e validação inteligente de imagem com IA
+        imagem = attrs.get('imagem')
+        is_create = not self.instance
+
+        if is_create and not imagem:
+            raise serializers.ValidationError({
+                "imagem": "A foto do animal é obrigatória para publicar o anúncio."
+            })
+
+        if not is_create and 'imagem' in attrs and not imagem and not getattr(self.instance, 'imagem', None):
+            raise serializers.ValidationError({
+                "imagem": "A foto do animal é obrigatória."
+            })
+
+        if imagem and hasattr(imagem, 'file'):
+            tipo_animal = attrs.get('tipo_animal') or (self.instance.tipo_animal if self.instance else None)
+            user_id = getattr(request.user, 'id', None) if request and getattr(request, 'user', None) else None
+            valido, erro_msg, _ = validar_imagem_pet_e_seguranca(
+                imagem.file,
+                tipo_esperado=tipo_animal,
+                user_id=user_id
+            )
+            if not valido:
+                raise serializers.ValidationError({
+                    "imagem": erro_msg
+                })
+
         return attrs
+
 
     def validate_imagem(self, value):
         if value:

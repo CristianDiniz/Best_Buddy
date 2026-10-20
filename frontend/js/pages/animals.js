@@ -67,7 +67,10 @@ function isValidImageType(file) {
 
 function resetImageInput() {
   optimizedImageFile = null;
-  if (petImageInput) petImageInput.value = "";
+  if (petImageInput) {
+    petImageInput.value = "";
+    petImageInput.classList.remove("bb-input--error");
+  }
   if (petImagePreviewWrap) {
     petImagePreviewWrap.classList.add("hidden");
     petImagePreviewWrap.style.display = "none";
@@ -360,6 +363,10 @@ async function openAdoptModal(defaultService = "ADOCAO") {
   modalAlertEl.innerHTML = "";
   formAdoptPet.reset();
   resetImageInput();
+  const labelImg = document.getElementById("label-pet-imagem");
+  if (labelImg) {
+    labelImg.textContent = "Foto do Pet * (JPEG, PNG ou WebP, máx 50MB - otimizada automaticamente)";
+  }
 
   if (wrapPetStatus) wrapPetStatus.classList.add("hidden");
 
@@ -464,6 +471,10 @@ async function openEditPetModal(animal) {
   if (descEl) descEl.value = animal.descricao || "";
 
   resetImageInput();
+  const labelImgEdit = document.getElementById("label-pet-imagem");
+  if (labelImgEdit) {
+    labelImgEdit.textContent = "Foto do Pet (opcional se já possuir foto cadastrada)";
+  }
   if (animal.imagem) {
     setImagePreview(animal.imagem, "Foto cadastrada", "");
   }
@@ -537,6 +548,7 @@ if (petImageInput) {
   petImageInput.addEventListener("change", async (e) => {
     const file = e.target.files && e.target.files[0];
     modalAlertEl.innerHTML = "";
+    petImageInput.classList.remove("bb-input--error");
     optimizedImageFile = null;
     if (!file) {
       resetImageInput();
@@ -666,6 +678,18 @@ formAdoptPet.addEventListener("submit", async (e) => {
     : (servico === "PERDIDO" ? "PERDIDO" : "DISPONIVEL");
 
   const selectedFile = petImageInput && petImageInput.files && petImageInput.files[0];
+
+  // A foto é obrigatória ao criar um novo anúncio
+  if (!isEdit && !selectedFile && !optimizedImageFile) {
+    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">A foto do animal é obrigatória para publicar o anúncio.</div>`;
+    if (petImageInput) {
+      petImageInput.classList.add("bb-input--error");
+      petImageInput.focus();
+    }
+    modalAlertEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    return;
+  }
+
   if (selectedFile) {
     if (!isValidImageType(selectedFile)) {
       modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">Formato de arquivo inválido. Apenas imagens JPEG, PNG ou WebP (.jpg, .jpeg, .png, .webp) são permitidas.</div>`;
@@ -762,7 +786,20 @@ formAdoptPet.addEventListener("submit", async (e) => {
       bbLoadAnimals();
     }, 1000);
   } catch (err) {
-    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">${err.message}</div>`;
+    let errorMsg = err.message || "Ocorreu um erro ao salvar o anúncio.";
+    if (err.payload && err.payload.imagem) {
+      errorMsg = Array.isArray(err.payload.imagem) ? err.payload.imagem.join(" ") : String(err.payload.imagem);
+      if (petImageInput) {
+        petImageInput.classList.add("bb-input--error");
+      }
+    } else if (errorMsg.startsWith("imagem: ")) {
+      errorMsg = errorMsg.replace(/^imagem:\s*/, "");
+      if (petImageInput) {
+        petImageInput.classList.add("bb-input--error");
+      }
+    }
+    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">${errorMsg}</div>`;
+    modalAlertEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
   } finally {
     modalSubmitBtn.disabled = false;
     modalSubmitBtn.textContent = isEdit

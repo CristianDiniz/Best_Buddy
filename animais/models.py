@@ -170,8 +170,11 @@ class Animal(models.Model):
 
     def save(self, *args, **kwargs):
         # Verifica se há imagem e se ela é um arquivo recém-enviado pelo cliente
-        if self.imagem and hasattr(self.imagem, 'file'):
-            if isinstance(self.imagem.file, UploadedFile):
-                self.imagem = otimizar_imagem_animal(self.imagem)
+        if self.imagem:
+            try:
+                if getattr(self.imagem, '_file', None) is not None and isinstance(self.imagem._file, UploadedFile):
+                    self.imagem = otimizar_imagem_animal(self.imagem)
+            except Exception:
+                pass
 
         super().save(*args, **kwargs)
