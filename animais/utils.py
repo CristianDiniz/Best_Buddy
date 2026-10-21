@@ -96,10 +96,10 @@ def verificar_pet_yolo(img_pil, tipo_esperado=None):
                 if tem_esperado:
                     return True, "", "OK", pets_encontrados
 
-                # Só acusa mismatch se o animal oposto foi detectado com alta certeza (>= 0.75) e o esperado não apareceu
+                # Só acusa mismatch se o animal oposto foi detectado com alta certeza (>= 0.65) e o esperado não apareceu
                 classe_oposta = 'cat' if classe_esperada == 'dog' else 'dog'
                 apenas_oposto_com_certeza = any(
-                    cls_name == classe_oposta and conf >= 0.75 for cls_name, conf in pets_encontrados
+                    cls_name == classe_oposta and conf >= 0.65 for cls_name, conf in pets_encontrados
                 )
 
                 if apenas_oposto_com_certeza:
