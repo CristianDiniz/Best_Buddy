@@ -58,7 +58,7 @@ def verificar_pet_yolo(img_pil, tipo_esperado=None):
     """
     detector = get_yolo_detector()
     if detector is None:
-        logger.warning("Detector YOLOv8 indisponível. Imagem aprovada por fallback resiliente.")
+        logger.warning("Detector de pets indisponível. Imagem aprovada por fallback resiliente.")
         return True, "", "OK", []
 
     try:
@@ -96,19 +96,13 @@ def verificar_pet_yolo(img_pil, tipo_esperado=None):
                 if tem_esperado:
                     return True, "", "OK", pets_encontrados
 
-                # Só acusa mismatch se o animal oposto foi detectado com alta certeza (>= 0.65) e o esperado não apareceu
-                classe_oposta = 'cat' if classe_esperada == 'dog' else 'dog'
-                apenas_oposto_com_certeza = any(
-                    cls_name == classe_oposta and conf >= 0.65 for cls_name, conf in pets_encontrados
+                # Se o pet esperado não estiver presente, rejeita imediatamente
+                return (
+                    False,
+                    f"Não detectamos o {nome_pt} mencionado na foto.",
+                    "PET_MISMATCH",
+                    pets_encontrados
                 )
-
-                if apenas_oposto_com_certeza:
-                    return (
-                        False,
-                        f"Não detectamos o {nome_pt} mencionado na foto.",
-                        "PET_MISMATCH",
-                        pets_encontrados
-                    )
 
         return True, "", "OK", pets_encontrados
 
