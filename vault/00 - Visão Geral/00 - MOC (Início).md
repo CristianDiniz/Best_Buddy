@@ -56,6 +56,7 @@ Este repositório de notas documenta tanto o **Backend Django REST** quanto o **
 - [[05 - Modelagem de Dados e Relacionamentos]] — Diagrama ERD em Mermaid e Dicionário de 8 tabelas.
 - [[06 - Matriz de Gap Analysis (O que Adicionar, Ajustar e Remover)]] — Confronto direto: código atual vs requisitos.
 - [[07 - Plano de Ação e Roadmap de Implementação]] — Cronograma detalhado em 5 fases de execução.
+- [[09 - Privacidade, Dados Sensiveis (LGPD) e Termos de Adesao]] — Tratamento LGPD, dados sensíveis, cookies/storage e modais de consentimento.
 
 ---
 
