@@ -50,9 +50,11 @@ const petImageFilename = document.getElementById("pet-imagem-filename");
 const petImageFilesize = document.getElementById("pet-imagem-filesize");
 const petImageClearBtn = document.getElementById("pet-imagem-clear-btn");
 
-const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
-const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png"];
-const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png"];
+let optimizedImageFile = null;
+
+const MAX_IMAGE_SIZE_BYTES = 50 * 1024 * 1024; // 50 MB (otimizado no front via Canvas antes do upload)
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
 
 function isValidImageType(file) {
   if (!file) return false;
@@ -64,7 +66,11 @@ function isValidImageType(file) {
 }
 
 function resetImageInput() {
-  if (petImageInput) petImageInput.value = "";
+  optimizedImageFile = null;
+  if (petImageInput) {
+    petImageInput.value = "";
+    petImageInput.classList.remove("bb-input--error");
+  }
   if (petImagePreviewWrap) {
     petImagePreviewWrap.classList.add("hidden");
     petImagePreviewWrap.style.display = "none";
@@ -357,6 +363,10 @@ async function openAdoptModal(defaultService = "ADOCAO") {
   modalAlertEl.innerHTML = "";
   formAdoptPet.reset();
   resetImageInput();
+  const labelImg = document.getElementById("label-pet-imagem");
+  if (labelImg) {
+    labelImg.textContent = "Foto do Pet * (JPEG, PNG ou WebP, máx 50MB - otimizada automaticamente)";
+  }
 
   if (wrapPetStatus) wrapPetStatus.classList.add("hidden");
 
@@ -461,6 +471,10 @@ async function openEditPetModal(animal) {
   if (descEl) descEl.value = animal.descricao || "";
 
   resetImageInput();
+  const labelImgEdit = document.getElementById("label-pet-imagem");
+  if (labelImgEdit) {
+    labelImgEdit.textContent = "Foto do Pet (opcional se já possuir foto cadastrada)";
+  }
   if (animal.imagem) {
     setImagePreview(animal.imagem, "Foto cadastrada", "");
   }
@@ -531,32 +545,55 @@ window.addEventListener("keydown", (e) => {
 });
 
 if (petImageInput) {
-  petImageInput.addEventListener("change", (e) => {
+  petImageInput.addEventListener("change", async (e) => {
     const file = e.target.files && e.target.files[0];
     modalAlertEl.innerHTML = "";
+    petImageInput.classList.remove("bb-input--error");
+    optimizedImageFile = null;
     if (!file) {
       resetImageInput();
       return;
     }
 
     if (!isValidImageType(file)) {
-      modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">Formato de arquivo inválido. Por favor, envie uma imagem nos formatos JPEG ou PNG (.jpg, .jpeg, .png).</div>`;
+      modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">Formato de arquivo inválido. Permitidos: JPEG, PNG ou WebP (.jpg, .jpeg, .png, .webp).</div>`;
       resetImageInput();
       return;
     }
 
     if (file.size > MAX_IMAGE_SIZE_BYTES) {
       const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-      modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">O arquivo selecionado tem ${sizeMB} MB. O tamanho máximo permitido é de 5 MB.</div>`;
+      modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">O arquivo selecionado tem ${sizeMB} MB. O tamanho máximo permitido é de 50 MB.</div>`;
       resetImageInput();
       return;
     }
 
     const previewUrl = URL.createObjectURL(file);
-    const sizeKB = file.size > 1024 * 1024
-      ? `${(file.size / (1024 * 1024)).toFixed(2)} MB`
-      : `${(file.size / 1024).toFixed(1)} KB`;
-    setImagePreview(previewUrl, file.name, sizeKB);
+    setImagePreview(previewUrl, file.name, "Otimizando imagem...");
+
+    // Compacta com Canvas em background enquanto o usuário preenche o restante do formulário
+    try {
+      if (typeof bbImageCompressor !== "undefined") {
+        const result = await bbImageCompressor.compress(file);
+        optimizedImageFile = result.file;
+        const newPreviewUrl = URL.createObjectURL(result.file);
+        const originalText = bbImageCompressor.formatBytes(result.originalSize);
+        const compressedText = bbImageCompressor.formatBytes(result.compressedSize);
+        const savedText = result.ratioSaved > 0 ? ` (-${result.ratioSaved}%)` : "";
+        setImagePreview(
+          newPreviewUrl,
+          result.file.name,
+          `${compressedText}${savedText} • original: ${originalText}`
+        );
+      } else {
+        const sizeKB = file.size > 1024 * 1024
+          ? `${(file.size / (1024 * 1024)).toFixed(2)} MB`
+          : `${(file.size / 1024).toFixed(1)} KB`;
+        setImagePreview(previewUrl, file.name, sizeKB);
+      }
+    } catch (err) {
+      console.warn("Erro na compressão preliminar da imagem:", err);
+    }
   });
 }
 
@@ -641,15 +678,27 @@ formAdoptPet.addEventListener("submit", async (e) => {
     : (servico === "PERDIDO" ? "PERDIDO" : "DISPONIVEL");
 
   const selectedFile = petImageInput && petImageInput.files && petImageInput.files[0];
+
+  // A foto é obrigatória ao criar um novo anúncio
+  if (!isEdit && !selectedFile && !optimizedImageFile) {
+    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">A foto do animal é obrigatória para publicar o anúncio.</div>`;
+    if (petImageInput) {
+      petImageInput.classList.add("bb-input--error");
+      petImageInput.focus();
+    }
+    modalAlertEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    return;
+  }
+
   if (selectedFile) {
     if (!isValidImageType(selectedFile)) {
-      modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">Formato de arquivo inválido. Apenas imagens JPEG ou PNG (.jpg, .jpeg, .png) são permitidas.</div>`;
+      modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">Formato de arquivo inválido. Apenas imagens JPEG, PNG ou WebP (.jpg, .jpeg, .png, .webp) são permitidas.</div>`;
       petImageInput.focus();
       return;
     }
     if (selectedFile.size > MAX_IMAGE_SIZE_BYTES) {
       const sizeMB = (selectedFile.size / (1024 * 1024)).toFixed(2);
-      modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">O arquivo de imagem excede o tamanho máximo de 5 MB (${sizeMB} MB).</div>`;
+      modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">O arquivo de imagem excede o tamanho máximo de 50 MB (${sizeMB} MB).</div>`;
       petImageInput.focus();
       return;
     }
@@ -664,6 +713,23 @@ formAdoptPet.addEventListener("submit", async (e) => {
   const castradoVal = document.getElementById("pet-castrado")?.value.trim();
   const medVal = document.getElementById("pet-medicamento")?.value.trim();
   const localVal = document.getElementById("pet-local")?.value.trim();
+
+  let fileToUpload = selectedFile;
+  if (selectedFile) {
+    if (optimizedImageFile) {
+      fileToUpload = optimizedImageFile;
+    } else if (typeof bbImageCompressor !== "undefined") {
+      modalSubmitBtn.disabled = true;
+      modalSubmitBtn.innerHTML = '<span class="bb-btn__spinner" aria-hidden="true"></span> Otimizando imagem...';
+      try {
+        const result = await bbImageCompressor.compress(selectedFile);
+        fileToUpload = result.file;
+        optimizedImageFile = result.file;
+      } catch (err) {
+        console.warn("Falha ao compactar antes do envio, usando original:", err);
+      }
+    }
+  }
 
   let payload;
   if (selectedFile) {
@@ -682,7 +748,7 @@ formAdoptPet.addEventListener("submit", async (e) => {
     if (castradoVal) payload.append("castrado", castradoVal);
     if (medVal) payload.append("medicamento", medVal);
     if (servico === "PERDIDO" && localVal) payload.append("local", localVal);
-    payload.append("imagem", selectedFile);
+    payload.append("imagem", fileToUpload);
   } else {
     payload = {
       tipo_servico: servico,
@@ -720,7 +786,20 @@ formAdoptPet.addEventListener("submit", async (e) => {
       bbLoadAnimals();
     }, 1000);
   } catch (err) {
-    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">${err.message}</div>`;
+    let errorMsg = err.message || "Ocorreu um erro ao salvar o anúncio.";
+    if (err.payload && err.payload.imagem) {
+      errorMsg = Array.isArray(err.payload.imagem) ? err.payload.imagem.join(" ") : String(err.payload.imagem);
+      if (petImageInput) {
+        petImageInput.classList.add("bb-input--error");
+      }
+    } else if (errorMsg.startsWith("imagem: ")) {
+      errorMsg = errorMsg.replace(/^imagem:\s*/, "");
+      if (petImageInput) {
+        petImageInput.classList.add("bb-input--error");
+      }
+    }
+    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">${errorMsg}</div>`;
+    modalAlertEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
   } finally {
     modalSubmitBtn.disabled = false;
     modalSubmitBtn.textContent = isEdit

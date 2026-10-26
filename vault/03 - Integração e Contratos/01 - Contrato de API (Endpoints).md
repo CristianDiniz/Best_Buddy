@@ -157,9 +157,9 @@ Publicação de anúncio de adoção ou reporte de animal perdido.
   - `idade_aproximada`: `"Filhote"`
   - `castrado`: `"Sim"`
   - `medicamento`: `"Não"`
-  - `imagem`: Arquivo binário de imagem (`.png`, `.jpg`, `.jpeg` de até 5 MB).
+  - `imagem`: Arquivo binário de imagem (`.png`, `.jpg`, `.jpeg`, `.webp` de até 15 MB).
 - **Regras de Negócio e Validações**:
-  - `imagem`: Validação estrita de extensão (apenas JPEG e PNG) e tamanho máximo de 5 MB.
+  - `imagem`: Validação de extensão (`.png`, `.jpg`, `.jpeg`, `.webp`) e tamanho máximo de 15 MB. O backend converte automaticamente para WebP otimizado via Pillow ou aceita WebP comprimido pelo frontend (Fast-Path).
   - `telefone_contato`: Campo obrigatório (com DDD). Caso ausente, herda o telefone validado do tutor logado; se nenhum existir, rejeita com HTTP 400 (`"É necessário um número de contato para cadastrar o animal."`).
   - Cota de 5 anúncios ativos para usuários comuns (PF).
 - **Response 201**: Registro criado com `id` e dados completos (incluindo URL da `imagem` persistida em `/media/animais/`).

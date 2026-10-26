@@ -2,3 +2,10 @@ node_modules/
 old/
 __pycache__/
 *.pyc
+vault/assets/
+*.pt
+*.onnx
+*.h5
+logs/
+*.log
+media/

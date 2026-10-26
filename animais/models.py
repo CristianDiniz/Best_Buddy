@@ -2,10 +2,12 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import UploadedFile
+from .utils import otimizar_imagem_animal
 
 
 def validar_tamanho_imagem(arquivo):
-    limite_mb = 5
+    limite_mb = 15
     if arquivo.size > limite_mb * 1024 * 1024:
         raise ValidationError(f"O tamanho máximo da imagem é de {limite_mb} MB.")
 
@@ -129,7 +131,7 @@ class Animal(models.Model):
         null=True,
         verbose_name="Foto do animal",
         validators=[
-            FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
+            FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'webp']),
             validar_tamanho_imagem
         ]
     )
@@ -165,3 +167,14 @@ class Animal(models.Model):
     def __str__(self):
         servico = "Adoção" if self.tipo_servico == self.TipoServico.ADOCAO else "Perdido"
         return f"[{servico}] {self.nome or 'Sem nome'} ({self.cidade})"
+
+    def save(self, *args, **kwargs):
+        # Verifica se há imagem e se ela é um arquivo recém-enviado pelo cliente
+        if self.imagem:
+            try:
+                if getattr(self.imagem, '_file', None) is not None and isinstance(self.imagem._file, UploadedFile):
+                    self.imagem = otimizar_imagem_animal(self.imagem)
+            except Exception:
+                pass
+
+        super().save(*args, **kwargs)
