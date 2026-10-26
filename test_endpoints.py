@@ -327,6 +327,19 @@ def run_tests():
     tutor_mgmt.delete()
     outro_user.delete()
 
+    # 15. Testando Estatísticas e Exclusão de Animais Adotados
+    print("\n15. Testando GET /api/animais/estatisticas/ e ?exclude_status=ADOTADO ...")
+    res_stats = client.get('/api/animais/estatisticas/')
+    assert res_stats.status_code == 200
+    assert 'total_adotados' in res_stats.data
+    assert 'total_disponiveis' in res_stats.data
+    print(f"OK! Estatísticas retornadas com sucesso: {res_stats.data}")
+
+    res_excl = client.get('/api/animais/?exclude_status=ADOTADO')
+    assert res_excl.status_code == 200
+    assert not any(p['status'] == 'ADOTADO' for p in res_excl.data)
+    print("OK! Animais adotados removidos com sucesso da lista com exclude_status=ADOTADO.")
+
     print("\n=== TODOS OS TESTES PASSARAM COM SUCESSO! ===")
 
 if __name__ == '__main__':

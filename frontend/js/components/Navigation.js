@@ -10,6 +10,7 @@ function bbRenderNavigation(targetSelector, activePage) {
   const links = [
     { key: "home", label: "Home", href: "/pages/home/index.html", icon: "🏠" },
     { key: "animals", label: "Animais", href: "/pages/animals/index.html", icon: "🐾" },
+    { key: "about", label: "Sobre Nós", href: "/pages/about/index.html", icon: "💙" },
   ];
 
   if (isAuth) {
