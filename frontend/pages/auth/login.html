@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="../../css/tailwind.build.css?v=6" />
 </head>
+
 <body class="overflow-x-hidden">
   <div class="bb-auth-shell">
     <!-- Vídeo em Background em Loop -->
@@ -43,7 +45,8 @@
 
           <div class="bb-field">
             <label class="bb-label" for="password">Senha</label>
-            <input class="bb-input" type="password" id="password" name="password" placeholder="Digite sua senha" required />
+            <input class="bb-input" type="password" id="password" name="password" placeholder="Digite sua senha"
+              required />
             <div class="bb-error-text" id="password-error"></div>
           </div>
 
@@ -53,10 +56,13 @@
 
           <div class="bb-field mb-5">
             <label class="flex items-start gap-2.5 cursor-pointer text-xs text-ink-300 select-none">
-              <input type="checkbox" id="login-cookie-consent" class="mt-0.5 rounded border-slate-300 text-sky-500 focus:ring-sky-400 cursor-pointer" />
+              <input type="checkbox" id="login-cookie-consent"
+                class="mt-0.5 rounded border-slate-300 text-sky-500 focus:ring-sky-400 cursor-pointer" />
               <span>
-                Autorizo o armazenamento essencial de cookies e tokens de sessao (JWT) para manter minha conta conectada conforme a
-                <a href="/pages/legal/privacy.html" target="_blank" class="text-brand-400 font-semibold underline hover:text-brand-300">Politica de Privacidade</a>.
+                Autorizo o armazenamento essencial de cookies e tokens de sessao (JWT) para manter minha conta conectada
+                conforme a
+                <a href="/pages/legal/privacy.html" target="_blank"
+                  class="text-brand-400 font-semibold underline hover:text-brand-300">Politica de Privacidade</a>.
               </span>
             </label>
             <div class="bb-error-text mt-1" id="cookie-consent-error"></div>
@@ -87,8 +93,8 @@
   <script src="../../js/api/client.js"></script>
   <script src="../../js/services/authService.js"></script>
   <script src="../../js/components/AuthHeader.js"></script>
-  <script src="../../js/components/CookieBanner.js?v=6"></script>
   <script src="../../js/utils/click-limiter.js"></script>
   <script src="../../js/pages/login.js?v=6"></script>
 </body>
+
 </html>

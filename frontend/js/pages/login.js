@@ -84,25 +84,6 @@ bbLoginForm.addEventListener("submit", async (event) => {
     if (errorEl) {
       errorEl.textContent = errorMsg;
     }
-    bbFormAlert.innerHTML = `
-      <div class="bb-alert bb-alert--error flex flex-col gap-2">
-        <span>${errorMsg}</span>
-        <button type="button" id="btn-quick-accept-cookies" class="bb-btn bb-btn--primary text-xs py-1.5 px-3 w-fit mt-1">
-          Aceitar Cookies e Entrar
-        </button>
-      </div>
-    `;
-    const quickBtn = document.getElementById("btn-quick-accept-cookies");
-    if (quickBtn) {
-      quickBtn.addEventListener("click", () => {
-        localStorage.setItem("bb_cookie_consent", "accepted");
-        if (checkboxEl) checkboxEl.checked = true;
-        const banner = document.getElementById("bb-cookie-banner");
-        if (banner) banner.remove();
-        bbFormAlert.innerHTML = "";
-        bbLoginForm.dispatchEvent(new Event("submit"));
-      });
-    }
     if (checkboxEl) checkboxEl.focus();
     return;
   }
