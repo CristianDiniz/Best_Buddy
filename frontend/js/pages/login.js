@@ -79,7 +79,7 @@ bbLoginForm.addEventListener("submit", async (event) => {
   const consentGiven = (checkboxEl && checkboxEl.checked) || bbHasCookieConsent();
 
   if (!consentGiven) {
-    const errorMsg = "Para entrar na sua conta e salvar o token de sessao, e obrigatorio aceitar os termos de cookies e armazenamento local (LGPD).";
+    const errorMsg = "Para poder utilizar este recurso, precisamos que aceite os termos de cookies e armazenamento.";
     const errorEl = document.getElementById("cookie-consent-error");
     if (errorEl) {
       errorEl.textContent = errorMsg;
@@ -110,7 +110,7 @@ bbLoginForm.addEventListener("submit", async (event) => {
   bbSetLoading(true);
   try {
     const session = await authService.login({ email, password });
-    
+
     // Assegura registro de consentimento aceito e remove o banner flutuante
     localStorage.setItem("bb_cookie_consent", "accepted");
     const banner = document.getElementById("bb-cookie-banner");
