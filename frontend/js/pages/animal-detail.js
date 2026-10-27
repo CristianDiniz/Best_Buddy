@@ -18,7 +18,7 @@ async function bbLoadDetail() {
     const petNome = animal.nome || "pet";
     const isPerdido = animal.tipo_servico === "PERDIDO";
     const tutorNome = animal.tutor_nome || "Tutor / Protetor";
-    const btnTexto = isPerdido ? "🚨 Vi este Pet (WhatsApp)" : "🐾 Quero Adotar (WhatsApp)";
+    const btnTexto = isPerdido ? "Vi este Pet (WhatsApp)" : "Quero Adotar (WhatsApp)";
     const waMsg = isPerdido
       ? `Olá, ${tutorNome}! Vi o anúncio do(a) ${encodeURIComponent(petNome)} como animal perdido no Best Buddy e gostaria de passar informações!`
       : `Olá, ${tutorNome}! Vi o anúncio do(a) ${encodeURIComponent(petNome)} para adoção no Best Buddy e tenho interesse em adotá-lo(a)!`;
@@ -34,7 +34,7 @@ async function bbLoadDetail() {
             <div class="text-right">
               <span class="text-xs uppercase tracking-wider text-ink-500 font-semibold block">Telefone / Ligação</span>
               <a href="tel:+55${cleanPhone}" class="text-brand-300 font-mono text-sm hover:underline font-bold">
-                📞 ${animal.telefone_contato}
+                ${animal.telefone_contato}
               </a>
             </div>
           </div>
@@ -45,13 +45,13 @@ async function bbLoadDetail() {
                target="_blank"
                rel="noopener noreferrer"
                id="bb-btn-adotar">
-              <span aria-hidden="true">💬</span> ${btnTexto}
+              ${btnTexto}
             </a>
 
             <a class="bb-btn bb-btn--secondary inline-flex items-center justify-center gap-2"
                href="tel:+55${cleanPhone}"
                title="Fazer ligação convencional">
-              <span aria-hidden="true">📞</span> Ligar
+              Ligar
             </a>
           </div>
         </div>
@@ -70,16 +70,15 @@ async function bbLoadDetail() {
       ? `
         <div class="mt-4 p-4 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-between gap-3 flex-wrap">
           <div class="flex items-center gap-2">
-            <span class="text-base">⭐</span>
             <span class="text-sm font-semibold text-brand-300">Este anúncio foi publicado por você!</span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <a href="/pages/animals/index.html?edit=${animal.id}" class="bb-btn bb-btn--xs bb-btn--primary">
-              ✏️ Editar Anúncio
+              Editar Anúncio
             </a>
             ${animal.status !== "ADOTADO" && animal.status !== "ENCONTRADO" ? `
               <button type="button" class="bb-btn bb-btn--xs bb-btn--secondary btn-detail-finish" data-id="${animal.id}" data-status="${isPerdido ? 'ENCONTRADO' : 'ADOTADO'}">
-                ${isPerdido ? '🎉 Marcar Encontrado' : '✅ Marcar Adotado'}
+                ${isPerdido ? 'Marcar Encontrado' : 'Marcar Adotado'}
               </button>
             ` : `<span class="text-xs text-ink-400 font-medium py-1 px-2 rounded bg-surface-700/60">Anúncio concluído</span>`}
           </div>
@@ -94,12 +93,12 @@ async function bbLoadDetail() {
           <div class="flex items-center justify-between mb-2">
             <h1 class="bb-page-title mb-0">${animal.nome || "Pet sem nome"}</h1>
             <span class="bb-status-badge ${animal.status === 'ADOTADO' ? 'bb-status-badge--adotado' : animal.status === 'ENCONTRADO' ? 'bb-status-badge--encontrado' : isPerdido ? 'bb-status-badge--perdido' : 'bb-status-badge--adocao'}">
-              ${animal.status === 'ADOTADO' ? '✅ Adotado' : animal.status === 'ENCONTRADO' ? '🎉 Encontrado' : isPerdido ? '🚨 Desaparecido' : '🐾 Para Adoção'}
+              ${animal.status === 'ADOTADO' ? 'Adotado' : animal.status === 'ENCONTRADO' ? 'Encontrado' : isPerdido ? 'Desaparecido' : 'Para Adoção'}
             </span>
           </div>
 
           <p class="text-ink-300 mb-4 flex flex-wrap gap-2">
-            ${animal.cidade ? `<span class="px-3 py-1 rounded-full bg-surface-700 border border-border text-sm">📍 ${animal.cidade}${animal.estado ? ` - ${animal.estado}` : ''}</span>` : ""}
+            ${animal.cidade ? `<span class="px-3 py-1 rounded-full bg-surface-700 border border-border text-sm">${animal.cidade}${animal.estado ? ` - ${animal.estado}` : ''}</span>` : ""}
             <span class="px-3 py-1 rounded-full bg-surface-700 border border-border text-sm">${animal.raca || "SRD"}</span>
             ${animal.idade_aproximada ? `<span class="px-3 py-1 rounded-full bg-surface-700 border border-border text-sm">${animal.idade_aproximada}</span>` : ""}
             ${animal.sexo ? `<span class="px-3 py-1 rounded-full bg-surface-700 border border-border text-sm">${bbSexoLabel[animal.sexo] || animal.sexo}</span>` : ""}

@@ -8,6 +8,28 @@ bbRenderAuthHeader("#bb-header");
 const bbLoginForm = document.getElementById("bb-login-form");
 const bbSubmitBtn = document.getElementById("bb-submit-btn");
 const bbFormAlert = document.getElementById("bb-form-alert");
+const bbConsentCheckbox = document.getElementById("login-cookie-consent");
+const bbConsentError = document.getElementById("cookie-consent-error");
+
+function bbHasCookieConsent() {
+  const c = localStorage.getItem("bb_cookie_consent");
+  return c === "accepted" || c === "true";
+}
+
+// Sincroniza o checkbox com o status atual de consentimento
+if (bbConsentCheckbox) {
+  if (bbHasCookieConsent()) {
+    bbConsentCheckbox.checked = true;
+  }
+  bbConsentCheckbox.addEventListener("change", () => {
+    if (bbConsentCheckbox.checked) {
+      if (bbConsentError) bbConsentError.textContent = "";
+      localStorage.setItem("bb_cookie_consent", "accepted");
+      const banner = document.getElementById("bb-cookie-banner");
+      if (banner) banner.remove();
+    }
+  });
+}
 
 function bbClearErrors() {
   bbFormAlert.innerHTML = "";
@@ -18,8 +40,8 @@ function bbClearErrors() {
 function bbShowFieldError(fieldId, message) {
   const input = document.getElementById(fieldId);
   const errorEl = document.getElementById(`${fieldId}-error`);
-  input.classList.add("bb-input--error");
-  errorEl.textContent = message;
+  if (input) input.classList.add("bb-input--error");
+  if (errorEl) errorEl.textContent = message;
 }
 
 function bbSetLoading(isLoading) {
@@ -41,7 +63,7 @@ bbLoginForm.addEventListener("submit", async (event) => {
     {
       email: [
         { test: bbValidation.isRequired, message: "Informe seu email." },
-        { test: bbValidation.isEmail, message: "Email inválido." },
+        { test: bbValidation.isEmail, message: "Email invalido." },
       ],
       password: [{ test: bbValidation.isRequired, message: "Informe sua senha." }],
     }
@@ -52,9 +74,48 @@ bbLoginForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  // Validacao estrita de consentimento para armazenamento de sessao e cookies essenciais
+  const checkboxEl = document.getElementById("login-cookie-consent");
+  const consentGiven = (checkboxEl && checkboxEl.checked) || bbHasCookieConsent();
+
+  if (!consentGiven) {
+    const errorMsg = "Para entrar na sua conta e salvar o token de sessao, e obrigatorio aceitar os termos de cookies e armazenamento local (LGPD).";
+    const errorEl = document.getElementById("cookie-consent-error");
+    if (errorEl) {
+      errorEl.textContent = errorMsg;
+    }
+    bbFormAlert.innerHTML = `
+      <div class="bb-alert bb-alert--error flex flex-col gap-2">
+        <span>${errorMsg}</span>
+        <button type="button" id="btn-quick-accept-cookies" class="bb-btn bb-btn--primary text-xs py-1.5 px-3 w-fit mt-1">
+          Aceitar Cookies e Entrar
+        </button>
+      </div>
+    `;
+    const quickBtn = document.getElementById("btn-quick-accept-cookies");
+    if (quickBtn) {
+      quickBtn.addEventListener("click", () => {
+        localStorage.setItem("bb_cookie_consent", "accepted");
+        if (checkboxEl) checkboxEl.checked = true;
+        const banner = document.getElementById("bb-cookie-banner");
+        if (banner) banner.remove();
+        bbFormAlert.innerHTML = "";
+        bbLoginForm.dispatchEvent(new Event("submit"));
+      });
+    }
+    if (checkboxEl) checkboxEl.focus();
+    return;
+  }
+
   bbSetLoading(true);
   try {
     const session = await authService.login({ email, password });
+    
+    // Assegura registro de consentimento aceito e remove o banner flutuante
+    localStorage.setItem("bb_cookie_consent", "accepted");
+    const banner = document.getElementById("bb-cookie-banner");
+    if (banner) banner.remove();
+
     bbStorage.setSession(session);
 
     const params = new URLSearchParams(window.location.search);

@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Best Buddy — Criar conta</title>
+  <title>Best Buddy | Criar conta</title>
   <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
   <link rel="alternate icon" type="image/x-icon" href="../../favicon.ico" />
   <link rel="apple-touch-icon" href="../../apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="stylesheet" href="../../css/tailwind.build.css" />
+  <link rel="stylesheet" href="../../css/tailwind.build.css?v=6" />
 </head>
 <body class="overflow-x-hidden">
   <div class="bb-auth-shell">
@@ -63,6 +63,19 @@
             <div class="bb-error-text" id="confirmar-senha-error"></div>
           </div>
 
+          <div class="bb-field mb-4">
+            <label class="flex items-start gap-2.5 cursor-pointer text-xs text-ink-300 select-none">
+              <input type="checkbox" id="termos-aceite" name="termos_aceitos" class="mt-0.5 rounded border-slate-300 text-sky-500 focus:ring-sky-400 cursor-pointer" required />
+              <span>
+                Declaro que li e concordo com os
+                <a href="javascript:void(0)" id="open-terms-link" class="text-brand-400 font-semibold underline hover:text-brand-300">Termos de Uso e Adesão</a>
+                e a
+                <a href="/pages/legal/privacy.html" target="_blank" class="text-brand-400 font-semibold underline hover:text-brand-300">Política de Privacidade</a>.
+              </span>
+            </label>
+            <div class="bb-error-text mt-1" id="termos-error"></div>
+          </div>
+
           <button class="bb-btn bb-btn--primary bb-btn--block" type="submit" id="bb-submit-btn">
             Criar conta
           </button>
@@ -75,7 +88,7 @@
     </main>
 
     <footer class="bb-auth-footer-simple">
-      © Best Buddy — Todos os direitos reservados
+      &copy; Best Buddy | Todos os direitos reservados
     </footer>
   </div>
 
@@ -87,6 +100,8 @@
   <script src="../../js/api/client.js"></script>
   <script src="../../js/services/authService.js"></script>
   <script src="../../js/components/AuthHeader.js"></script>
+  <script src="../../js/components/TermsModal.js"></script>
+  <script src="../../js/components/CookieBanner.js?v=6"></script>
   <script src="../../js/utils/click-limiter.js"></script>
   <script src="../../js/pages/register.js"></script>
 </body>

@@ -157,12 +157,12 @@ erDiagram
 - [ ] **Frontend:** Adicionar botão *"🚨 Denunciar"* no card/detalhe com modal Tailwind e seleção de motivo.
 - [ ] **Backend:** Implementar privilégio de cota ilimitada de anúncios para contas de Pessoa Jurídica / ONGs homologadas.
 - [x] **Backend / IA:** Implementar validador de fotos com YOLOv8-nano e OpenNSFW2 com fallback resiliente e telemetria estruturada (`animais/utils.py`).
-- [ ] **Compliance, LGPD e Termos (Opção A):** Implementar Termos de Adesão, Política de Privacidade e Banner de Cookies conforme [[09 - Privacidade, Dados Sensiveis (LGPD) e Termos de Adesao]]:
-  - [ ] Páginas estáticas dedicadas `frontend/pages/legal/terms.html` e `privacy.html`.
-  - [ ] Banner flutuante de armazenamento essencial/cookies (`CookieBanner.js`).
-  - [ ] Checkbox bloqueante no cadastro (`register.html`) e modal de leitura rápida (`TermsModal.js`).
-  - [ ] Disclaimer de responsabilidade e autorização de WhatsApp nos modais de cadastro de pets (`animals/index.html`).
-  - [ ] Campo de auditoria de aceite no modelo `Usuario` (`termos_aceitos_em`).
+- [x] **Compliance, LGPD e Termos (Opção A):** Implementar Termos de Adesão, Política de Privacidade e Banner de Cookies conforme [[09 - Privacidade, Dados Sensiveis (LGPD) e Termos de Adesao]]:
+  - [x] Páginas estáticas dedicadas `frontend/pages/legal/terms.html` e `privacy.html`.
+  - [x] Banner flutuante de armazenamento essencial/cookies (`CookieBanner.js`).
+  - [x] Checkbox bloqueante no cadastro (`register.html`) e modal de leitura rápida (`TermsModal.js`).
+  - [x] Disclaimer de responsabilidade e autorização de WhatsApp nos modais de cadastro de pets (`animals/index.html`).
+  - [x] Campo de auditoria de aceite no modelo `Usuario` (`termos_aceitos_em`).
 - [ ] **Frontend / Compliance:** Auditoria e substituição das fotos do Hero Carousel (`assets/images`) por imagens com licença livre comprovada (Unsplash/Pexels) ou fotos reais, com criação de `frontend/assets/images/CREDITS.md` para conformidade jurídica.
 - [ ] **DevOps:** Configuração das variáveis de ambiente de produção no `.env` (Twilio oficial e servidor SMTP).
 

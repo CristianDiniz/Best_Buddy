@@ -3,7 +3,7 @@
  *
  * USE_MOCKS controla se os services usam dados fake (js/mocks/*) ou
  * batem no backend real. Deixe true enquanto o backend não estiver
- * pronto/corrigido — todas as telas funcionam só com o front.
+ * pronto/corrigido - todas as telas funcionam só com o front.
  *
  * Quando o backend estiver ok, mude para false e ajuste API_BASE_URL.
  */

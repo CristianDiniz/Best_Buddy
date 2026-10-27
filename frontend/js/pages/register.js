@@ -54,6 +54,23 @@ if (bbTelefoneInput) {
   });
 }
 
+const bbOpenTermsLink = document.getElementById("open-terms-link");
+if (bbOpenTermsLink) {
+  bbOpenTermsLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (typeof bbOpenTermsModal === "function") {
+      bbOpenTermsModal(() => {
+        const cb = document.getElementById("termos-aceite");
+        if (cb) {
+          cb.checked = true;
+          const errorEl = document.getElementById("termos-error");
+          if (errorEl) errorEl.textContent = "";
+        }
+      });
+    }
+  });
+}
+
 function bbClearErrors() {
   bbFormAlert.innerHTML = "";
   document.querySelectorAll(".bb-error-text").forEach((el) => (el.textContent = ""));
@@ -134,6 +151,14 @@ bbRegisterForm.addEventListener("submit", async (event) => {
     // Prossiga se a rota de verificação não estiver disponível
   }
 
+  const termosCheckbox = document.getElementById("termos-aceite");
+  if (termosCheckbox && !termosCheckbox.checked) {
+    const errorEl = document.getElementById("termos-error");
+    if (errorEl) errorEl.textContent = "Você precisa aceitar os Termos de Uso e a Política de Privacidade para criar sua conta.";
+    termosCheckbox.focus();
+    return;
+  }
+
   try {
     await authService.register({
       nome: data.nome,
@@ -141,7 +166,11 @@ bbRegisterForm.addEventListener("submit", async (event) => {
       telefone: data.telefone.replace(/\D/g, ""),
       password: data.senha,
       tipo: "PF",
+      termos_aceitos: true,
     });
+    localStorage.setItem("bb_cookie_consent", "accepted");
+    const banner = document.getElementById("bb-cookie-banner");
+    if (banner) banner.remove();
     bbFormAlert.innerHTML = `<div class="bb-alert bb-alert--success">Conta criada com sucesso! Redirecionando para o login...</div>`;
     setTimeout(() => (window.location.href = "login.html"), 1200);
   } catch (err) {

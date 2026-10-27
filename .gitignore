@@ -9,3 +9,5 @@ vault/assets/
 logs/
 *.log
 media/
+venv/
+.env

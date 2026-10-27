@@ -12,7 +12,7 @@ const bbValidation = {
   },
 
   // isCPF(value) {
-  //   // Validação de formato (11 dígitos), não de dígito verificador —
+  //   // Validação de formato (11 dígitos), não de dígito verificador -
   //   // suficiente para o front; validação forte fica a cargo do backend.
   //   const digits = (value || "").replace(/\D/g, "");
   //   return digits.length === 11;

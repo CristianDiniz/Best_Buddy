@@ -15,8 +15,10 @@ class UsuarioSerializer(serializers.ModelSerializer):
             "telefone",
             "telefone_validado",
             "created_at",
+            "termos_aceitos_em",
+            "versao_termos",
         ]
-        read_only_fields = ["id", "telefone_validado", "created_at"]
+        read_only_fields = ["id", "telefone_validado", "created_at", "termos_aceitos_em", "versao_termos"]
 
 
 class PessoaFisicaSerializer(serializers.ModelSerializer):
@@ -61,6 +63,7 @@ class RegisterUsuarioSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
     tipo = serializers.ChoiceField(choices=Usuario.TipoUsuario.choices, default="PF")
     telefone = serializers.CharField(required=True, allow_blank=False, allow_null=True)
+    termos_aceitos = serializers.BooleanField(write_only=True, required=False, default=True)
 
     # PF
     nome = serializers.CharField(required=False, allow_blank=True)
@@ -68,6 +71,11 @@ class RegisterUsuarioSerializer(serializers.Serializer):
     # PJ
     razao_social = serializers.CharField(required=False, allow_blank=True)
     cnpj = serializers.CharField(required=False, allow_blank=True)
+
+    def validate_termos_aceitos(self, value):
+        if value is False:
+            raise serializers.ValidationError("É obrigatório aceitar os Termos de Uso e a Política de Privacidade para cadastrar uma conta.")
+        return value
 
     def validate_telefone(self, value):
         if not value:

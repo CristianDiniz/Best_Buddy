@@ -5,7 +5,25 @@ Este guia fornece o passo a passo prático para inicializar ambos os ambientes l
 
 ---
 
-## 1. Como Iniciar o Backend Django
+## ⚡ Inicialização Rápida em 1 Clique (Sem Docker)
+
+Caso não possua o Docker instalado ou não queira gerenciar containers, utilize os scripts automatizados na raiz do repositório:
+
+- **Para subir tudo (MySQL/SQLite, Backend e Frontend):**
+  Dê um duplo clique ou execute no terminal:
+  ```cmd
+  start.bat
+  ```
+  *O script detecta o Python, ativa o ambiente virtual `venv`, verifica o serviço `MySQL80` (com fallback seguro para SQLite), executa as migrações, popula o banco e abre as janelas do Backend (`:8000`), Frontend (`:5500`) e seu navegador automaticamente.*
+
+- **Para parar todos os serviços e liberar as portas:**
+  ```cmd
+  stop.bat
+  ```
+
+---
+
+## 1. Como Iniciar o Backend Django (Modo Manual)
 
 Abra um terminal (PowerShell) no diretório raiz do backend (`Best_Buddy`):
 

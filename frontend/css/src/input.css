@@ -207,7 +207,9 @@
   }
 
   .bb-error-text:not(:empty)::before {
-    content: "⚠";
+    content: "!";
+    font-weight: 700;
+    margin-right: 0.25rem;
   }
 
   .bb-radio-group {
@@ -442,7 +444,7 @@
   }
 
   .bb-animal-card__image--empty::before {
-    content: "🐾";
+    content: "";
     @apply text-3xl opacity-30 group-hover:opacity-50 group-hover:scale-110 transition-all duration-300 block;
   }
 

@@ -120,8 +120,8 @@ function renderLost() {
     bbLostToggleWrapEl.classList.remove("hidden");
     const remaining = allLostAnimals.length - INITIAL_LIMIT;
     bbLostToggleBtn.textContent = lostExpanded
-      ? "Recolher vitrine de desaparecidos ↑"
-      : `Ver mais animais perdidos (${remaining}) ↓`;
+      ? "Recolher vitrine de desaparecidos"
+      : `Ver mais animais perdidos (${remaining})`;
   } else {
     bbLostToggleWrapEl.classList.add("hidden");
   }
@@ -146,8 +146,8 @@ function renderAdopt() {
     bbAdoptToggleWrapEl.classList.remove("hidden");
     const remaining = allAdoptAnimals.length - INITIAL_LIMIT;
     bbAdoptToggleBtn.textContent = adoptExpanded
-      ? "Recolher vitrine de adoção ↑"
-      : `Ver mais animais para adoção (${remaining}) ↓`;
+      ? "Recolher vitrine de adoção"
+      : `Ver mais animais para adoção (${remaining})`;
   } else {
     bbAdoptToggleWrapEl.classList.add("hidden");
   }
@@ -242,7 +242,7 @@ if (filterEstadoSelect) {
     if (filterCidadesDatalist) filterCidadesDatalist.innerHTML = "";
 
     if (!uf) {
-      filterCidadeInput.placeholder = "🔍 Buscar por cidade...";
+      filterCidadeInput.placeholder = "Buscar por cidade...";
     } else {
       filterCidadeInput.placeholder = "Carregando cidades...";
       try {
@@ -264,7 +264,7 @@ filterClearBtn.addEventListener("click", () => {
   if (filterCidadesDatalist) filterCidadesDatalist.innerHTML = "";
   if (filterCidadeInput) {
     filterCidadeInput.value = "";
-    filterCidadeInput.placeholder = "🔍 Buscar por cidade...";
+    filterCidadeInput.placeholder = "Buscar por cidade...";
   }
   if (filterTipoAnimalSelect) filterTipoAnimalSelect.value = "";
   if (filterTempoSelect) filterTempoSelect.value = "";
@@ -337,7 +337,7 @@ function updateModalServiceUI(service) {
   if (service === "PERDIDO") {
     if (wrapPetLocal) wrapPetLocal.classList.remove("hidden");
     if (petLocalInput) petLocalInput.required = true;
-    if (modalHeading) modalHeading.innerHTML = `<span>🚨</span> Reportar Animal Perdido`;
+    if (modalHeading) modalHeading.textContent = "Reportar Animal Perdido";
     if (modalDesc) modalDesc.textContent = "Preencha as informações do animal desaparecido para que a comunidade possa ajudar a localizá-lo.";
     modalSubmitBtn.textContent = "Publicar Animal Perdido";
   } else {
@@ -346,7 +346,7 @@ function updateModalServiceUI(service) {
       petLocalInput.required = false;
       petLocalInput.value = "";
     }
-    if (modalHeading) modalHeading.innerHTML = `<span>🐾</span> Anunciar Pet para Adoção`;
+    if (modalHeading) modalHeading.textContent = "Anunciar Pet para Adoção";
     if (modalDesc) modalDesc.textContent = "Preencha os dados do animal. O telefone informado será o canal direto para interessados entrarem em contato via WhatsApp.";
     modalSubmitBtn.textContent = "Publicar Anúncio";
   }
@@ -431,7 +431,7 @@ async function openEditPetModal(animal) {
 
   const modalHeading = document.querySelector("#adopt-modal h2");
   const modalDesc = document.getElementById("modal-adopt-desc");
-  if (modalHeading) modalHeading.innerHTML = `<span>✏️</span> Editar Anúncio do Pet`;
+  if (modalHeading) modalHeading.textContent = "Editar Anúncio do Pet";
   if (modalDesc) modalDesc.textContent = "Atualize os dados e o status do anúncio do seu animal.";
   if (modalSubmitBtn) modalSubmitBtn.textContent = "Salvar Alterações";
 
@@ -441,7 +441,7 @@ async function openEditPetModal(animal) {
   if (petServicoSelect) {
     petServicoSelect.value = animal.tipo_servico || "ADOCAO";
     updateModalServiceUI(animal.tipo_servico || "ADOCAO");
-    if (modalHeading) modalHeading.innerHTML = `<span>✏️</span> Editar Anúncio do Pet`;
+    if (modalHeading) modalHeading.textContent = "Editar Anúncio do Pet";
     if (modalSubmitBtn) modalSubmitBtn.textContent = "Salvar Alterações";
   }
 
@@ -583,7 +583,7 @@ if (petImageInput) {
         setImagePreview(
           newPreviewUrl,
           result.file.name,
-          `${compressedText}${savedText} • original: ${originalText}`
+          `${compressedText}${savedText} | original: ${originalText}`
         );
       } else {
         const sizeKB = file.size > 1024 * 1024
@@ -657,7 +657,7 @@ formAdoptPet.addEventListener("submit", async (e) => {
 
   if (!effectivePhone && !isEdit) {
     const errorMsg = "É necessário ter um telefone cadastrado na sua conta para anunciar um animal.";
-    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error font-semibold">⚠️ ${errorMsg} <a href="/pages/auth/profile.html" class="underline font-bold text-brand-300 ml-1">Cadastrar no Perfil →</a></div>`;
+    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error font-semibold">${errorMsg} <a href="/pages/auth/profile.html" class="underline font-bold text-brand-300 ml-1">Cadastrar no Perfil &rarr;</a></div>`;
     return;
   }
 

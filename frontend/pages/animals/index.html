@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Best Buddy — Encontre ou Ajude um Pet</title>
+  <title>Best Buddy | Encontre ou Ajude um Pet</title>
   <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
   <link rel="alternate icon" type="image/x-icon" href="../../favicon.ico" />
   <link rel="apple-touch-icon" href="../../apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="stylesheet" href="../../css/tailwind.build.css" />
+  <link rel="stylesheet" href="../../css/tailwind.build.css?v=6" />
 </head>
 <body>
   <div class="bb-shell">
@@ -19,17 +19,17 @@
         <!-- Topo: Título e Botão de Ação -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div>
-            <h1 class="bb-page-title mb-1">Encontre ou Ajude um Pet 🐾</h1>
+            <h1 class="bb-page-title mb-1">Encontre ou Ajude um Pet</h1>
             <p class="text-sm text-ink-300">
               Adote um companheiro ou ajude uma família a reencontrar seu pet desaparecido.
             </p>
           </div>
           <div class="flex flex-wrap items-center gap-3">
             <button class="bb-btn bb-btn--amber shrink-0 flex items-center gap-2" id="bb-report-lost-btn" type="button">
-              <span>🚨</span> + Reportar Pet Perdido
+              + Reportar Pet Perdido
             </button>
             <button class="bb-btn bb-btn--primary shrink-0 flex items-center gap-2" id="bb-announce-pet-btn" type="button">
-              <span>🐾</span> + Anunciar Pet para Adoção
+              + Anunciar Pet para Adoção
             </button>
           </div>
         </div>
@@ -40,10 +40,10 @@
             <!-- Abas: Todos os Pets vs Meus Anúncios -->
             <div class="flex items-center gap-2 p-1 bg-surface-700/80 rounded-xl border border-border w-fit">
               <button id="tab-all-pets" type="button" class="px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition-all bg-brand-500 text-white shadow-sm">
-                🐾 Todos os Pets
+                Todos os Pets
               </button>
               <button id="tab-my-pets" type="button" class="px-4 py-2 text-xs md:text-sm font-medium rounded-lg text-ink-300 hover:text-ink-100 hover:bg-black/5 transition-all">
-                👤 Meus Anúncios
+                Meus Anúncios
               </button>
             </div>
 
@@ -61,7 +61,7 @@
                   id="filter-cidade"
                   list="filter-cidades-list"
                   class="bb-input text-xs md:text-sm py-2"
-                  placeholder="🔍 Buscar por cidade..."
+                  placeholder="Buscar por cidade..."
                   autocomplete="off"
                 />
                 <datalist id="filter-cidades-list"></datalist>
@@ -70,18 +70,18 @@
               <div>
                 <select id="filter-tipo-animal" class="bb-input text-xs md:text-sm py-2">
                   <option value="">Todos os tipos</option>
-                  <option value="CACHORRO">🐶 Cachorros</option>
-                  <option value="GATO">🐱 Gatos</option>
-                  <option value="OUTRO">🐾 Outros</option>
+                  <option value="CACHORRO">Cachorros</option>
+                  <option value="GATO">Gatos</option>
+                  <option value="OUTRO">Outros</option>
                 </select>
               </div>
 
               <div>
                 <select id="filter-tempo" class="bb-input text-xs md:text-sm py-2">
                   <option value="">Qualquer tempo</option>
-                  <option value="recentes">⚡ Mais recentes</option>
-                  <option value="semana">📅 Última semana</option>
-                  <option value="mes">🗓️ Último mês</option>
+                  <option value="recentes">Mais recentes</option>
+                  <option value="semana">Última semana</option>
+                  <option value="mes">Último mês</option>
                 </select>
               </div>
 
@@ -89,7 +89,7 @@
                 Filtrar
               </button>
               <button id="filter-clear-btn" type="button" class="bb-btn bb-btn--secondary text-xs py-2 px-3" title="Limpar filtros">
-                ✕ Limpar
+                Limpar
               </button>
             </div>
           </div>
@@ -103,14 +103,14 @@
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-border/70">
             <div class="flex items-center gap-3">
               <h2 class="text-xl font-bold text-ink-100 flex items-center gap-2">
-                <span>🚨</span> Animais Perdidos & Desaparecidos
+                Animais Perdidos e Desaparecidos
               </h2>
               <span id="bb-lost-count" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 font-semibold border border-amber-500/30">
                 0
               </span>
             </div>
             <a href="/pages/community/index.html" class="text-xs text-brand-500 hover:underline flex items-center gap-1 font-medium">
-              Reportar desaparecimento no mural →
+              Reportar desaparecimento no mural &rarr;
             </a>
           </div>
           <p class="text-xs text-ink-300 mb-4">
@@ -121,7 +121,7 @@
 
           <div id="bb-lost-toggle-wrap" class="mt-6 text-center hidden">
             <button id="bb-lost-toggle-btn" type="button" class="bb-btn bb-btn--secondary text-xs md:text-sm">
-              Ver mais animais perdidos ↓
+              Ver mais animais perdidos &darr;
             </button>
           </div>
         </section>
@@ -131,7 +131,7 @@
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-border/70">
             <div class="flex items-center gap-3">
               <h2 class="text-xl font-bold text-ink-100 flex items-center gap-2">
-                <span>🐾</span> Animais Prontos para Adoção
+                Animais Prontos para Adoção
               </h2>
               <span id="bb-adopt-count" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 font-semibold border border-emerald-500/30">
                 0
@@ -149,7 +149,7 @@
 
           <div id="bb-adopt-toggle-wrap" class="mt-6 text-center hidden">
             <button id="bb-adopt-toggle-btn" type="button" class="bb-btn bb-btn--secondary text-xs md:text-sm">
-              Ver mais animais para adoção ↓
+              Ver mais animais para adoção &darr;
             </button>
           </div>
         </section>
@@ -165,7 +165,7 @@
 
         <div class="bb-modal-header">
           <h2 class="bb-modal-title" id="modal-adopt-title">
-            <span>🐾</span> Anunciar Pet para Adoção
+            Anunciar Pet para Adoção
           </h2>
           <p class="bb-modal-desc" id="modal-adopt-desc">
             Preencha os dados do animal. O contato via WhatsApp será vinculado automaticamente ao telefone cadastrado em sua conta.
@@ -179,8 +179,8 @@
             <div>
               <label class="bb-label" for="pet-servico">Finalidade do Anúncio *</label>
               <select class="bb-input" id="pet-servico" required>
-                <option value="ADOCAO">🐾 Doação / Colocar para Adoção</option>
-                <option value="PERDIDO">🚨 Animal Perdido / Desaparecido</option>
+                <option value="ADOCAO">Doação / Colocar para Adoção</option>
+                <option value="PERDIDO">Animal Perdido / Desaparecido</option>
               </select>
             </div>
 
@@ -252,7 +252,7 @@
               <div>
                 <label class="bb-label flex items-center justify-between" for="pet-telefone">
                   <span>Telefone / WhatsApp de Contato</span>
-                  <span class="text-xs text-brand-600 font-medium">🔒 Vinculado ao seu perfil</span>
+                  <span class="text-xs text-brand-600 font-medium">(Vinculado ao seu perfil)</span>
                 </label>
                 <input
                   class="bb-input bg-surface-800/40 cursor-not-allowed opacity-90 font-mono text-sm"
@@ -267,8 +267,8 @@
                   <a href="/pages/auth/profile.html" class="text-brand-400 hover:underline">Meu Perfil</a>.
                 </p>
                 <div id="pet-telefone-warning" class="hidden mt-2 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs">
-                  ⚠️ <strong>Atenção:</strong> Você ainda não cadastrou um telefone na sua conta.
-                  <a href="/pages/auth/profile.html" class="underline font-bold text-amber-200 ml-1">Cadastrar no perfil →</a>
+                  <strong>Atenção:</strong> Você ainda não cadastrou um telefone na sua conta.
+                  <a href="/pages/auth/profile.html" class="underline font-bold text-amber-200 ml-1">Cadastrar no perfil &rarr;</a>
                 </div>
               </div>
             </div>
@@ -297,11 +297,11 @@
             <div id="wrap-pet-status" class="hidden">
               <label class="bb-label" for="pet-status">Status do Anúncio</label>
               <select class="bb-input" id="pet-status">
-                <option value="DISPONIVEL">🐾 Disponível para Adoção</option>
-                <option value="ADOTADO">✅ Adotado (Concluído)</option>
-                <option value="PERDIDO">🚨 Perdido / Desaparecido</option>
-                <option value="ENCONTRADO">🎉 Encontrado (Concluído)</option>
-                <option value="INATIVO">⏸️ Inativo</option>
+                <option value="DISPONIVEL">Disponível para Adoção</option>
+                <option value="ADOTADO">Adotado (Concluído)</option>
+                <option value="PERDIDO">Perdido / Desaparecido</option>
+                <option value="ENCONTRADO">Encontrado (Concluído)</option>
+                <option value="INATIVO">Inativo</option>
               </select>
             </div>
 
@@ -324,7 +324,24 @@
                   <p id="pet-imagem-filename" style="font-size: 0.75rem; font-weight: 600; color: #16233a; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
                   <p id="pet-imagem-filesize" style="font-size: 0.7rem; color: #64748b; margin: 0.125rem 0 0 0;"></p>
                 </div>
-                <button type="button" id="pet-imagem-clear-btn" class="bb-btn bb-btn--secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; height: auto;" title="Remover imagem">✕ Remover</button>
+                <button type="button" id="pet-imagem-clear-btn" class="bb-btn bb-btn--secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; height: auto;" title="Remover imagem">Remover foto</button>
+              </div>
+            </div>
+
+            <!-- Disclaimer Legal: Adoção Responsável e LGPD (Nota 09) -->
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-xs leading-relaxed space-y-1.5 my-3">
+              <div class="font-bold text-slate-800 text-xs">
+                Declaração de Adoção Responsável e Legitimidade de Posse
+              </div>
+              <p class="text-[11px] text-slate-600 m-0">Ao cadastrar este animal, você declara expressamente que:</p>
+              <ol class="list-decimal list-inside space-y-1 pl-1 text-[11px] text-slate-600">
+                <li>É o legítimo tutor ou protetor autorizado do pet, assumindo total responsabilidade pelas informações prestadas.</li>
+                <li>O anúncio destina-se exclusivamente à adoção responsável gratuita ou localização de pet perdido (<strong>é terminantemente proibida a venda ou cobrança de taxas</strong>).</li>
+                <li>Autoriza a <strong>exibição pública voluntária do seu WhatsApp</strong> para contato direto com adotantes.</li>
+                <li>A foto enviada é autêntica e retrata o animal anunciado (sua localização residencial não é exposta).</li>
+              </ol>
+              <div class="text-[10px] text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-200 mt-1">
+                <strong>Atenção Legal:</strong> É estritamente proibido o anúncio de animais silvestres ou exóticos (Crime Ambiental - Lei Federal nº 9.605/1998).
               </div>
             </div>
 
@@ -340,21 +357,22 @@
     <div id="bb-footer"></div>
   </div>
 
-  <script src="../../js/config.js"></script>
-  <script src="../../js/utils/storage.js"></script>
-  <script src="../../js/mocks/mock-utils.js"></script>
-  <script src="../../js/mocks/mock-data.js"></script>
-  <script src="../../js/api/client.js"></script>
-  <script src="../../js/services/ibgeService.js"></script>
-  <script src="../../js/services/animalService.js"></script>
-  <script src="../../js/services/authService.js"></script>
-  <script src="../../js/utils/header-scroll.js"></script>
-  <script src="../../js/components/Navigation.js"></script>
-  <script src="../../js/components/Footer.js"></script>
-  <script src="../../js/components/AnimalCard.js"></script>
-  <script src="../../js/components/StateView.js"></script>
-  <script src="../../js/utils/click-limiter.js"></script>
-  <script src="../../js/utils/image-compressor.js"></script>
-  <script src="../../js/pages/animals.js?v=4"></script>
+  <script src="../../js/config.js?v=5"></script>
+  <script src="../../js/utils/storage.js?v=5"></script>
+  <script src="../../js/mocks/mock-utils.js?v=5"></script>
+  <script src="../../js/mocks/mock-data.js?v=5"></script>
+  <script src="../../js/api/client.js?v=5"></script>
+  <script src="../../js/services/ibgeService.js?v=5"></script>
+  <script src="../../js/services/animalService.js?v=5"></script>
+  <script src="../../js/services/authService.js?v=5"></script>
+  <script src="../../js/utils/header-scroll.js?v=5"></script>
+  <script src="../../js/components/Navigation.js?v=6"></script>
+  <script src="../../js/components/Footer.js?v=5"></script>
+  <script src="../../js/components/CookieBanner.js?v=6"></script>
+  <script src="../../js/components/AnimalCard.js?v=5"></script>
+  <script src="../../js/components/StateView.js?v=5"></script>
+  <script src="../../js/utils/click-limiter.js?v=5"></script>
+  <script src="../../js/utils/image-compressor.js?v=5"></script>
+  <script src="../../js/pages/animals.js?v=5"></script>
 </body>
 </html>
