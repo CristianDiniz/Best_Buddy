@@ -2,6 +2,8 @@ function bbRenderFooter(targetSelector) {
   const el = document.querySelector(targetSelector);
   if (!el) return;
 
+  const aboutPath = window.location.protocol === "file:" ? "../about/index.html" : "/pages/about/index.html";
+
   el.innerHTML = `
     <footer class="bb-footer" style="background-color: #0c2340 !important; color: #e2e8f0; width: 100%; padding: 1.75rem 0; margin-top: 4rem; border-top: 1px solid #1a3a60;">
       <div class="bb-container" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;">
@@ -15,7 +17,7 @@ function bbRenderFooter(targetSelector) {
         </div>
 
         <div style="display: flex; align-items: center; gap: 1.5rem; font-size: 0.8rem;">
-          <a href="/pages/animals/index.html" style="color: #cbd5e1; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#cbd5e1'">Sobre nós</a>
+          <a href="${aboutPath}" id="bb-footer-link-about" style="color: #cbd5e1; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#cbd5e1'">Sobre nós</a>
           <a href="/pages/animals/index.html" style="color: #cbd5e1; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#cbd5e1'">Contato</a>
           <a href="/pages/animals/index.html" style="color: #cbd5e1; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#cbd5e1'">Política</a>
         </div>

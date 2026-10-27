@@ -12,6 +12,17 @@ const bbLostToggleBtn = document.getElementById("bb-lost-toggle-btn");
 const bbAdoptToggleBtn = document.getElementById("bb-adopt-toggle-btn");
 const bbAnimalsAlertEl = document.getElementById("bb-animals-alert");
 
+// Elementos de Estatísticas & Animais Adotados
+const bbAdoptedCountEl = document.getElementById("bb-adopted-count");
+const bbAdoptedSubcountEl = document.getElementById("bb-adopted-subcount");
+const bbStatAvailableCountEl = document.getElementById("bb-stat-available-count");
+const bbStatLostCountEl = document.getElementById("bb-stat-lost-count");
+const bbAdoptedShowcaseSectionEl = document.getElementById("bb-adopted-showcase-section");
+const bbAdoptedGridEl = document.getElementById("bb-adopted-grid");
+const bbToggleAdoptedGalleryBtn = document.getElementById("bb-toggle-adopted-gallery-btn");
+const bbCloseAdoptedGalleryBtn = document.getElementById("bb-close-adopted-gallery-btn");
+const bbAdoptionCelebrationToast = document.getElementById("bb-adoption-celebration-toast");
+
 // Filtros e Abas
 const tabAllPets = document.getElementById("tab-all-pets");
 const tabMyPets = document.getElementById("tab-my-pets");
@@ -100,6 +111,8 @@ function setImagePreview(src, name, sizeText) {
 const INITIAL_LIMIT = 4;
 let allLostAnimals = [];
 let allAdoptAnimals = [];
+let allAdoptedAnimals = [];
+let adoptedGalleryOpen = false;
 let lostExpanded = false;
 let adoptExpanded = false;
 let activeTab = "all"; // "all" | "my"
@@ -139,8 +152,8 @@ function renderAdopt() {
 
   if (!allAdoptAnimals.length) {
     bbAdoptGridEl.innerHTML = bbStateHtml({
-      title: "Nenhum animal para adoção encontrado.",
-      description: "Tente ajustar ou limpar seus filtros para ver mais pets.",
+      title: "Nenhum animal para adoção disponível no momento.",
+      description: "Todos os pets cadastrados já encontraram um lar amoroso ou não há pets para os filtros selecionados!",
     });
     bbAdoptToggleWrapEl.classList.add("hidden");
     return;
@@ -160,6 +173,20 @@ function renderAdopt() {
   }
 }
 
+function renderAdopted() {
+  if (!bbAdoptedGridEl) return;
+
+  if (!allAdoptedAnimals.length) {
+    bbAdoptedGridEl.innerHTML = bbStateHtml({
+      title: "Nenhum animal adotado registrado ainda.",
+      description: "Assim que um tutor marcar o anúncio como ADOTADO, a história de sucesso aparecerá aqui!",
+    });
+    return;
+  }
+
+  bbAdoptedGridEl.innerHTML = allAdoptedAnimals.map(bbAnimalCardHtml).join("");
+}
+
 async function bbLoadAnimals() {
   bbLostGridEl.innerHTML = bbSkeletonGridHtml(INITIAL_LIMIT);
   bbAdoptGridEl.innerHTML = bbSkeletonGridHtml(INITIAL_LIMIT);
@@ -175,9 +202,10 @@ async function bbLoadAnimals() {
   if (activeTab === "my" && currentUser) commonParams.tutor_id = currentUser.id;
 
   try {
-    const [lostList, adoptList] = await Promise.all([
+    const [lostList, adoptList, stats] = await Promise.all([
       animalService.list({ ...commonParams, tipo_servico: "PERDIDO" }),
       animalService.list({ ...commonParams, tipo_servico: "ADOCAO" }),
+      animalService.getStats().catch(() => null),
     ]);
 
     let rawLost = Array.isArray(lostList) ? lostList : [];
@@ -194,11 +222,35 @@ async function bbLoadAnimals() {
       rawAdopt = rawAdopt.filter((a) => !a.created_at || new Date(a.created_at).getTime() >= monthAgo);
     }
 
+    // REGRA DE NEGÓCIO: Animais adotados saem da lista de animais para adoção!
+    const availablePets = rawAdopt.filter((a) => (a.status || "").toUpperCase() !== "ADOTADO");
+    const adoptedPets = rawAdopt.filter((a) => (a.status || "").toUpperCase() === "ADOTADO");
+
     allLostAnimals = rawLost;
-    allAdoptAnimals = rawAdopt;
+    allAdoptAnimals = availablePets;
+    allAdoptedAnimals = adoptedPets;
+
+    // Atualização dos Contadores em Destaque
+    const adoptedTotal = stats && typeof stats.total_adotados === "number"
+      ? stats.total_adotados
+      : adoptedPets.length;
+
+    if (bbAdoptedCountEl) {
+      bbAdoptedCountEl.textContent = adoptedTotal;
+    }
+    if (bbAdoptedSubcountEl) {
+      bbAdoptedSubcountEl.textContent = adoptedTotal;
+    }
+    if (bbStatAvailableCountEl) {
+      bbStatAvailableCountEl.textContent = availablePets.length;
+    }
+    if (bbStatLostCountEl) {
+      bbStatLostCountEl.textContent = allLostAnimals.length;
+    }
 
     renderLost();
     renderAdopt();
+    renderAdopted();
   } catch (err) {
     bbLostGridEl.innerHTML = bbStateHtml({
       title: "Não foi possível carregar os animais desaparecidos.",
@@ -223,6 +275,27 @@ bbAdoptToggleBtn.addEventListener("click", () => {
   adoptExpanded = !adoptExpanded;
   renderAdopt();
 });
+
+// Alternar Galeria de Pets Adotados (Finais Felizes)
+if (bbToggleAdoptedGalleryBtn && bbAdoptedShowcaseSectionEl) {
+  bbToggleAdoptedGalleryBtn.addEventListener("click", () => {
+    adoptedGalleryOpen = !adoptedGalleryOpen;
+    if (adoptedGalleryOpen) {
+      bbAdoptedShowcaseSectionEl.classList.remove("hidden");
+      renderAdopted();
+      bbAdoptedShowcaseSectionEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      bbAdoptedShowcaseSectionEl.classList.add("hidden");
+    }
+  });
+}
+
+if (bbCloseAdoptedGalleryBtn && bbAdoptedShowcaseSectionEl) {
+  bbCloseAdoptedGalleryBtn.addEventListener("click", () => {
+    adoptedGalleryOpen = false;
+    bbAdoptedShowcaseSectionEl.classList.add("hidden");
+  });
+}
 
 // Ações de Filtro (RF08)
 function applyFilters() {
@@ -880,16 +953,31 @@ document.addEventListener("click", async (e) => {
   if (finishBtn) {
     const id = finishBtn.dataset.id;
     const targetStatus = finishBtn.dataset.status;
-    const confirmMsg = targetStatus === "ENCONTRADO"
+    const isPerdido = targetStatus === "ENCONTRADO";
+    const confirmMsg = isPerdido
       ? "Deseja marcar este pet como ENCONTRADO? O anúncio será dado como concluído."
-      : "Deseja marcar este pet como ADOTADO? O anúncio será dado como concluído.";
+      : "Deseja marcar este pet como ADOTADO? Ele sairá da lista de animais para adoção e entrará no contador de adotados.";
 
     if (!confirm(confirmMsg)) return;
 
     finishBtn.disabled = true;
     try {
       await animalService.update(id, { status: targetStatus });
-      bbLoadAnimals();
+
+      if (targetStatus === "ADOTADO") {
+        if (bbAdoptionCelebrationToast) {
+          bbAdoptionCelebrationToast.classList.remove("hidden");
+          bbAdoptionCelebrationToast.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        if (bbAdoptedCountEl) {
+          bbAdoptedCountEl.classList.add("scale-125", "transition-transform", "duration-300");
+          setTimeout(() => {
+            bbAdoptedCountEl.classList.remove("scale-125");
+          }, 600);
+        }
+      }
+
+      await bbLoadAnimals();
     } catch (err) {
       alert("Erro ao atualizar anúncio: " + err.message);
       finishBtn.disabled = false;
@@ -900,7 +988,20 @@ document.addEventListener("click", async (e) => {
   // 2. Editar Informações do Pet
   const editBtn = e.target.closest(".btn-edit-animal");
   if (editBtn) {
-    openEditPetModal(editBtn.dataset.id);
+    const id = editBtn.dataset.id;
+    const allPets = [...allLostAnimals, ...allAdoptAnimals, ...allAdoptedAnimals];
+    let animal = allPets.find((a) => String(a.id) === String(id));
+    if (!animal) {
+      try {
+        animal = await animalService.getById(id);
+      } catch (err) {
+        alert("Não foi possível carregar os dados para edição: " + err.message);
+        return;
+      }
+    }
+    if (animal) {
+      openEditPetModal(animal);
+    }
     return;
   }
 
