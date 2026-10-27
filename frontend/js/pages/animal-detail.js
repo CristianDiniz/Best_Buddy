@@ -74,9 +74,9 @@ async function bbLoadDetail() {
             <span class="text-sm font-semibold text-brand-300">Este anúncio foi publicado por você!</span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
-            <a href="/pages/animals/index.html?edit=${animal.id}" class="bb-btn bb-btn--xs bb-btn--primary">
+            <button type="button" class="bb-btn bb-btn--xs bb-btn--primary btn-detail-edit" data-id="${animal.id}" data-no-limit onclick="if(window.bbOpenEditModal){window.bbOpenEditModal('${animal.id}');}else{window.location.href='/pages/animals/index.html?edit=${animal.id}';}">
               ✏️ Editar Anúncio
-            </a>
+            </button>
             ${animal.status !== "ADOTADO" && animal.status !== "ENCONTRADO" ? `
               <button type="button" class="bb-btn bb-btn--xs bb-btn--secondary btn-detail-finish" data-id="${animal.id}" data-status="${isPerdido ? 'ENCONTRADO' : 'ADOTADO'}">
                 ${isPerdido ? '🎉 Marcar Encontrado' : '✅ Marcar Adotado'}
@@ -116,6 +116,17 @@ async function bbLoadDetail() {
         </div>
       </div>
     `;
+
+    const detailEditBtn = document.querySelector(".btn-detail-edit");
+    if (detailEditBtn) {
+      detailEditBtn.addEventListener("click", () => {
+        if (typeof window.bbOpenEditModal === "function") {
+          window.bbOpenEditModal(detailEditBtn.dataset.id);
+        } else {
+          window.location.href = `/pages/animals/index.html?edit=${detailEditBtn.dataset.id}`;
+        }
+      });
+    }
 
     const detailFinishBtn = document.querySelector(".btn-detail-finish");
     if (detailFinishBtn) {

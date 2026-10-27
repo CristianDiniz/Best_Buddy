@@ -9,6 +9,7 @@
   <link rel="apple-touch-icon" href="../../apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="../../css/tailwind.build.css" />
+  <link rel="stylesheet" href="../../css/edit-modal.css" />
 </head>
 <body>
   <div class="bb-shell">
@@ -159,181 +160,409 @@
 
     <!-- Modal para Anunciar Pet para Adoção / Pet Perdido -->
     <div id="adopt-modal" class="bb-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-adopt-title">
-      <div class="bb-modal-dialog">
+      <div class="bb-modal-dialog bb-edit-dialog">
         <!-- Botão X de Fechar no topo direito -->
         <button id="modal-adopt-close-btn" class="bb-modal-close-btn" type="button" aria-label="Fechar popup">&times;</button>
 
-        <div class="bb-modal-header">
-          <h2 class="bb-modal-title" id="modal-adopt-title">
-            <span>🐾</span> Anunciar Pet para Adoção
-          </h2>
-          <p class="bb-modal-desc" id="modal-adopt-desc">
-            Preencha os dados do animal. O contato via WhatsApp será vinculado automaticamente ao telefone cadastrado em sua conta.
-          </p>
+        <!-- Cabeçalho moderno: ícone + identificação + chip -->
+        <div class="bb-edit-header" id="adopt-header-wrap">
+          <div class="bb-edit-header__thumb" id="modal-adopt-thumb">🐾</div>
+          <div class="bb-edit-header__info">
+            <p class="bb-edit-header__eyebrow" id="modal-adopt-eyebrow">📢 Novo Anúncio</p>
+            <h2 class="bb-edit-header__title" id="modal-adopt-title">Anunciar Pet para Adoção</h2>
+            <span class="bb-edit-chip bb-edit-chip--adocao" id="modal-adopt-chip">🐾 Adoção</span>
+            <p class="bb-modal-desc hidden" id="modal-adopt-desc" style="display:none;"></p>
+          </div>
         </div>
 
-        <div class="bb-modal-body">
-          <div id="modal-adopt-alert"></div>
+        <!-- Abas com etapas organizadas -->
+        <div class="bb-edit-tabs" id="adopt-tabs" role="tablist">
+          <button type="button" class="bb-edit-tab is-active" data-adopt-tab="0" role="tab" aria-selected="true" id="adopt-tab-sobre">
+            <span class="bb-edit-tab__num">1</span> Sobre o pet
+          </button>
+          <button type="button" class="bb-edit-tab" data-adopt-tab="1" role="tab" aria-selected="false" id="adopt-tab-local">
+            <span class="bb-edit-tab__num">2</span> Local &amp; Contato
+          </button>
+          <button type="button" class="bb-edit-tab" data-adopt-tab="2" role="tab" aria-selected="false" id="adopt-tab-saude">
+            <span class="bb-edit-tab__num">3</span> Saúde &amp; Foto
+          </button>
+        </div>
 
-          <form id="form-adopt-pet" class="space-y-4">
-            <div>
-              <label class="bb-label" for="pet-servico">Finalidade do Anúncio *</label>
-              <select class="bb-input" id="pet-servico" required>
-                <option value="ADOCAO">🐾 Doação / Colocar para Adoção</option>
-                <option value="PERDIDO">🚨 Animal Perdido / Desaparecido</option>
-              </select>
-            </div>
+        <form id="form-adopt-pet">
+          <div class="bb-modal-body bb-edit-body">
+            <div id="modal-adopt-alert"></div>
 
-            <div id="wrap-pet-local" class="hidden">
-              <label class="bb-label" for="pet-local">Último local visto / Ponto de referência *</label>
-              <input class="bb-input" type="text" id="pet-local" placeholder="Ex: Próximo à praça central, Bairro X, Rua Y..." />
-            </div>
+            <!-- Aba 1: Sobre o pet -->
+            <div class="bb-edit-panel is-active" id="adopt-panel-0" role="tabpanel" aria-labelledby="adopt-tab-sobre">
+              <div class="bb-edit-section">
+                <p class="bb-edit-section__title">📌 Objetivo do Anúncio</p>
+                <div class="bb-edit-field">
+                  <label class="bb-label" for="pet-servico">Finalidade do Anúncio <span class="bb-edit-required">*</span></label>
+                  <select class="bb-input" id="pet-servico" required>
+                    <option value="ADOCAO">🐾 Doação / Colocar para Adoção</option>
+                    <option value="PERDIDO">🚨 Animal Perdido / Desaparecido</option>
+                  </select>
+                </div>
+              </div>
 
-            <div class="bb-modal-grid-2">
-              <div>
-                <label class="bb-label" for="pet-nome">Nome do Pet *</label>
-                <input class="bb-input" type="text" id="pet-nome" required placeholder="Ex: Bob, Pipoca..." />
-              </div>
-              <div>
-                <label class="bb-label" for="pet-tipo">Tipo de Animal *</label>
-                <select class="bb-input" id="pet-tipo" required>
-                  <option value="CACHORRO">Cachorro</option>
-                  <option value="GATO">Gato</option>
-                  <option value="OUTRO">Outro</option>
-                </select>
-              </div>
-            </div>
+              <div class="bb-edit-section">
+                <p class="bb-edit-section__title">🐾 Dados Básicos</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bb-edit-field">
+                  <div>
+                    <label class="bb-label" for="pet-nome">Nome do Pet <span class="bb-edit-required">*</span></label>
+                    <input class="bb-input" type="text" id="pet-nome" required placeholder="Ex: Bob, Pipoca..." />
+                  </div>
+                  <div>
+                    <label class="bb-label" for="pet-tipo">Tipo de Animal <span class="bb-edit-required">*</span></label>
+                    <select class="bb-input" id="pet-tipo" required>
+                      <option value="CACHORRO">🐶 Cachorro</option>
+                      <option value="GATO">🐱 Gato</option>
+                      <option value="OUTRO">🐾 Outro</option>
+                    </select>
+                  </div>
+                </div>
 
-            <div class="bb-modal-grid-3">
-              <div>
-                <label class="bb-label" for="pet-sexo">Sexo *</label>
-                <select class="bb-input" id="pet-sexo" required>
-                  <option value="M">Macho</option>
-                  <option value="F">Fêmea</option>
-                  <option value="I">Indeterminado</option>
-                </select>
-              </div>
-              <div>
-                <label class="bb-label" for="pet-raca">Raça (opcional)</label>
-                <input class="bb-input" type="text" id="pet-raca" placeholder="Ex: SRD, Poodle..." />
-              </div>
-              <div>
-                <label class="bb-label" for="pet-idade">Idade Aproximada</label>
-                <select class="bb-input" id="pet-idade">
-                  <option value="">Selecione a idade...</option>
-                  <option value="Filhote">Filhote</option>
-                  <option value="Adulto">Adulto</option>
-                  <option value="Idoso">Idoso</option>
-                </select>
-              </div>
-            </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bb-edit-field">
+                  <div>
+                    <label class="bb-label" for="pet-sexo">Sexo <span class="bb-edit-required">*</span></label>
+                    <select class="bb-input" id="pet-sexo" required>
+                      <option value="M">Macho</option>
+                      <option value="F">Fêmea</option>
+                      <option value="I">Indeterminado</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="bb-label" for="pet-raca">Raça (opcional)</label>
+                    <input class="bb-input" type="text" id="pet-raca" placeholder="Ex: SRD, Poodle..." />
+                  </div>
+                  <div>
+                    <label class="bb-label" for="pet-idade">Idade Aproximada</label>
+                    <select class="bb-input" id="pet-idade">
+                      <option value="">Selecione...</option>
+                      <option value="Filhote">Filhote</option>
+                      <option value="Adulto">Adulto</option>
+                      <option value="Idoso">Idoso</option>
+                    </select>
+                  </div>
+                </div>
 
-            <div class="bb-modal-grid-3">
-              <div>
-                <label class="bb-label" for="pet-estado">Estado (UF) *</label>
-                <select id="pet-estado" class="bb-input" required>
-                  <option value="">Selecione a UF...</option>
-                </select>
-              </div>
-              <div>
-                <label class="bb-label" for="pet-cidade">Cidade *</label>
-                <input
-                  class="bb-input"
-                  type="text"
-                  id="pet-cidade"
-                  list="pet-cidades-list"
-                  required
-                  disabled
-                  placeholder="Selecione a UF primeiro..."
-                  autocomplete="off"
-                />
-                <datalist id="pet-cidades-list"></datalist>
-              </div>
-              <div>
-                <label class="bb-label flex items-center justify-between" for="pet-telefone">
-                  <span>Telefone / WhatsApp de Contato</span>
-                  <span class="text-xs text-brand-600 font-medium">🔒 Vinculado ao seu perfil</span>
-                </label>
-                <input
-                  class="bb-input bg-surface-800/40 cursor-not-allowed opacity-90 font-mono text-sm"
-                  type="tel"
-                  id="pet-telefone"
-                  readonly
-                  disabled
-                  placeholder="Carregando telefone do perfil..."
-                />
-                <p class="text-xs text-ink-300 mt-1">
-                  Contato vinculado ao seu perfil. Para alterá-lo, vá em
-                  <a href="/pages/auth/profile.html" class="text-brand-400 hover:underline">Meu Perfil</a>.
-                </p>
-                <div id="pet-telefone-warning" class="hidden mt-2 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs">
-                  ⚠️ <strong>Atenção:</strong> Você ainda não cadastrou um telefone na sua conta.
-                  <a href="/pages/auth/profile.html" class="underline font-bold text-amber-200 ml-1">Cadastrar no perfil →</a>
+                <div class="bb-edit-field">
+                  <label class="bb-label" for="pet-descricao">Descrição / Temperamento <span class="bb-edit-required">*</span></label>
+                  <textarea class="bb-input" id="pet-descricao" rows="3" maxlength="255" required placeholder="Muito carinhoso, brincalhão, se dá bem com crianças e outros animais..."></textarea>
+                  <p class="bb-edit-hint">
+                    <span>Destaque detalhes da personalidade e características.</span>
+                    <span id="pet-descricao-count">0/255</span>
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div class="bb-modal-grid-2">
-              <div>
-                <label class="bb-label" for="pet-castrado">Castrado</label>
-                <select class="bb-input" id="pet-castrado">
-                  <option value="">Selecione...</option>
-                  <option value="Sim">Castrado (Sim)</option>
-                  <option value="Não">Não castrado</option>
-                  <option value="Não sei">Não informado / Não sei</option>
-                </select>
-              </div>
-              <div>
-                <label class="bb-label" for="pet-medicamento">Medicamentos / Cuidados</label>
-                <select class="bb-input" id="pet-medicamento">
-                  <option value="">Selecione...</option>
-                  <option value="Sim">Usa medicamentos contínuos (Sim)</option>
-                  <option value="Não">Não necessita de medicamentos</option>
-                  <option value="Não sei">Não informado / Não sei</option>
-                </select>
-              </div>
-            </div>
+            <!-- Aba 2: Localização & Contato -->
+            <div class="bb-edit-panel" id="adopt-panel-1" role="tabpanel" aria-labelledby="adopt-tab-local">
+              <div class="bb-edit-section">
+                <p class="bb-edit-section__title">📍 Onde o Pet está?</p>
 
-            <div id="wrap-pet-status" class="hidden">
-              <label class="bb-label" for="pet-status">Status do Anúncio</label>
-              <select class="bb-input" id="pet-status">
-                <option value="DISPONIVEL">🐾 Disponível para Adoção</option>
-                <option value="ADOTADO">✅ Adotado (Concluído)</option>
-                <option value="PERDIDO">🚨 Perdido / Desaparecido</option>
-                <option value="ENCONTRADO">🎉 Encontrado (Concluído)</option>
-                <option value="INATIVO">⏸️ Inativo</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="bb-label" for="pet-descricao">Descrição / Temperamento * (máx 255 chars)</label>
-              <textarea class="bb-input" id="pet-descricao" rows="3" maxlength="255" required placeholder="Muito brincalhão, convive bem com outros animais e crianças..."></textarea>
-            </div>
-
-            <div>
-              <label class="bb-label" for="pet-imagem" id="label-pet-imagem">Foto do Pet * (JPEG, PNG ou WebP, máx 50MB - otimizada automaticamente)</label>
-              <input
-                class="bb-input cursor-pointer"
-                type="file"
-                id="pet-imagem"
-                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-              />
-              <div id="pet-imagem-preview-wrap" class="hidden" style="margin-top: 0.5rem; display: none; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; border: 1px solid #dfe5ef; border-radius: 0.5rem; background: #f8fafc;">
-                <img id="pet-imagem-preview" src="" alt="Prévia da foto" style="width: 3.5rem; height: 3.5rem; object-fit: cover; border-radius: 0.375rem; border: 1px solid #cbd5e1;" />
-                <div style="flex: 1; min-width: 0;">
-                  <p id="pet-imagem-filename" style="font-size: 0.75rem; font-weight: 600; color: #16233a; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
-                  <p id="pet-imagem-filesize" style="font-size: 0.7rem; color: #64748b; margin: 0.125rem 0 0 0;"></p>
+                <div id="wrap-pet-local" class="bb-edit-field hidden">
+                  <label class="bb-label" for="pet-local">Último local visto / Ponto de referência <span class="bb-edit-required">*</span></label>
+                  <input class="bb-input" type="text" id="pet-local" placeholder="Ex: Próximo à praça central, Rua X, Bairro Y..." />
+                  <p class="bb-edit-hint">Ajuda as pessoas da região a identificarem o local com facilidade.</p>
                 </div>
-                <button type="button" id="pet-imagem-clear-btn" class="bb-btn bb-btn--secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; height: auto;" title="Remover imagem">✕ Remover</button>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bb-edit-field">
+                  <div>
+                    <label class="bb-label" for="pet-estado">Estado (UF) <span class="bb-edit-required">*</span></label>
+                    <select id="pet-estado" class="bb-input" required>
+                      <option value="">Selecione a UF...</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="bb-label" for="pet-cidade">Cidade <span class="bb-edit-required">*</span></label>
+                    <input
+                      class="bb-input"
+                      type="text"
+                      id="pet-cidade"
+                      list="pet-cidades-list"
+                      required
+                      disabled
+                      placeholder="Selecione a UF primeiro..."
+                      autocomplete="off"
+                    />
+                    <datalist id="pet-cidades-list"></datalist>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bb-edit-section">
+                <p class="bb-edit-section__title">📱 Contato do Tutor</p>
+                <div class="bb-edit-field">
+                  <label class="bb-label flex items-center justify-between" for="pet-telefone">
+                    <span>Telefone / WhatsApp de Contato</span>
+                    <span class="text-xs text-brand-600 font-medium">🔒 Vinculado ao seu perfil</span>
+                  </label>
+                  <input
+                    class="bb-input bg-surface-800/40 cursor-not-allowed opacity-90 font-mono text-sm"
+                    type="tel"
+                    id="pet-telefone"
+                    readonly
+                    disabled
+                    placeholder="Carregando telefone do perfil..."
+                  />
+                  <p class="bb-edit-hint">
+                    <span>Os interessados entrarão em contato diretamente no WhatsApp do seu perfil.</span>
+                  </p>
+                  <div id="pet-telefone-warning" class="hidden mt-2 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs">
+                    ⚠️ <strong>Atenção:</strong> Você ainda não cadastrou um telefone na sua conta.
+                    <a href="/pages/auth/profile.html" class="underline font-bold text-amber-200 ml-1">Cadastrar no perfil →</a>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div class="bb-modal-footer">
-              <button class="bb-btn bb-btn--secondary" type="button" id="modal-adopt-cancel-btn">Cancelar</button>
-              <button class="bb-btn bb-btn--primary" type="submit" id="modal-adopt-submit-btn">Publicar Anúncio</button>
+            <!-- Aba 3: Saúde & Foto -->
+            <div class="bb-edit-panel" id="adopt-panel-2" role="tabpanel" aria-labelledby="adopt-tab-saude">
+              <div class="bb-edit-section">
+                <p class="bb-edit-section__title">🩺 Cuidados e Saúde</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bb-edit-field">
+                  <div>
+                    <label class="bb-label" for="pet-castrado">Castrado</label>
+                    <select class="bb-input" id="pet-castrado">
+                      <option value="">Selecione...</option>
+                      <option value="Sim">Castrado (Sim)</option>
+                      <option value="Não">Não castrado</option>
+                      <option value="Não sei">Não informado / Não sei</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="bb-label" for="pet-medicamento">Medicamentos / Cuidados</label>
+                    <select class="bb-input" id="pet-medicamento">
+                      <option value="">Selecione...</option>
+                      <option value="Sim">Usa medicamentos contínuos (Sim)</option>
+                      <option value="Não">Não necessita de medicamentos</option>
+                      <option value="Não sei">Não informado / Não sei</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div id="wrap-pet-status" class="hidden bb-edit-field">
+                  <label class="bb-label" for="pet-status">Status do Anúncio</label>
+                  <select class="bb-input" id="pet-status">
+                    <option value="DISPONIVEL">🐾 Disponível para Adoção</option>
+                    <option value="ADOTADO">✅ Adotado (Concluído)</option>
+                    <option value="PERDIDO">🚨 Perdido / Desaparecido</option>
+                    <option value="ENCONTRADO">🎉 Encontrado (Concluído)</option>
+                    <option value="INATIVO">⏸️ Inativo</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="bb-edit-section">
+                <p class="bb-edit-section__title">📷 Foto do Pet</p>
+                <div class="bb-edit-field">
+                  <label class="bb-label" for="pet-imagem" id="label-pet-imagem">Foto Principal <span class="bb-edit-required">*</span></label>
+                  <input
+                    class="hidden"
+                    type="file"
+                    id="pet-imagem"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                  />
+
+                  <!-- Card elegante de upload de foto com preview grande -->
+                  <div class="bb-edit-photo" id="adopt-photo-box">
+                    <div class="bb-edit-photo__img" id="adopt-photo-img">🐾</div>
+                    <div class="bb-edit-photo__info">
+                      <p class="bb-edit-photo__name" id="pet-imagem-filename">Nenhuma foto selecionada</p>
+                      <p class="bb-edit-photo__meta" id="pet-imagem-filesize">JPEG, PNG ou WebP • máx 50MB (otimizada automaticamente)</p>
+                      <div class="bb-edit-photo__actions">
+                        <button type="button" class="bb-edit-mini-btn" id="adopt-photo-choose-btn">📷 Escolher Foto</button>
+                        <button type="button" class="bb-edit-mini-btn bb-edit-mini-btn--ghost hidden" id="pet-imagem-clear-btn">✕ Remover</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Wrappers ocultos mantidos para total compatibilidade -->
+                  <div id="pet-imagem-preview-wrap" class="hidden" style="display:none;">
+                    <img id="pet-imagem-preview" src="" alt="Prévia da foto" />
+                  </div>
+                </div>
+              </div>
             </div>
-          </form>
+          </div>
+
+          <!-- Rodapé moderno com navegação entre etapas -->
+          <div class="bb-edit-footer">
+            <button class="bb-btn bb-btn--secondary" type="button" id="modal-adopt-cancel-btn">Cancelar</button>
+            <div class="bb-edit-footer__nav">
+              <button class="bb-btn bb-btn--secondary hidden" type="button" id="adopt-prev-btn">← Anterior</button>
+              <button class="bb-btn bb-btn--secondary" type="button" id="adopt-next-btn">Próximo →</button>
+              <button class="bb-btn bb-btn--primary hidden" type="submit" id="modal-adopt-submit-btn">Publicar Anúncio</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal de Edição de Anúncio (somente o dono do anúncio) -->
+    <div id="edit-modal" class="bb-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+      <div class="bb-modal-dialog bb-edit-dialog">
+        <button id="edit-modal-close-btn" class="bb-modal-close-btn" type="button" aria-label="Fechar edição">&times;</button>
+
+        <!-- Cabeçalho: foto + nome + tipo de anúncio -->
+        <div class="bb-edit-header">
+          <div class="bb-edit-header__thumb" id="edit-header-thumb">🐾</div>
+          <div class="bb-edit-header__info">
+            <p class="bb-edit-header__eyebrow">✏️ Editar anúncio</p>
+            <h2 class="bb-edit-header__title" id="edit-modal-title">Pet</h2>
+            <span class="bb-edit-chip bb-edit-chip--adocao" id="edit-header-chip">🐾 Adoção</span>
+          </div>
         </div>
+
+        <!-- Abas -->
+        <div class="bb-edit-tabs" role="tablist">
+          <button type="button" class="bb-edit-tab is-active" id="edit-tab-sobre" data-edit-tab="0" role="tab" aria-selected="true" aria-controls="edit-panel-sobre">
+            <span class="bb-edit-tab__num">1</span> Sobre o pet
+          </button>
+          <button type="button" class="bb-edit-tab" id="edit-tab-local" data-edit-tab="1" role="tab" aria-selected="false" aria-controls="edit-panel-local">
+            <span class="bb-edit-tab__num">2</span> Saúde e local
+          </button>
+          <button type="button" class="bb-edit-tab" id="edit-tab-status" data-edit-tab="2" role="tab" aria-selected="false" aria-controls="edit-panel-status">
+            <span class="bb-edit-tab__num">3</span> Foto e status
+          </button>
+        </div>
+
+        <form id="form-edit-pet" novalidate style="display: contents;">
+          <div class="bb-modal-body bb-edit-body">
+            <div id="edit-modal-alert"></div>
+
+            <!-- Aba 1: Sobre o pet -->
+            <div class="bb-edit-panel is-active" id="edit-panel-sobre" role="tabpanel">
+              <div class="bb-edit-field">
+                <label class="bb-label" for="edit-nome">Nome do pet <span class="bb-edit-required">*</span></label>
+                <input class="bb-input" type="text" id="edit-nome" maxlength="50" placeholder="Ex: Bob, Pipoca..." />
+              </div>
+
+              <div class="bb-edit-field">
+                <span class="bb-label">Tipo de animal</span>
+                <div class="bb-edit-segmented" id="edit-tipo-group">
+                  <label><input type="radio" name="edit-tipo" value="CACHORRO" /><span>🐶 Cachorro</span></label>
+                  <label><input type="radio" name="edit-tipo" value="GATO" /><span>🐱 Gato</span></label>
+                  <label><input type="radio" name="edit-tipo" value="OUTRO" /><span>🐾 Outro</span></label>
+                </div>
+              </div>
+
+              <div class="bb-edit-field">
+                <span class="bb-label">Sexo</span>
+                <div class="bb-edit-segmented" id="edit-sexo-group">
+                  <label><input type="radio" name="edit-sexo" value="M" /><span>♂ Macho</span></label>
+                  <label><input type="radio" name="edit-sexo" value="F" /><span>♀ Fêmea</span></label>
+                  <label><input type="radio" name="edit-sexo" value="I" /><span>Não sei</span></label>
+                </div>
+              </div>
+
+              <div class="bb-modal-grid-2 bb-edit-field">
+                <div>
+                  <label class="bb-label" for="edit-raca">Raça</label>
+                  <input class="bb-input" type="text" id="edit-raca" maxlength="50" placeholder="Ex: SRD, Poodle..." />
+                </div>
+                <div>
+                  <label class="bb-label" for="edit-idade">Idade aproximada</label>
+                  <select class="bb-input" id="edit-idade">
+                    <option value="">Não informada</option>
+                    <option value="Filhote">Filhote</option>
+                    <option value="Adulto">Adulto</option>
+                    <option value="Idoso">Idoso</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="bb-edit-field">
+                <label class="bb-label" for="edit-descricao">Descrição / Temperamento <span class="bb-edit-required">*</span></label>
+                <textarea class="bb-input" id="edit-descricao" rows="3" maxlength="255" placeholder="Conte um pouco sobre o jeitinho do pet..."></textarea>
+                <p class="bb-edit-hint"><span>Seja breve e objetivo.</span><span id="edit-descricao-count">0/255</span></p>
+              </div>
+            </div>
+
+            <!-- Aba 2: Saúde e local -->
+            <div class="bb-edit-panel" id="edit-panel-local" role="tabpanel">
+              <div class="bb-edit-section">
+                <h3 class="bb-edit-section__title">🩺 Saúde</h3>
+                <div class="bb-modal-grid-2">
+                  <div>
+                    <label class="bb-label" for="edit-castrado">Castrado</label>
+                    <select class="bb-input" id="edit-castrado">
+                      <option value="">Não informado</option>
+                      <option value="Sim">Sim</option>
+                      <option value="Não">Não</option>
+                      <option value="Não sei">Não sei</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="bb-label" for="edit-medicamento">Usa medicamentos?</label>
+                    <select class="bb-input" id="edit-medicamento">
+                      <option value="">Não informado</option>
+                      <option value="Sim">Sim, contínuos</option>
+                      <option value="Não">Não</option>
+                      <option value="Não sei">Não sei</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bb-edit-section">
+                <h3 class="bb-edit-section__title">📍 Localização</h3>
+                <div class="bb-modal-grid-2 bb-edit-field">
+                  <div>
+                    <label class="bb-label" for="edit-estado">Estado (UF) <span class="bb-edit-required">*</span></label>
+                    <select class="bb-input" id="edit-estado">
+                      <option value="">Selecione...</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="bb-label" for="edit-cidade">Cidade <span class="bb-edit-required">*</span></label>
+                    <input class="bb-input" type="text" id="edit-cidade" list="edit-cidades-list" maxlength="100" autocomplete="off" placeholder="Digite a cidade..." />
+                    <datalist id="edit-cidades-list"></datalist>
+                  </div>
+                </div>
+                <div class="bb-edit-field hidden" id="edit-wrap-local">
+                  <label class="bb-label" for="edit-local">Último local visto <span class="bb-edit-required">*</span></label>
+                  <input class="bb-input" type="text" id="edit-local" maxlength="200" placeholder="Ex: Próximo à praça central, Bairro X..." />
+                </div>
+              </div>
+            </div>
+
+            <!-- Aba 3: Foto e status -->
+            <div class="bb-edit-panel" id="edit-panel-status" role="tabpanel">
+              <div class="bb-edit-section">
+                <h3 class="bb-edit-section__title">📷 Foto do anúncio</h3>
+                <div class="bb-edit-photo">
+                  <div class="bb-edit-photo__img" id="edit-photo-img">🐾</div>
+                  <div class="bb-edit-photo__info">
+                    <p class="bb-edit-photo__name" id="edit-photo-name">Foto atual</p>
+                    <p class="bb-edit-photo__meta" id="edit-photo-meta">JPEG, PNG ou WebP • otimizada automaticamente</p>
+                    <div class="bb-edit-photo__actions">
+                      <button type="button" class="bb-edit-mini-btn" id="edit-photo-change-btn">🔄 Trocar foto</button>
+                      <button type="button" class="bb-edit-mini-btn bb-edit-mini-btn--ghost hidden" id="edit-photo-undo-btn">✕ Manter a atual</button>
+                    </div>
+                  </div>
+                </div>
+                <input type="file" id="edit-imagem" class="hidden" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+              </div>
+
+              <div class="bb-edit-section">
+                <h3 class="bb-edit-section__title">📌 Situação do anúncio</h3>
+                <div class="bb-edit-status-list" id="edit-status-list" role="radiogroup" aria-label="Situação do anúncio"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rodapé fixo -->
+          <div class="bb-edit-footer">
+            <span class="bb-edit-dirty" id="edit-dirty-indicator">Alterações não salvas</span>
+            <div class="bb-edit-footer__nav" style="margin-left: auto;">
+              <button class="bb-btn bb-btn--secondary" type="button" id="edit-modal-cancel-btn">Cancelar</button>
+              <button class="bb-btn bb-btn--primary" type="submit" id="edit-modal-submit-btn">Salvar alterações</button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -342,6 +571,7 @@
 
   <script src="../../js/config.js"></script>
   <script src="../../js/utils/storage.js"></script>
+  <script src="../../js/utils/validation.js"></script>
   <script src="../../js/mocks/mock-utils.js"></script>
   <script src="../../js/mocks/mock-data.js"></script>
   <script src="../../js/api/client.js"></script>
@@ -355,6 +585,7 @@
   <script src="../../js/components/StateView.js"></script>
   <script src="../../js/utils/click-limiter.js"></script>
   <script src="../../js/utils/image-compressor.js"></script>
-  <script src="../../js/pages/animals.js?v=4"></script>
+  <script src="../../js/pages/animals.js?v=7"></script>
+  <script src="../../js/pages/animals-edit.js?v=3"></script>
 </body>
 </html>

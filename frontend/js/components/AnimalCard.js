@@ -42,7 +42,7 @@ function bbAnimalCardHtml(animal) {
             ${finishBtnText}
           </button>
         ` : `<span class="text-xs text-slate-400 font-medium py-1 px-2 rounded bg-slate-100">Anúncio concluído</span>`}
-        <button type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors btn-edit-animal" data-id="${animal.id}" title="Editar informações">
+        <button type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors btn-edit-animal" data-id="${animal.id}" data-no-limit onclick="event.stopPropagation();if(window.bbOpenEditModal){window.bbOpenEditModal('${animal.id}');}else{window.location.href='/pages/animals/index.html?edit=${animal.id}';}" title="Editar informações">
           ✏️ Editar
         </button>
         <button type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-500 bg-rose-50 hover:bg-rose-100 transition-colors btn-delete-animal" data-id="${animal.id}" title="Excluir anúncio">
