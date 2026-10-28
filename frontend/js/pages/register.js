@@ -55,14 +55,24 @@ if (bbTelefoneInput) {
 }
 
 const bbOpenTermsLink = document.getElementById("open-terms-link");
+const bbTermosCheckbox = document.getElementById("termos-aceite");
+
+if (bbTermosCheckbox) {
+  bbTermosCheckbox.addEventListener("change", () => {
+    if (bbTermosCheckbox.checked) {
+      const errorEl = document.getElementById("termos-error");
+      if (errorEl) errorEl.textContent = "";
+    }
+  });
+}
+
 if (bbOpenTermsLink) {
   bbOpenTermsLink.addEventListener("click", (e) => {
     e.preventDefault();
     if (typeof bbOpenTermsModal === "function") {
       bbOpenTermsModal(() => {
-        const cb = document.getElementById("termos-aceite");
-        if (cb) {
-          cb.checked = true;
+        if (bbTermosCheckbox) {
+          bbTermosCheckbox.checked = true;
           const errorEl = document.getElementById("termos-error");
           if (errorEl) errorEl.textContent = "";
         }
@@ -135,6 +145,14 @@ bbRegisterForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  // Validação síncrona dos termos ANTES de qualquer requisição e antes do estado de loading
+  if (bbTermosCheckbox && !bbTermosCheckbox.checked) {
+    const errorEl = document.getElementById("termos-error");
+    if (errorEl) errorEl.textContent = "Você precisa aceitar os Termos de Uso e a Política de Privacidade para criar sua conta.";
+    bbTermosCheckbox.focus();
+    return;
+  }
+
   bbSetLoading(true);
 
   // Validação prévia de disponibilidade do telefone antes da submissão
@@ -149,14 +167,6 @@ bbRegisterForm.addEventListener("submit", async (event) => {
     }
   } catch (_) {
     // Prossiga se a rota de verificação não estiver disponível
-  }
-
-  const termosCheckbox = document.getElementById("termos-aceite");
-  if (termosCheckbox && !termosCheckbox.checked) {
-    const errorEl = document.getElementById("termos-error");
-    if (errorEl) errorEl.textContent = "Você precisa aceitar os Termos de Uso e a Política de Privacidade para criar sua conta.";
-    termosCheckbox.focus();
-    return;
   }
 
   try {
