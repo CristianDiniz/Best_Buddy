@@ -21,7 +21,6 @@ function renderHomePets() {
   if (filtered.length === 0) {
     bbHomePetsEl.innerHTML = `
       <div class="col-span-full py-12 text-center text-ink-300 bg-white border border-border/80 rounded-2xl p-8">
-        <span class="text-4xl block mb-2">🐾</span>
         <h4 class="font-bold text-ink-100 text-base mb-1">Nenhum animal encontrado para esta categoria</h4>
         <p class="text-xs text-ink-300">Que tal anunciar um pet e ajudar a encontrar um lar?</p>
       </div>
@@ -129,7 +128,7 @@ async function bbLoadHomePets() {
   if (!bbHomePetsEl) return;
   bbHomePetsEl.innerHTML = typeof bbSkeletonGridHtml === "function" ? bbSkeletonGridHtml(5) : `
     <div class="col-span-full py-12 text-center text-ink-300">
-      <span class="animate-spin inline-block text-2xl mb-2">🐾</span>
+      <div class="inline-block w-8 h-8 border-3 border-brand-500 border-t-transparent rounded-full animate-spin mb-2"></div>
       <p class="text-xs">Carregando pets para adoção...</p>
     </div>
   `;
@@ -156,10 +155,9 @@ function bbCheckSessionExpiredNotice() {
       "bg-amber-500/10 border border-amber-500/30 text-amber-700 text-sm px-4 py-3 rounded-xl mb-6 flex items-center justify-between";
     banner.innerHTML = `
       <div class="flex items-center gap-2">
-        <span>⚠️</span>
         <span>Sua sessão expirou por inatividade. Você pode continuar navegando ou entrar novamente quando quiser.</span>
       </div>
-      <button type="button" class="text-amber-700 hover:text-ink-100 text-xs font-bold uppercase tracking-wider ml-4 cursor-pointer" onclick="this.parentElement.remove()">✕</button>
+      <button type="button" class="text-amber-700 hover:text-ink-100 text-xs font-bold uppercase tracking-wider ml-4 cursor-pointer" onclick="this.parentElement.remove()">&times;</button>
     `;
     const container = document.querySelector(".bb-container");
     if (container) {

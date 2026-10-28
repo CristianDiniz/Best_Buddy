@@ -40,7 +40,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       : "bg-rose-500/10 border-rose-500/40 text-rose-300";
     alertContainer.innerHTML = `
       <div class="bb-alert border p-3 rounded-lg mb-6 flex items-center gap-2 ${bg}">
-        <span>${isSuccess ? "✅" : "⚠️"}</span>
         <span>${msg}</span>
       </div>
     `;

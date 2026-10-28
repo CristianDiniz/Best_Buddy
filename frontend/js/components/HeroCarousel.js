@@ -6,7 +6,7 @@ function bbRenderHeroCarousel(targetSelector) {
   const slides = [
     {
       img: "../../assets/images/cachorroDeLado.jpg",
-      alt: "Cachorro de perfil — Pets Desaparecidos Best Buddy",
+      alt: "Cachorro de perfil - Pets Desaparecidos Best Buddy",
       title: "Ajude a reencontrar pets perdidos!",
       desc: "Encontrou um animalzinho ou perdeu seu companheiro? Conecte-se diretamente com a família.",
       cta: "Ver pets perdidos",
@@ -14,7 +14,7 @@ function bbRenderHeroCarousel(targetSelector) {
     },
     {
       img: "../../assets/images/cachorroComABocaAberta.jpg",
-      alt: "Cachorro feliz com a boca aberta — Animais disponíveis",
+      alt: "Cachorro feliz com a boca aberta - Animais disponíveis",
       title: "Conheça nossos animais",
       desc: "Veja os bichinhos que estão esperando por um novo lar cheio de carinho.",
       cta: "Ver animais",
@@ -22,7 +22,7 @@ function bbRenderHeroCarousel(targetSelector) {
     },
     {
       img: "../../assets/images/cachorroCoberto.jpg",
-      alt: "Cachorro enrolado em cobertor — Adote um animal",
+      alt: "Cachorro enrolado em cobertor - Adote um animal",
       title: "Adote animais aqui!",
       desc: "Dê uma segunda chance a quem mais precisa. Conheça nossos pets disponíveis para adoção.",
       cta: "Quero adotar",
@@ -52,8 +52,8 @@ function bbRenderHeroCarousel(targetSelector) {
       .join("")}
       </div>
 
-      <button class="bb-hero__arrow bb-hero__arrow--prev" type="button" aria-label="Slide anterior">‹</button>
-      <button class="bb-hero__arrow bb-hero__arrow--next" type="button" aria-label="Próximo slide">›</button>
+      <button class="bb-hero__arrow bb-hero__arrow--prev" type="button" aria-label="Slide anterior">&lsaquo;</button>
+      <button class="bb-hero__arrow bb-hero__arrow--next" type="button" aria-label="Próximo slide">&rsaquo;</button>
 
       <div class="bb-hero__dots">
         ${slides

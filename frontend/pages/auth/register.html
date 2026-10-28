@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Best Buddy — Criar conta</title>
+  <title>Best Buddy | Criar conta</title>
   <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
   <link rel="alternate icon" type="image/x-icon" href="../../favicon.ico" />
   <link rel="apple-touch-icon" href="../../apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="stylesheet" href="../../css/tailwind.build.css" />
+  <link rel="stylesheet" href="../../css/tailwind.build.css?v=6" />
 </head>
+
 <body class="overflow-x-hidden">
   <div class="bb-auth-shell">
     <!-- Vídeo em Background em Loop -->
@@ -46,21 +48,40 @@
 
           <div class="bb-field">
             <label class="bb-label" for="telefone">Telefone / WhatsApp <span class="text-rose-500">*</span></label>
-            <input class="bb-input" type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000" maxlength="15" autocomplete="tel" required />
+            <input class="bb-input" type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000"
+              maxlength="15" autocomplete="tel" required />
             <div class="bb-error-text" id="telefone-error"></div>
             <p class="text-xs text-ink-300 mt-1">Este número será único e vinculado aos anúncios dos seus animais.</p>
           </div>
 
           <div class="bb-field">
             <label class="bb-label" for="senha">Senha</label>
-            <input class="bb-input" type="password" id="senha" name="senha" placeholder="Mínimo 6 caracteres" required />
+            <input class="bb-input" type="password" id="senha" name="senha" placeholder="Mínimo 6 caracteres"
+              required />
             <div class="bb-error-text" id="senha-error"></div>
           </div>
 
           <div class="bb-field">
             <label class="bb-label" for="confirmar-senha">Confirmar senha</label>
-            <input class="bb-input" type="password" id="confirmar-senha" name="confirmar_senha" placeholder="Repita a senha" required />
+            <input class="bb-input" type="password" id="confirmar-senha" name="confirmar_senha"
+              placeholder="Repita a senha" required />
             <div class="bb-error-text" id="confirmar-senha-error"></div>
+          </div>
+
+          <div class="bb-field mb-4">
+            <label class="flex items-start gap-2.5 cursor-pointer text-xs text-ink-300 select-none">
+              <input type="checkbox" id="termos-aceite" name="termos_aceitos"
+                class="mt-0.5 rounded border-slate-300 text-sky-500 focus:ring-sky-400 cursor-pointer" required />
+              <span>
+                Declaro que li e concordo com os
+                <a href="javascript:void(0)" id="open-terms-link"
+                  class="text-brand-400 font-semibold underline hover:text-brand-300">Termos de Uso e Adesão</a>
+                e a
+                <a href="/pages/legal/privacy.html" target="_blank"
+                  class="text-brand-400 font-semibold underline hover:text-brand-300">Política de Privacidade</a>.
+              </span>
+            </label>
+            <div class="bb-error-text mt-1" id="termos-error"></div>
           </div>
 
           <button class="bb-btn bb-btn--primary bb-btn--block" type="submit" id="bb-submit-btn">
@@ -75,7 +96,7 @@
     </main>
 
     <footer class="bb-auth-footer-simple">
-      © Best Buddy — Todos os direitos reservados
+      &copy; Best Buddy | Todos os direitos reservados
     </footer>
   </div>
 
@@ -87,7 +108,9 @@
   <script src="../../js/api/client.js"></script>
   <script src="../../js/services/authService.js"></script>
   <script src="../../js/components/AuthHeader.js"></script>
+  <script src="../../js/components/TermsModal.js"></script>
   <script src="../../js/utils/click-limiter.js"></script>
   <script src="../../js/pages/register.js"></script>
 </body>
+
 </html>

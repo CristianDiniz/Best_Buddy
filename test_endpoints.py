@@ -176,6 +176,30 @@ def run_tests():
     res_login_tutor = client_tutor.post('/api/token/', {'email': 'tutor_validado@teste.com', 'password': 'password123'}, format='json')
     client_tutor.credentials(HTTP_AUTHORIZATION=f"Bearer {res_login_tutor.data['access']}")
 
+    # 7.1 Teste: Criação SEM foto é barrada
+    payload_sem_foto = {
+        "tipo_servico": "ADOCAO",
+        "tipo_animal": "CACHORRO",
+        "nome": "Caramelo Teste",
+        "cidade": "São Carlos",
+        "descricao": "Pet sem foto.",
+    }
+    res_sem_foto = client_tutor.post('/api/animais/', payload_sem_foto, format='json')
+    assert res_sem_foto.status_code == 400, "Deveria barrar criação sem foto"
+    assert "foto do animal é obrigatória" in str(res_sem_foto.data)
+    print("OK! Criação sem foto barrada com sucesso.")
+
+    import io
+    from PIL import Image
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    from unittest.mock import patch
+
+    def make_test_img(name="pet.jpg"):
+        buf = io.BytesIO()
+        Image.new('RGB', (100, 100), color='white').save(buf, format='JPEG')
+        buf.seek(0)
+        return SimpleUploadedFile(name, buf.getvalue(), content_type="image/jpeg")
+
     payload_pet = {
         "tipo_servico": "ADOCAO",
         "tipo_animal": "CACHORRO",
@@ -185,8 +209,10 @@ def run_tests():
         "raca": "SRD",
         "sexo": "M",
         "idade_aproximada": "Filhote",
+        "imagem": make_test_img("caramelo.jpg")
     }
-    res_create = client_tutor.post('/api/animais/', payload_pet, format='json')
+    with patch('animais.serializers.validar_imagem_pet_e_seguranca', return_value=(True, "", "OK")):
+        res_create = client_tutor.post('/api/animais/', payload_pet, format='multipart')
     assert res_create.status_code == 201, f"Falha ao criar pet: {res_create.data}"
     # Verifica se o contato veio da FK do tutor automaticamente no campo telefone_contato e no alias contato
     assert res_create.data['telefone_contato'] == '(11) 97777-6666', f"Telefone de contato incorreto: {res_create.data['telefone_contato']}"
@@ -212,7 +238,16 @@ def run_tests():
             telefone_contato="(16) 99999-0000"
         )
 
-    res_cota = client.post('/api/animais/', payload_pet, format='json')
+    payload_pet_cota = {
+        "tipo_servico": "ADOCAO",
+        "tipo_animal": "CACHORRO",
+        "nome": "Caramelo Cota",
+        "cidade": "São Carlos",
+        "descricao": "Pet cota.",
+        "imagem": make_test_img("cota.jpg")
+    }
+    with patch('animais.serializers.validar_imagem_pet_e_seguranca', return_value=(True, "", "OK")):
+        res_cota = client.post('/api/animais/', payload_pet_cota, format='multipart')
     assert res_cota.status_code == 400
     assert "Limite atingido" in str(res_cota.data)
     print(f"OK! Cota validada com sucesso: {res_cota.data}")
@@ -228,7 +263,16 @@ def run_tests():
     res_sem_whats_login = client_sem_whats.post('/api/token/', {'email': 'sem_whats@teste.com', 'password': 'password123'}, format='json')
     client_sem_whats.credentials(HTTP_AUTHORIZATION=f"Bearer {res_sem_whats_login.data['access']}")
     
-    res_bloqueio = client_sem_whats.post('/api/animais/', payload_pet, format='json')
+    payload_pet_sem_whats = {
+        "tipo_servico": "ADOCAO",
+        "tipo_animal": "CACHORRO",
+        "nome": "Caramelo Sem Whats",
+        "cidade": "São Carlos",
+        "descricao": "Pet sem whats.",
+        "imagem": make_test_img("whats.jpg")
+    }
+    with patch('animais.serializers.validar_imagem_pet_e_seguranca', return_value=(True, "", "OK")):
+        res_bloqueio = client_sem_whats.post('/api/animais/', payload_pet_sem_whats, format='multipart')
     assert res_bloqueio.status_code == 400, f"Deveria barrar criação sem WhatsApp validado, obteve: {res_bloqueio.status_code}"
     print(f"OK! Bloqueio efetuado: {res_bloqueio.data}")
     novo_user.delete()
@@ -290,15 +334,18 @@ def run_tests():
     res_l_mgmt = client_mgmt.post('/api/token/', {'email': 'tutor_mgmt@teste.com', 'password': 'password123'}, format='json')
     client_mgmt.credentials(HTTP_AUTHORIZATION=f"Bearer {res_l_mgmt.data['access']}")
 
-    res_pet_novo = client_mgmt.post('/api/animais/', {
+    payload_miau = {
         "tipo_servico": "ADOCAO",
         "tipo_animal": "GATO",
         "nome": "Miau Teste",
         "cidade": "Campinas",
         "descricao": "Gatinho muito tranquilo.",
-        "sexo": "F"
-    }, format='json')
-    assert res_pet_novo.status_code == 201
+        "sexo": "F",
+        "imagem": make_test_img("miau.jpg")
+    }
+    with patch('animais.serializers.validar_imagem_pet_e_seguranca', return_value=(True, "", "OK")):
+        res_pet_novo = client_mgmt.post('/api/animais/', payload_miau, format='multipart')
+    assert res_pet_novo.status_code == 201, f"Falha ao criar pet: {res_pet_novo.data}"
     pet_id = res_pet_novo.data['id']
     assert res_pet_novo.data['status'] == 'DISPONIVEL'
 

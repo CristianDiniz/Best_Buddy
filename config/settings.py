@@ -183,3 +183,46 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': False,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+# Diretório e Configuração de Logs do Sistema (LGPD Compliant + Log Rotation)
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} [{name}] {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+        'simple': {
+            'format': '{levelname} [{name}]: {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'ia_file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(LOGS_DIR / 'ia_validation.log'),
+            'maxBytes': 5 * 1024 * 1024,  # Máximo de 5 MB por arquivo
+            'backupCount': 3,            # Mantém no máximo 3 arquivos rotacionados (~15 MB teto total)
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+    },
+    'loggers': {
+        'animais': {
+            'handlers': ['console', 'ia_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

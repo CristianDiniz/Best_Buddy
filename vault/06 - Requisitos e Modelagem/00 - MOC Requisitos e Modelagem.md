@@ -36,6 +36,9 @@ Este módulo do **Obsidian Vault** reúne a documentação canônica de requisit
 ### 8. [[08 - Implementações futuras]]
 - Backlog de evolução: Twilio WhatsApp, Contas de ONG com cota ilimitada, Catálogo de Serviços e Clínicas, Sistema Universal de Denúncias, Moderação Avançada de Staff e Recuperação de Senha por Email.
 
+### 9. [[09 - Privacidade, Dados Sensiveis (LGPD) e Termos de Adesao]]
+- Tratamento de privacidade e conformidade com a LGPD (Lei 13.709/2018), mapeamento de dados sensíveis e PII, política de armazenamento local/cookies e especificação dos 5 modais e componentes de consentimento.
+
 ---
 
 ## 🔗 Links Rápidos

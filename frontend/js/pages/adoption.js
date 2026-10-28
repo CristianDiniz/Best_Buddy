@@ -28,7 +28,7 @@ async function bbLoadSummary() {
         <div>
           <strong class="text-ink-100">${animal.nome}</strong>
           <p class="mt-1 mb-0 text-ink-300 text-sm">
-            ${animal.raca || "SRD"} · ${animal.idade_aproximada}
+            ${animal.raca || "SRD"} | ${animal.idade_aproximada}
           </p>
         </div>
       </div>

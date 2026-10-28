@@ -11,6 +11,11 @@ const BB_STORAGE_KEYS = {
 
 const bbStorage = {
   setSession({ access, refresh, user }) {
+    if (access || refresh) {
+      localStorage.setItem("bb_cookie_consent", "accepted");
+      const banner = document.getElementById("bb-cookie-banner");
+      if (banner) banner.remove();
+    }
     if (access) localStorage.setItem(BB_STORAGE_KEYS.ACCESS_TOKEN, access);
     if (refresh) localStorage.setItem(BB_STORAGE_KEYS.REFRESH_TOKEN, refresh);
     if (user) localStorage.setItem(BB_STORAGE_KEYS.USER, JSON.stringify(user));

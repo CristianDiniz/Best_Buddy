@@ -40,6 +40,17 @@ class Usuario(AbstractUser):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    termos_aceitos_em = models.DateTimeField(
+        auto_now_add=True,
+        null=True,
+        blank=True,
+        verbose_name="Data de Aceite dos Termos e Privacidade"
+    )
+    versao_termos = models.CharField(
+        max_length=10,
+        default="1.0",
+        verbose_name="Versão dos Termos Aceitos"
+    )
 
     
 

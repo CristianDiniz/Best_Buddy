@@ -8,12 +8,12 @@ function bbRenderNavigation(targetSelector, activePage) {
   const initials = user?.nome ? user.nome.trim().charAt(0).toUpperCase() : "U";
 
   const links = [
-    { key: "home", label: "Home", href: "/pages/home/index.html", icon: "🏠" },
-    { key: "animals", label: "Animais", href: "/pages/animals/index.html", icon: "🐾" },
+    { key: "home", label: "Home", href: "/pages/home/index.html" },
+    { key: "animals", label: "Animais", href: "/pages/animals/index.html" },
   ];
 
   if (isAuth) {
-    links.push({ key: "profile", label: "Meu Perfil", href: "/pages/auth/profile.html", icon: "⚙️" });
+    links.push({ key: "profile", label: "Meu Perfil", href: "/pages/auth/profile.html" });
   }
 
   const linksHtml = links
@@ -21,7 +21,6 @@ function bbRenderNavigation(targetSelector, activePage) {
       (link) => `
       <li>
         <a class="bb-nav__link" href="${link.href}" ${link.key === activePage ? 'aria-current="page"' : ""}>
-          <span aria-hidden="true">${link.icon}</span>
           <span>${link.label}</span>
         </a>
       </li>`
@@ -57,7 +56,6 @@ function bbRenderNavigation(targetSelector, activePage) {
     <header class="bb-header">
       <div class="bb-container bb-header__bar bb-header__bar--nav">
         <a href="/pages/home/index.html" class="bb-logo">
-          <span class="bb-logo__icon" aria-hidden="true">🐾</span>
           <span class="bb-logo__text bb-logo__text--dark">Best</span><span class="bb-logo__text bb-logo__text--accent">Buddy</span>
         </a>
         <nav aria-label="Navegação principal" class="bb-header__nav-wrap">

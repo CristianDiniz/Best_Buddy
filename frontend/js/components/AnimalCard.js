@@ -9,13 +9,13 @@ function bbAnimalCardHtml(animal) {
 
   let statusBadge = "";
   if (animal.status === "ADOTADO") {
-    statusBadge = `<span class="bb-status-badge bb-status-badge--adotado">✅ Adotado</span>`;
+    statusBadge = `<span class="bb-status-badge bb-status-badge--adotado">Adotado</span>`;
   } else if (animal.status === "ENCONTRADO") {
-    statusBadge = `<span class="bb-status-badge bb-status-badge--encontrado">🎉 Encontrado</span>`;
+    statusBadge = `<span class="bb-status-badge bb-status-badge--encontrado">Encontrado</span>`;
   } else if (isPerdido) {
-    statusBadge = `<span class="bb-status-badge bb-status-badge--perdido">🚨 Desaparecido</span>`;
+    statusBadge = `<span class="bb-status-badge bb-status-badge--perdido">Desaparecido</span>`;
   } else {
-    statusBadge = `<span class="bb-status-badge bb-status-badge--adocao">🐾 Para Adoção</span>`;
+    statusBadge = `<span class="bb-status-badge bb-status-badge--adocao">Para Adoção</span>`;
   }
 
   const imageHtml = animal.imagem
@@ -32,7 +32,7 @@ function bbAnimalCardHtml(animal) {
   let ownerActionsHtml = "";
   if (isOwner) {
     const isFinished = animal.status === "ADOTADO" || animal.status === "ENCONTRADO";
-    const finishBtnText = isPerdido ? "🎉 Marcar Encontrado" : "✅ Marcar Adotado";
+    const finishBtnText = isPerdido ? "Marcar Encontrado" : "Marcar Adotado";
     const targetStatus = isPerdido ? "ENCONTRADO" : "ADOTADO";
 
     ownerActionsHtml = `
@@ -43,10 +43,10 @@ function bbAnimalCardHtml(animal) {
           </button>
         ` : `<span class="text-xs text-slate-400 font-medium py-1 px-2 rounded bg-slate-100">Anúncio concluído</span>`}
         <button type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors btn-edit-animal" data-id="${animal.id}" title="Editar informações">
-          ✏️ Editar
+          Editar
         </button>
         <button type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-500 bg-rose-50 hover:bg-rose-100 transition-colors btn-delete-animal" data-id="${animal.id}" title="Excluir anúncio">
-          🗑️
+          Excluir
         </button>
       </div>
     `;
@@ -54,7 +54,7 @@ function bbAnimalCardHtml(animal) {
 
   const actionButtonHtml = !isOwner ? `
     <a href="${waLink}" ${cleanPhone ? 'target="_blank" rel="noopener noreferrer"' : ''} class="bb-adopt-btn" onclick="event.stopPropagation()">
-      ${isPerdido ? '🚨 Vi este pet' : 'Quero adotar'}
+      ${isPerdido ? 'Vi este pet' : 'Quero adotar'}
     </a>
   ` : '';
 
@@ -86,7 +86,7 @@ function bbAnimalCardHtml(animal) {
             <span class="bb-pet-tag">${sexoLabel}</span>
             ${animal.cidade ? `
               <span class="bb-pet-tag bb-pet-tag--location" title="${animal.cidade}${animal.estado ? ` - ${animal.estado}` : ''}">
-                📍 ${animal.cidade}${animal.estado ? ` - ${animal.estado}` : ''}
+                ${animal.cidade}${animal.estado ? ` - ${animal.estado}` : ''}
               </span>
             ` : ''}
           </div>

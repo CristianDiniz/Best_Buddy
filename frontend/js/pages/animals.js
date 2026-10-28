@@ -67,7 +67,10 @@ function isValidImageType(file) {
 
 function resetImageInput() {
   optimizedImageFile = null;
-  if (petImageInput) petImageInput.value = "";
+  if (petImageInput) {
+    petImageInput.value = "";
+    petImageInput.classList.remove("bb-input--error");
+  }
   if (petImagePreviewWrap) {
     petImagePreviewWrap.classList.add("hidden");
     petImagePreviewWrap.style.display = "none";
@@ -117,8 +120,8 @@ function renderLost() {
     bbLostToggleWrapEl.classList.remove("hidden");
     const remaining = allLostAnimals.length - INITIAL_LIMIT;
     bbLostToggleBtn.textContent = lostExpanded
-      ? "Recolher vitrine de desaparecidos ↑"
-      : `Ver mais animais perdidos (${remaining}) ↓`;
+      ? "Recolher vitrine de desaparecidos"
+      : `Ver mais animais perdidos (${remaining})`;
   } else {
     bbLostToggleWrapEl.classList.add("hidden");
   }
@@ -143,8 +146,8 @@ function renderAdopt() {
     bbAdoptToggleWrapEl.classList.remove("hidden");
     const remaining = allAdoptAnimals.length - INITIAL_LIMIT;
     bbAdoptToggleBtn.textContent = adoptExpanded
-      ? "Recolher vitrine de adoção ↑"
-      : `Ver mais animais para adoção (${remaining}) ↓`;
+      ? "Recolher vitrine de adoção"
+      : `Ver mais animais para adoção (${remaining})`;
   } else {
     bbAdoptToggleWrapEl.classList.add("hidden");
   }
@@ -239,7 +242,7 @@ if (filterEstadoSelect) {
     if (filterCidadesDatalist) filterCidadesDatalist.innerHTML = "";
 
     if (!uf) {
-      filterCidadeInput.placeholder = "🔍 Buscar por cidade...";
+      filterCidadeInput.placeholder = "Buscar por cidade...";
     } else {
       filterCidadeInput.placeholder = "Carregando cidades...";
       try {
@@ -261,7 +264,7 @@ filterClearBtn.addEventListener("click", () => {
   if (filterCidadesDatalist) filterCidadesDatalist.innerHTML = "";
   if (filterCidadeInput) {
     filterCidadeInput.value = "";
-    filterCidadeInput.placeholder = "🔍 Buscar por cidade...";
+    filterCidadeInput.placeholder = "Buscar por cidade...";
   }
   if (filterTipoAnimalSelect) filterTipoAnimalSelect.value = "";
   if (filterTempoSelect) filterTempoSelect.value = "";
@@ -334,7 +337,7 @@ function updateModalServiceUI(service) {
   if (service === "PERDIDO") {
     if (wrapPetLocal) wrapPetLocal.classList.remove("hidden");
     if (petLocalInput) petLocalInput.required = true;
-    if (modalHeading) modalHeading.innerHTML = `<span>🚨</span> Reportar Animal Perdido`;
+    if (modalHeading) modalHeading.textContent = "Reportar Animal Perdido";
     if (modalDesc) modalDesc.textContent = "Preencha as informações do animal desaparecido para que a comunidade possa ajudar a localizá-lo.";
     modalSubmitBtn.textContent = "Publicar Animal Perdido";
   } else {
@@ -343,7 +346,7 @@ function updateModalServiceUI(service) {
       petLocalInput.required = false;
       petLocalInput.value = "";
     }
-    if (modalHeading) modalHeading.innerHTML = `<span>🐾</span> Anunciar Pet para Adoção`;
+    if (modalHeading) modalHeading.textContent = "Anunciar Pet para Adoção";
     if (modalDesc) modalDesc.textContent = "Preencha os dados do animal. O telefone informado será o canal direto para interessados entrarem em contato via WhatsApp.";
     modalSubmitBtn.textContent = "Publicar Anúncio";
   }
@@ -360,6 +363,10 @@ async function openAdoptModal(defaultService = "ADOCAO") {
   modalAlertEl.innerHTML = "";
   formAdoptPet.reset();
   resetImageInput();
+  const labelImg = document.getElementById("label-pet-imagem");
+  if (labelImg) {
+    labelImg.textContent = "Foto do Pet * (JPEG, PNG ou WebP, máx 50MB - otimizada automaticamente)";
+  }
 
   if (wrapPetStatus) wrapPetStatus.classList.add("hidden");
 
@@ -424,7 +431,7 @@ async function openEditPetModal(animal) {
 
   const modalHeading = document.querySelector("#adopt-modal h2");
   const modalDesc = document.getElementById("modal-adopt-desc");
-  if (modalHeading) modalHeading.innerHTML = `<span>✏️</span> Editar Anúncio do Pet`;
+  if (modalHeading) modalHeading.textContent = "Editar Anúncio do Pet";
   if (modalDesc) modalDesc.textContent = "Atualize os dados e o status do anúncio do seu animal.";
   if (modalSubmitBtn) modalSubmitBtn.textContent = "Salvar Alterações";
 
@@ -434,7 +441,7 @@ async function openEditPetModal(animal) {
   if (petServicoSelect) {
     petServicoSelect.value = animal.tipo_servico || "ADOCAO";
     updateModalServiceUI(animal.tipo_servico || "ADOCAO");
-    if (modalHeading) modalHeading.innerHTML = `<span>✏️</span> Editar Anúncio do Pet`;
+    if (modalHeading) modalHeading.textContent = "Editar Anúncio do Pet";
     if (modalSubmitBtn) modalSubmitBtn.textContent = "Salvar Alterações";
   }
 
@@ -464,6 +471,10 @@ async function openEditPetModal(animal) {
   if (descEl) descEl.value = animal.descricao || "";
 
   resetImageInput();
+  const labelImgEdit = document.getElementById("label-pet-imagem");
+  if (labelImgEdit) {
+    labelImgEdit.textContent = "Foto do Pet (opcional se já possuir foto cadastrada)";
+  }
   if (animal.imagem) {
     setImagePreview(animal.imagem, "Foto cadastrada", "");
   }
@@ -537,6 +548,7 @@ if (petImageInput) {
   petImageInput.addEventListener("change", async (e) => {
     const file = e.target.files && e.target.files[0];
     modalAlertEl.innerHTML = "";
+    petImageInput.classList.remove("bb-input--error");
     optimizedImageFile = null;
     if (!file) {
       resetImageInput();
@@ -571,7 +583,7 @@ if (petImageInput) {
         setImagePreview(
           newPreviewUrl,
           result.file.name,
-          `${compressedText}${savedText} • original: ${originalText}`
+          `${compressedText}${savedText} | original: ${originalText}`
         );
       } else {
         const sizeKB = file.size > 1024 * 1024
@@ -645,7 +657,7 @@ formAdoptPet.addEventListener("submit", async (e) => {
 
   if (!effectivePhone && !isEdit) {
     const errorMsg = "É necessário ter um telefone cadastrado na sua conta para anunciar um animal.";
-    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error font-semibold">⚠️ ${errorMsg} <a href="/pages/auth/profile.html" class="underline font-bold text-brand-300 ml-1">Cadastrar no Perfil →</a></div>`;
+    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error font-semibold">${errorMsg} <a href="/pages/auth/profile.html" class="underline font-bold text-brand-300 ml-1">Cadastrar no Perfil &rarr;</a></div>`;
     return;
   }
 
@@ -666,6 +678,18 @@ formAdoptPet.addEventListener("submit", async (e) => {
     : (servico === "PERDIDO" ? "PERDIDO" : "DISPONIVEL");
 
   const selectedFile = petImageInput && petImageInput.files && petImageInput.files[0];
+
+  // A foto é obrigatória ao criar um novo anúncio
+  if (!isEdit && !selectedFile && !optimizedImageFile) {
+    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">A foto do animal é obrigatória para publicar o anúncio.</div>`;
+    if (petImageInput) {
+      petImageInput.classList.add("bb-input--error");
+      petImageInput.focus();
+    }
+    modalAlertEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    return;
+  }
+
   if (selectedFile) {
     if (!isValidImageType(selectedFile)) {
       modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">Formato de arquivo inválido. Apenas imagens JPEG, PNG ou WebP (.jpg, .jpeg, .png, .webp) são permitidas.</div>`;
@@ -762,7 +786,20 @@ formAdoptPet.addEventListener("submit", async (e) => {
       bbLoadAnimals();
     }, 1000);
   } catch (err) {
-    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">${err.message}</div>`;
+    let errorMsg = err.message || "Ocorreu um erro ao salvar o anúncio.";
+    if (err.payload && err.payload.imagem) {
+      errorMsg = Array.isArray(err.payload.imagem) ? err.payload.imagem.join(" ") : String(err.payload.imagem);
+      if (petImageInput) {
+        petImageInput.classList.add("bb-input--error");
+      }
+    } else if (errorMsg.startsWith("imagem: ")) {
+      errorMsg = errorMsg.replace(/^imagem:\s*/, "");
+      if (petImageInput) {
+        petImageInput.classList.add("bb-input--error");
+      }
+    }
+    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">${errorMsg}</div>`;
+    modalAlertEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
   } finally {
     modalSubmitBtn.disabled = false;
     modalSubmitBtn.textContent = isEdit
