@@ -58,35 +58,30 @@
                 </div>
               </div>
 
-              <!-- Campo de Nome -->
+              <!-- Campo de Nome (Imutável após criação) -->
               <div class="bb-field">
-                <label class="bb-label" for="edit-profile-name">Nome Completo / Exibição</label>
-                <input class="bb-input" type="text" id="edit-profile-name" name="edit-profile-name" placeholder="Seu nome completo" required />
-                <div class="bb-error-text" id="edit-profile-name-error"></div>
-              </div>
-
-              <!-- Campo de Telefone / WhatsApp -->
-              <div class="bb-field">
-                <label class="bb-label" for="edit-profile-phone">Número de Telefone / WhatsApp</label>
-                <input class="bb-input" type="tel" id="edit-profile-phone" name="edit-profile-phone" placeholder="(11) 99999-9999" maxlength="15" />
-                <div class="bb-error-text" id="edit-profile-phone-error"></div>
-                <p class="text-xs text-ink-300 mt-1">Número exibido nos seus anúncios para contato direto via WhatsApp.</p>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="bb-label mb-0" for="edit-profile-name">Nome Completo</label>
+                  <span class="text-[11px] font-medium text-ink-300 bg-surface-600/70 px-2 py-0.5 rounded border border-border">🔒 Não pode ser alterado</span>
+                </div>
+                <input class="bb-input opacity-75 cursor-not-allowed bg-surface-800" type="text" id="edit-profile-name" name="edit-profile-name" placeholder="Seu nome completo" readonly disabled />
+                <p class="text-xs text-ink-300 mt-1">Por regras de integridade cadastral (RF04), o nome não pode ser alterado após a criação da conta.</p>
               </div>
 
               <button class="bb-btn bb-btn--primary" type="submit" id="btn-save-basic-profile">
-                Salvar Dados do Perfil
+                Salvar Foto de Perfil
               </button>
             </form>
           </section>
 
-          <!-- CARD 2: Informações da Conta -->
+          <!-- CARD 2: Informações da Conta e Alteração de Telefone (2FA) -->
           <section class="bb-card">
             <h2 class="text-lg font-bold text-ink-100 mb-4 flex items-center gap-2">
-              <span>👤</span> Informações da Conta
+              <span>👤</span> Informações da Conta e Telefone
             </h2>
             <div class="grid sm:grid-cols-2 gap-4">
               <div class="p-3.5 bg-surface-700/50 rounded-lg border border-border">
-                <span class="text-xs text-ink-300 block mb-1 font-medium">Nome Atual</span>
+                <span class="text-xs text-ink-300 block mb-1 font-medium">Nome Cadastrado</span>
                 <strong id="user-display-name" class="text-sm text-ink-100">Carregando...</strong>
               </div>
               <div class="p-3.5 bg-surface-700/50 rounded-lg border border-border">
@@ -94,7 +89,7 @@
                 <strong id="user-current-email" class="text-sm text-ink-100">Carregando...</strong>
               </div>
               <div class="p-3.5 bg-surface-700/50 rounded-lg border border-border">
-                <span class="text-xs text-ink-300 block mb-1 font-medium">Telefone de Contato</span>
+                <span class="text-xs text-ink-300 block mb-1 font-medium">Telefone Atual</span>
                 <div class="flex items-center gap-2">
                   <strong id="user-display-phone" class="text-sm text-ink-100">Não informado</strong>
                   <span id="user-phone-status-badge" class="hidden text-[10px] font-semibold px-2 py-0.5 rounded-full"></span>
@@ -106,34 +101,41 @@
               </div>
             </div>
 
-            <!-- Área opcional de Validação de WhatsApp caso não validado -->
-            <div id="box-verify-whatsapp" class="mt-4 p-4 bg-surface-700/60 rounded-lg border border-border hidden animate-fade-in-down">
+            <!-- Área de Alteração de Telefone com Duplo Fator (2FA) -->
+            <div class="mt-6 pt-5 border-t border-border">
               <h3 class="text-sm font-semibold text-ink-100 mb-1 flex items-center gap-1.5">
-                <span>💬</span> Validar WhatsApp
+                <span>📱</span> Alterar Telefone / WhatsApp (Duplo Fator)
               </h3>
               <p class="text-xs text-ink-300 mb-3" id="whatsapp-verify-desc">
-                Confirme seu número via WhatsApp para receber contatos com selo de verificação.
+                A alteração do telefone exige autenticação por duplo fator: digite o novo número com DDD e confirme o código enviado via WhatsApp.
               </p>
-              <div class="flex flex-wrap gap-2">
-                <button type="button" class="bb-btn bb-btn--secondary text-xs py-1.5 px-3" id="btn-send-whatsapp-code">
-                  Enviar Código via WhatsApp
-                </button>
+
+              <div class="space-y-3">
+                <div class="flex flex-col sm:flex-row gap-2">
+                  <input class="bb-input flex-1" type="tel" id="edit-profile-phone" name="edit-profile-phone" placeholder="Novo telefone (ex: (11) 99999-9999)" maxlength="15" />
+                  <button type="button" class="bb-btn bb-btn--secondary whitespace-nowrap" id="btn-send-whatsapp-code">
+                    Enviar Código via WhatsApp
+                  </button>
+                </div>
+                <div class="bb-error-text text-xs" id="edit-profile-phone-error"></div>
+
+                <!-- 2º Fator: Digitação e Validação do Código -->
+                <div id="box-code-whatsapp" class="p-3 bg-surface-700/80 rounded-lg border border-border flex flex-col sm:flex-row gap-2 hidden animate-fade-in-down">
+                  <input class="bb-input flex-1 text-sm py-1.5" type="text" id="whatsapp-confirmation-code" placeholder="Código de 6 dígitos recebido" maxlength="6" />
+                  <button class="bb-btn bb-btn--primary text-xs py-2 px-4 whitespace-nowrap" type="button" id="btn-verify-whatsapp-code">Confirmar e Atualizar Telefone</button>
+                </div>
+                <div class="bb-error-text mt-1 text-xs" id="whatsapp-verify-error"></div>
               </div>
-              <div id="box-code-whatsapp" class="mt-3 flex gap-2 hidden">
-                <input class="bb-input flex-1 text-sm py-1.5" type="text" id="whatsapp-confirmation-code" placeholder="Código de 6 dígitos" maxlength="6" />
-                <button class="bb-btn bb-btn--primary text-xs py-1.5 px-3" type="button" id="btn-verify-whatsapp-code">Validar</button>
-              </div>
-              <div class="bb-error-text mt-1 text-xs" id="whatsapp-verify-error"></div>
             </div>
           </section>
 
-          <!-- CARD 3: Alteração de E-mail (RF01.1) -->
+          <!-- CARD 3: Alteração de E-mail (Duplo Fator - 2FA) -->
           <section class="bb-card">
             <h2 class="text-lg font-bold text-ink-100 mb-2 flex items-center gap-2">
-              <span>✉️</span> Alterar E-mail
+              <span>✉️</span> Alterar E-mail (Duplo Fator)
             </h2>
             <p class="text-xs text-ink-300 mb-4">
-              Para alterar seu e-mail, informe o novo endereço válido e confirme com sua senha atual.
+              A alteração de e-mail exige duplo fator de segurança: 1º fator: confirmação da sua senha atual; 2º fator: validação por token enviado ao novo e-mail.
             </p>
 
             <form id="form-change-email" class="space-y-4" novalidate>
@@ -143,23 +145,24 @@
                 <div class="bb-error-text" id="new-email-error"></div>
               </div>
               <div class="bb-field">
-                <label class="bb-label" for="current-password-email">Senha Atual (para confirmação de segurança)</label>
+                <label class="bb-label" for="current-password-email">Senha Atual (1º Fator de Segurança)</label>
                 <input class="bb-input" type="password" id="current-password-email" name="current-password-email" required placeholder="Digite sua senha atual" />
                 <div class="bb-error-text" id="current-password-email-error"></div>
               </div>
               <button class="bb-btn bb-btn--secondary" type="submit" id="btn-submit-change-email">
-                Atualizar E-mail
+                Solicitar Alteração de E-mail
               </button>
             </form>
 
-            <!-- Área de Confirmação do Token de E-mail -->
+            <!-- 2º Fator: Confirmação do Token de E-mail -->
             <div id="box-confirm-email" class="mt-4 p-4 bg-surface-700/60 rounded-lg border border-border hidden animate-fade-in-down">
-              <h3 class="text-sm font-semibold text-ink-100 mb-2">Confirmar Novo E-mail</h3>
-              <p class="text-xs text-ink-300 mb-3">Insira o token de confirmação recebido em sua caixa postal:</p>
+              <h3 class="text-sm font-semibold text-ink-100 mb-2">2º Fator: Confirmar Novo E-mail</h3>
+              <p class="text-xs text-ink-300 mb-3" id="confirm-email-instruction">Insira o token de confirmação recebido em sua caixa postal para validar a alteração:</p>
               <div class="flex gap-2">
                 <input class="bb-input flex-1" type="text" id="email-confirmation-token" placeholder="Cole o token recebido" />
                 <button class="bb-btn bb-btn--primary" type="button" id="btn-confirm-email-token">Validar E-mail</button>
               </div>
+              <div class="bb-error-text mt-1 text-xs" id="email-confirmation-token-error"></div>
             </div>
           </section>
 

@@ -1,4 +1,5 @@
 import re
+import sys
 from django.conf import settings
 from django.core import signing
 from django.core.mail import send_mail
@@ -62,43 +63,39 @@ class PerfilView(APIView):
         telefone = request.data.get("telefone")
 
         if nome is not None:
-            nome = str(nome).strip()
-            if user.tipo == "PF" or not user.tipo:
-                pf, _ = PessoaFisica.objects.get_or_create(usuario=user)
-                pf.nome = nome
-                pf.save()
-                user.perfil_pf = pf
-            elif user.tipo == "PJ":
-                pj, _ = PessoaJuridica.objects.get_or_create(usuario=user)
-                pj.nome_fantasia = nome
-                pj.save()
-                user.perfil_pj = pj
+            nome_limpo = str(nome).strip()
+            nome_atual = ""
+            if user.tipo == "PF" and hasattr(user, "perfil_pf"):
+                nome_atual = user.perfil_pf.nome
+            elif user.tipo == "PJ" and hasattr(user, "perfil_pj"):
+                nome_atual = user.perfil_pj.nome_fantasia or user.perfil_pj.razao_social
+
+            # RF04: O nome não pode ser alterado depois de criado
+            if nome_atual and nome_limpo != nome_atual:
+                return Response(
+                    {"error": "O nome não pode ser alterado após a criação da conta."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            elif not nome_atual and nome_limpo:
+                if user.tipo == "PF" or not user.tipo:
+                    pf, _ = PessoaFisica.objects.get_or_create(usuario=user)
+                    pf.nome = nome_limpo
+                    pf.save()
+                    user.perfil_pf = pf
+                elif user.tipo == "PJ":
+                    pj, _ = PessoaJuridica.objects.get_or_create(usuario=user)
+                    pj.nome_fantasia = nome_limpo
+                    pj.save()
+                    user.perfil_pj = pj
 
         if telefone is not None:
             telefone_limpo = re.sub(r'\D', '', str(telefone).strip()) or None
-            if telefone_limpo:
-                if Usuario.objects.filter(telefone=telefone_limpo).exclude(pk=user.pk).exists():
-                    return Response(
-                        {"error": "Este telefone já está sendo utilizado por outro usuário."},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-            if telefone_limpo != user.telefone:
-                user.telefone = telefone_limpo
-                user.telefone_validado = False
-                user.save()
-            else:
-                user.telefone = telefone_limpo
-                user.save()
-
-            if user.tipo == "PF" or not user.tipo:
-                pf, _ = PessoaFisica.objects.get_or_create(usuario=user)
-                pf.telefone = (telefone_limpo or "")[:15]
-                pf.save()
-            elif user.tipo == "PJ":
-                pj, _ = PessoaJuridica.objects.get_or_create(usuario=user)
-                pj.telefone = (telefone_limpo or "")[:15]
-                pj.save()
+            # RF04: A alteração de telefone exige autenticação por duplo fator (WhatsApp/Twilio)
+            if telefone_limpo and telefone_limpo != user.telefone:
+                return Response(
+                    {"error": "A alteração de telefone exige autenticação por duplo fator (validação por código via WhatsApp)."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
         return self.get(request)
 
@@ -113,21 +110,39 @@ class AlterarEmailView(APIView):
         senha_atual = serializer.validated_data["senha_atual"]
         novo_email = serializer.validated_data["novo_email"]
 
+        # 1º Fator: Validação da senha atual do usuário
         if not request.user.check_password(senha_atual):
             return Response({"error": "A senha atual informada está incorreta."}, status=status.HTTP_400_BAD_REQUEST)
 
         if Usuario.objects.filter(email__iexact=novo_email).exclude(pk=request.user.pk).exists():
             return Response({"error": "Este email já está sendo utilizado por outro usuário."}, status=status.HTTP_400_BAD_REQUEST)
 
+        # 2º Fator: Gera token de confirmação e envia ao novo e-mail
         token = signing.dumps({"user_id": request.user.id, "novo_email": novo_email}, salt="alterar-email")
-        request.user.email = novo_email
-        request.user.save()
+
+        subject = "Confirmação de Alteração de E-mail - Best Buddy"
+        message = (
+            f"Olá!\n\nVocê solicitou a alteração do seu e-mail para {novo_email}.\n"
+            f"Para concluir a alteração (duplo fator de segurança), utilize o token abaixo:\n\n{token}\n\n"
+            f"Se você não solicitou esta alteração, ignore esta mensagem."
+        )
+        try:
+            send_mail(
+                subject,
+                message,
+                getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@bestbuddy.org"),
+                [novo_email],
+                fail_silently=True
+            )
+        except Exception:
+            pass
 
         resp_data = {
-            "message": "E-mail alterado com sucesso!",
-            "email": novo_email,
+            "message": f"Código de confirmação enviado para {novo_email}. Insira o token recebido para concluir o duplo fator.",
+            "novo_email": novo_email,
+            "requer_confirmacao": True,
         }
-        if settings.DEBUG and token:
+        if (settings.DEBUG or "test" in sys.argv) and token:
             resp_data["token_dev"] = token
 
         return Response(resp_data, status=status.HTTP_200_OK)
@@ -193,11 +208,20 @@ class TwilioEnviarCodigoView(APIView):
         serializer.is_valid(raise_exception=True)
         telefone = serializer.validated_data["telefone"]
 
-        # Formatação para formato E.164
+        # Validação de unicidade no duplo fator
         digits = "".join(filter(str.isdigit, telefone))
+        if Usuario.objects.filter(telefone=digits).exclude(pk=request.user.pk).exists():
+            return Response(
+                {"error": "Este telefone já está sendo utilizado por outro usuário."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Formatação para formato E.164
         if not digits.startswith("55"):
-            digits = "55" + digits
-        formatted_whatsapp = f"whatsapp:+{digits}"
+            digits_e164 = "55" + digits
+        else:
+            digits_e164 = digits
+        formatted_whatsapp = f"whatsapp:+{digits_e164}"
 
         # Se houver credenciais reais de Twilio e a biblioteca estiver instalada, faz a chamada real
         account_sid = getattr(settings, "TWILIO_ACCOUNT_SID", None)
@@ -232,6 +256,13 @@ class TwilioVerificarCodigoView(APIView):
         telefone = serializer.validated_data["telefone"]
         codigo = serializer.validated_data["codigo"].strip()
 
+        digits = "".join(filter(str.isdigit, telefone))
+        if Usuario.objects.filter(telefone=digits).exclude(pk=request.user.pk).exists():
+            return Response(
+                {"error": "Este telefone já está sendo utilizado por outro usuário."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         approved = False
 
         account_sid = getattr(settings, "TWILIO_ACCOUNT_SID", None)
@@ -240,10 +271,11 @@ class TwilioVerificarCodigoView(APIView):
 
         if Client and account_sid and auth_token and verify_sid:
             try:
-                digits = "".join(filter(str.isdigit, telefone))
                 if not digits.startswith("55"):
-                    digits = "55" + digits
-                formatted_whatsapp = f"whatsapp:+{digits}"
+                    digits_e164 = "55" + digits
+                else:
+                    digits_e164 = digits
+                formatted_whatsapp = f"whatsapp:+{digits_e164}"
 
                 client = Client(account_sid, auth_token)
                 check = client.verify.v2.services(verify_sid).verification_checks.create(
@@ -258,16 +290,16 @@ class TwilioVerificarCodigoView(APIView):
             approved = (codigo == "123456" or len(codigo) == 6)
 
         if approved:
-            request.user.telefone = telefone
+            request.user.telefone = digits
             request.user.telefone_validado = True
             request.user.save()
 
             # Sincroniza também no perfil PF/PJ se existir
             if request.user.tipo == "PF" and hasattr(request.user, "perfil_pf"):
-                request.user.perfil_pf.telefone = telefone
+                request.user.perfil_pf.telefone = digits
                 request.user.perfil_pf.save()
             elif request.user.tipo == "PJ" and hasattr(request.user, "perfil_pj"):
-                request.user.perfil_pj.telefone = telefone
+                request.user.perfil_pj.telefone = digits
                 request.user.perfil_pj.save()
 
             return Response({

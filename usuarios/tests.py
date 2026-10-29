@@ -17,7 +17,7 @@ class UsuarioAuthTests(TestCase):
         payload = {
             "nome": "João Silva",
             "email": "joao@teste.com",
-            "password": "senhaForte123",
+            "password": "SenhaForte@123",
             "telefone": "(11) 98765-4321",
             "tipo": "PF",
         }
@@ -26,6 +26,51 @@ class UsuarioAuthTests(TestCase):
         self.assertIn("access", res.data)
         self.assertEqual(res.data["user"]["email"], "joao@teste.com")
         self.assertTrue(Usuario.objects.filter(email="joao@teste.com").exists())
+
+    def test_registro_falha_nome_invalido(self):
+        # Nome vazio
+        payload_vazio = {
+            "nome": "",
+            "email": "nome_vazio@teste.com",
+            "password": "SenhaForte@123",
+            "telefone": "11988881111",
+            "tipo": "PF",
+        }
+        res_vazio = self.client.post(self.register_url, payload_vazio, format="json")
+        self.assertEqual(res_vazio.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("nome", res_vazio.data)
+
+        # Nome com menos de 3 caracteres
+        payload_curto = {
+            "nome": "Ab",
+            "email": "nome_curto@teste.com",
+            "password": "SenhaForte@123",
+            "telefone": "11988882222",
+            "tipo": "PF",
+        }
+        res_curto = self.client.post(self.register_url, payload_curto, format="json")
+        self.assertEqual(res_curto.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("nome", res_curto.data)
+
+    def test_registro_falha_senha_fraca(self):
+        senhas_fracas = [
+            "Abc@1",            # Menos de 8 caracteres
+            "senhademais@123",  # Sem maiúscula
+            "SENHADEMAIS@123",  # Sem minúscula
+            "SenhaForteSemNum!",# Sem número
+            "SenhaForte12345",  # Sem caractere especial
+        ]
+        for idx, senha in enumerate(senhas_fracas):
+            payload = {
+                "nome": f"Teste Senha {idx}",
+                "email": f"teste_pwd_{idx}@teste.com",
+                "password": senha,
+                "telefone": f"1198888000{idx}",
+                "tipo": "PF",
+            }
+            res = self.client.post(self.register_url, payload, format="json")
+            self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST, f"Senha '{senha}' deveria ser rejeitada")
+            self.assertIn("password", res.data)
 
     def test_bloqueio_telefone_duplicado_no_registro(self):
         Usuario.objects.create_user(
@@ -36,7 +81,7 @@ class UsuarioAuthTests(TestCase):
         payload = {
             "nome": "Outro Usuário",
             "email": "outro@teste.com",
-            "password": "senhaForte123",
+            "password": "SenhaForte@123",
             "telefone": "11987654321",
             "tipo": "PF",
         }
@@ -77,21 +122,90 @@ class UsuarioAuthTests(TestCase):
         res = self.client.get(self.perfil_url)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_perfil_patch_atualiza_nome_e_telefone(self):
+    def test_perfil_patch_bloqueia_alteracao_de_nome(self):
         user = Usuario.objects.create_user(
-            email="perfil@teste.com",
-            password="password123",
+            email="perfil_nome@teste.com",
+            password="SenhaForte@123",
             telefone="11966665555",
             tipo="PF"
         )
-        PessoaFisica.objects.create(usuario=user, nome="Nome Antigo")
+        PessoaFisica.objects.create(usuario=user, nome="Nome Original")
         self.client.force_authenticate(user=user)
 
-        res = self.client.patch(self.perfil_url, {"nome": "Nome Atualizado", "telefone": "11988889999"}, format="json")
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data["nome"], "Nome Atualizado")
-        self.assertEqual(res.data["telefone"], "11988889999")
-        self.assertFalse(res.data["telefone_validado"])
+        # Tentativa de alterar o nome cadastrado deve ser bloqueada com 400
+        res = self.client.patch(self.perfil_url, {"nome": "Tentativa Novo Nome"}, format="json")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", res.data)
+        self.assertEqual(res.data["error"], "O nome não pode ser alterado após a criação da conta.")
+
+    def test_perfil_patch_bloqueia_alteracao_direta_de_telefone(self):
+        user = Usuario.objects.create_user(
+            email="perfil_tel@teste.com",
+            password="SenhaForte@123",
+            telefone="11966665555",
+            tipo="PF"
+        )
+        self.client.force_authenticate(user=user)
+
+        # Tentativa de alterar telefone diretamente via PATCH sem 2FA deve ser bloqueada
+        res = self.client.patch(self.perfil_url, {"telefone": "11988889999"}, format="json")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", res.data)
+        self.assertIn("duplo fator", res.data["error"].lower())
+
+    def test_alteracao_telefone_duplo_fator_sucesso(self):
+        user = Usuario.objects.create_user(
+            email="tel_2fa@teste.com",
+            password="SenhaForte@123",
+            telefone="11955554444",
+            tipo="PF"
+        )
+        self.client.force_authenticate(user=user)
+
+        # 1º Fator: Envio de código WhatsApp
+        res_env = self.client.post("/api/usuarios/whatsapp/enviar/", {"telefone": "11977778888"}, format="json")
+        self.assertEqual(res_env.status_code, status.HTTP_200_OK)
+
+        # 2º Fator: Validação do código OTP
+        res_verif = self.client.post("/api/usuarios/whatsapp/verificar/", {"telefone": "11977778888", "codigo": "123456"}, format="json")
+        self.assertEqual(res_verif.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_verif.data["telefone"], "11977778888")
+        self.assertTrue(res_verif.data["telefone_validado"])
+
+        user.refresh_from_db()
+        self.assertEqual(user.telefone, "11977778888")
+        self.assertTrue(user.telefone_validado)
+
+    def test_alteracao_email_duplo_fator_sucesso(self):
+        user = Usuario.objects.create_user(
+            email="original_email@teste.com",
+            password="SenhaForte@123",
+            telefone="11944443333",
+            tipo="PF"
+        )
+        user.set_password("SenhaForte@123")
+        user.save()
+        self.client.force_authenticate(user=user)
+
+        # 1º Fator: Solicitação com senha atual
+        res_sol = self.client.post("/api/usuarios/alterar-email/", {
+            "novo_email": "novo_email_2fa@teste.com",
+            "senha_atual": "SenhaForte@123"
+        }, format="json")
+        self.assertEqual(res_sol.status_code, status.HTTP_200_OK)
+        token = res_sol.data.get("token_dev")
+        self.assertTrue(token)
+
+        # E-mail não deve ser alterado antes da confirmação do 2º fator
+        user.refresh_from_db()
+        self.assertEqual(user.email, "original_email@teste.com")
+
+        # 2º Fator: Confirmação com o token
+        res_conf = self.client.post("/api/usuarios/confirmar-email/", {"token": token}, format="json")
+        self.assertEqual(res_conf.status_code, status.HTTP_200_OK)
+
+        user.refresh_from_db()
+        self.assertEqual(user.email, "novo_email_2fa@teste.com")
 
     def test_bloqueio_listagem_usuarios_para_usuario_comum(self):
         user = Usuario.objects.create_user(

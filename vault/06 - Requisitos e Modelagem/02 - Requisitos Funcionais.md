@@ -8,11 +8,12 @@ Este documento cataloga os Requisitos Funcionais do sistema **Best Buddy**, orga
 ## 🔐 Módulo 1: Autenticação, Perfil e Controle de Acesso
 
 ### `RF01` — Cadastro de Usuário
-* **Descrição:** Formulário ágil de criação de conta contendo:
-  - `email` (válido, normalizado e único).
-  - `senha` (mínimo de 8 caracteres, com hash seguro no backend).
-  - `confirmação_de_senha`.
-  - `telefone` (celular com DDD, opcional no registro inicial).
+* **Descrição:** Formulário ágil e acessível de criação de conta contendo os campos na mesma ordem do formulário:
+  1. `nome`: obrigatório, mínimo de 3 caracteres (indicado com `*` acessível para leitores de tela).
+  2. `email`: obrigatório, válido, normalizado e único (indicado com `*`).
+  3. `telefone`: celular com DDD, obrigatório e único (indicado com `*`).
+  4. `senha`: obrigatória, não permitindo senha fraca — mínimo de 8 caracteres contendo letras maiúsculas, minúsculas, pelo menos um número e pelo menos um caractere especial, com hash seguro no backend (indicado com `*`).
+  5. `confirmar_senha`: obrigatória, idêntica à senha digitada (indicado com `*`).
 
 ### `RF02` — Autenticação de Usuário (Login)
 * **Descrição:** Autenticação via email e senha retornando par de tokens JWT (`access` e `refresh`) e dados essenciais do usuário (`id`, `email`, `telefone`).
@@ -23,10 +24,15 @@ Este documento cataloga os Requisitos Funcionais do sistema **Best Buddy**, orga
   - Usuários já autenticados que tentarem acessar páginas de autenticação (`/login.html` ou `/register.html`) são redirecionados automaticamente para a Home (`/pages/home/index.html`).
 
 ### `RF04` — Gestão de Perfil do Tutor ("Editar Perfil")
-* **Descrição:** Interface autenticada para o usuário gerenciar suas credenciais e contato:
-  1. **Alteração de Email:** Exige confirmação da senha atual e validação de formato do novo email.
-  2. **Alteração de Senha:** Exige confirmação da senha atual para permitir a definição da nova senha.
-  3. **Atualização de Telefone:** Permite inserir ou atualizar o número de telefone de contato (celular com DDD).
+* **Descrição:** Interface autenticada para o usuário gerenciar suas credenciais e contato com regras de segurança estritas:
+  1. **Imutabilidade do Nome:** O nome do usuário não pode ser alterado após a criação da conta, permanecendo como dado cadastral permanente.
+  2. **Alteração de E-mail (Duplo Fator - 2FA):** A alteração de e-mail exige obrigatoriamente autenticação em duas etapas:
+     - *1º Fator:* Informação da senha atual do usuário e formato válido do novo e-mail.
+     - *2º Fator:* Envio de token/código de confirmação ao novo e-mail solicitado e validação obrigatória do token. O e-mail só é atualizado no sistema após a confirmação do token.
+  3. **Alteração de Telefone (Duplo Fator - 2FA):** A alteração do número de telefone celular/WhatsApp exige obrigatoriamente autenticação em duas etapas:
+     - *1º Fator:* Solicitação pelo usuário autenticado informando o novo número de celular com DDD válido.
+     - *2º Fator:* Envio de código OTP de verificação via WhatsApp e validação obrigatória do código recebido. O novo telefone só é salvo e ativado no cadastro após a validação do código.
+  4. **Alteração de Senha:** Exige confirmação da senha atual para autorizar a definição e hash da nova senha forte.
 
 ---
 
@@ -35,11 +41,12 @@ Este documento cataloga os Requisitos Funcionais do sistema **Best Buddy**, orga
 > [!IMPORTANT]
 > **Tabela Unificada:** Os serviços de "Adoção" e "Animal Perdido" compartilham a mesma tabela `Animal` (`animais_animal`), utilizando o discriminador `tipo_servico` (`ADOCAO` ou `PERDIDO`).
 
-### `RF05` — Vitrine Pública de Adoção
-* **Descrição:** Listagem pública de animais cadastrados com `tipo_servico='ADOCAO'` e status `Disponível`, exibindo card com foto, nome (opcional), cidade, estado, sexo, porte/idade aproximada e botão direto para o WhatsApp do tutor.
+### `RF05` — Vitrine Pública de Animais
+* **Descrição:** Listagem pública de animais cadastrados com filtro 'Buscar por' (Adoção ou Perdido) e status `Disponível` ou `Perdido`, exibindo card com foto, nome (opcional), cidade, estado, sexo, porte/idade aproximada e botão direto para o WhatsApp do tutor.
 
-### `RF06` — Filtros de Busca em Adoção
+### `RF06` — Filtros de Busca na Vitrine
 * **Descrição:** Filtros combinados de pesquisa por:
+  - **Serviço:** Filtro "Buscar por" (Todos os serviços, Adoção, Animais Perdidos).
   - **Localização:** Estado (UF) e Cidade (select / busca padronizada).
   - **Tempo de postagem:** Mais recentes, última semana, último mês.
   - **Tipo de animal:** Cachorro, Gato, Outro.
