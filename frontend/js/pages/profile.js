@@ -179,19 +179,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // 4. Salvar Alterações de Nome, Telefone e Foto
+  // 4. Salvar Alterações de Foto e Telefone (Nome é somente leitura)
   if (formBasicProfile) {
     formBasicProfile.addEventListener("submit", async (e) => {
       e.preventDefault();
       clearErrors();
 
-      const newName = editNameInput.value.trim();
       const newPhone = editPhoneInput ? editPhoneInput.value.trim() : "";
-
-      if (!bbValidation.isRequired(newName)) {
-        showFieldError("edit-profile-name", "Informe seu nome completo.");
-        return;
-      }
 
       if (newPhone && !bbValidation.isPhone(newPhone)) {
         showFieldError("edit-profile-phone", "Informe um telefone válido com DDD (ex: (11) 99999-9999) ou deixe em branco.");
@@ -204,13 +198,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       try {
         const resp = await authService.updateProfile({
-          nome: newName,
           telefone: newPhone,
         });
 
-        // Atualiza a sessão local
+        // Atualiza a sessão local mantendo o nome intacto
         const user = bbStorage.getUser() || {};
-        user.nome = newName;
         user.telefone = newPhone;
         user.avatar = currentAvatarData;
         if (resp && typeof resp.telefone_validado !== "undefined") {
@@ -218,10 +210,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         bbStorage.setUser(user);
 
-        if (displayName) displayName.textContent = newName;
         updatePhoneUI(newPhone, user.telefone_validado);
 
-        // Re-renderiza a navegação superior para refletir a nova foto e nome imediatamente
+        // Re-renderiza a navegação superior para refletir a nova foto imediatamente
         if (typeof bbRenderNavigation === "function") {
           bbRenderNavigation("#bb-nav", "profile");
         }
@@ -440,9 +431,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             { test: bbValidation.isRequired, message: "Informe sua senha atual." },
           ],
           "new-password": [
-            { test: (v) => bbValidation.minLength(v, 6), message: "A nova senha deve ter ao menos 6 caracteres." },
+            { test: bbValidation.isRequired, message: "Informe a nova senha." },
+            { test: bbValidation.isStrongPassword, message: "A nova senha deve ter no mínimo 8 caracteres e conter pelo menos uma letra e um número." },
           ],
           "confirm-new-password": [
+            { test: bbValidation.isRequired, message: "Confirme a nova senha." },
             { test: (v, all) => bbValidation.passwordsMatch(v, all["new-password"]), message: "As novas senhas não coincidem." },
           ],
         }

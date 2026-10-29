@@ -58,11 +58,16 @@
                 </div>
               </div>
 
-              <!-- Campo de Nome -->
+              <!-- Campo de Nome (Apenas Exibição / Somente Leitura) -->
               <div class="bb-field">
-                <label class="bb-label" for="edit-profile-name">Nome Completo / Exibição</label>
-                <input class="bb-input" type="text" id="edit-profile-name" name="edit-profile-name" placeholder="Seu nome completo" required />
-                <div class="bb-error-text" id="edit-profile-name-error"></div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="bb-label mb-0" for="edit-profile-name">Nome Completo / Exibição</label>
+                  <span class="text-[11px] text-ink-400 font-medium bg-surface-600/70 border border-border px-2 py-0.5 rounded-md flex items-center gap-1">
+                    🔒 Somente leitura
+                  </span>
+                </div>
+                <input class="bb-input bg-surface-700/60 text-ink-200 cursor-not-allowed opacity-90" type="text" id="edit-profile-name" name="edit-profile-name" readonly disabled />
+                <p class="text-xs text-ink-300 mt-1">O nome não pode ser alterado diretamente. A alteração poderá ser solicitada futuramente via chamado de suporte.</p>
               </div>
 
               <!-- Campo de Telefone / WhatsApp -->
@@ -181,12 +186,12 @@
               <div class="grid sm:grid-cols-2 gap-4">
                 <div class="bb-field">
                   <label class="bb-label" for="new-password">Nova Senha</label>
-                  <input class="bb-input" type="password" id="new-password" name="new-password" required minlength="6" placeholder="Mínimo 6 caracteres" />
+                  <input class="bb-input" type="password" id="new-password" name="new-password" required minlength="8" placeholder="Mínimo 8 caracteres (letras e números)" />
                   <div class="bb-error-text" id="new-password-error"></div>
                 </div>
                 <div class="bb-field">
                   <label class="bb-label" for="confirm-new-password">Confirmar Nova Senha</label>
-                  <input class="bb-input" type="password" id="confirm-new-password" name="confirm-new-password" required minlength="6" placeholder="Repita a nova senha" />
+                  <input class="bb-input" type="password" id="confirm-new-password" name="confirm-new-password" required minlength="8" placeholder="Repita a nova senha" />
                   <div class="bb-error-text" id="confirm-new-password-error"></div>
                 </div>
               </div>

@@ -87,17 +87,25 @@ bbRegisterForm.addEventListener("submit", async (event) => {
   };
 
   const errors = bbValidation.runRules(data, {
-    nome: [{ test: bbValidation.isRequired, message: "Informe seu nome." }],
+    nome: [
+      { test: bbValidation.isRequired, message: "Informe seu nome." },
+      { test: (v) => bbValidation.minLength(v, 3), message: "O nome deve ter no mínimo 3 caracteres." },
+      { test: bbValidation.isAlphanumericName, message: "O nome deve conter apenas letras e números, sem caracteres especiais proibidos." },
+    ],
     email: [
       { test: bbValidation.isRequired, message: "Informe seu email." },
-      { test: bbValidation.isEmail, message: "Email inválido." },
+      { test: bbValidation.isEmail, message: "Informe um email válido." },
     ],
     telefone: [
       { test: bbValidation.isRequired, message: "Informe seu número de telefone." },
       { test: bbValidation.isValidBrazilianPhone, message: "Informe um telefone válido com DDD (ex: (11) 99999-9999)." },
     ],
-    senha: [{ test: (v) => bbValidation.minLength(v, 6), message: "Senha deve ter ao menos 6 caracteres." }],
+    senha: [
+      { test: bbValidation.isRequired, message: "Informe sua senha." },
+      { test: bbValidation.isStrongPassword, message: "A senha deve ter no mínimo 8 caracteres e conter pelo menos uma letra e um número." },
+    ],
     confirmar_senha: [
+      { test: bbValidation.isRequired, message: "Confirme sua senha." },
       { test: (v, all) => bbValidation.passwordsMatch(v, all.senha), message: "As senhas não coincidem." },
     ],
   });
@@ -137,7 +145,7 @@ bbRegisterForm.addEventListener("submit", async (event) => {
   try {
     await authService.register({
       nome: data.nome,
-      email: data.email,
+      email: data.email.toLowerCase(),
       telefone: data.telefone.replace(/\D/g, ""),
       password: data.senha,
       tipo: "PF",

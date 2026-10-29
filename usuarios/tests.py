@@ -77,7 +77,7 @@ class UsuarioAuthTests(TestCase):
         res = self.client.get(self.perfil_url)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_perfil_patch_atualiza_nome_e_telefone(self):
+    def test_perfil_patch_atualiza_telefone_e_bloqueia_alteracao_livre_nome(self):
         user = Usuario.objects.create_user(
             email="perfil@teste.com",
             password="password123",
@@ -87,9 +87,10 @@ class UsuarioAuthTests(TestCase):
         PessoaFisica.objects.create(usuario=user, nome="Nome Antigo")
         self.client.force_authenticate(user=user)
 
+        # Tentativa de alterar o nome livremente deve ser ignorada, mantendo o nome original
         res = self.client.patch(self.perfil_url, {"nome": "Nome Atualizado", "telefone": "11988889999"}, format="json")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data["nome"], "Nome Atualizado")
+        self.assertEqual(res.data["nome"], "Nome Antigo")
         self.assertEqual(res.data["telefone"], "11988889999")
         self.assertFalse(res.data["telefone_validado"])
 

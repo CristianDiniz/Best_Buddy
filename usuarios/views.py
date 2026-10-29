@@ -58,21 +58,9 @@ class PerfilView(APIView):
 
     def patch(self, request):
         user = request.user
-        nome = request.data.get("nome")
         telefone = request.data.get("telefone")
 
-        if nome is not None:
-            nome = str(nome).strip()
-            if user.tipo == "PF" or not user.tipo:
-                pf, _ = PessoaFisica.objects.get_or_create(usuario=user)
-                pf.nome = nome
-                pf.save()
-                user.perfil_pf = pf
-            elif user.tipo == "PJ":
-                pj, _ = PessoaJuridica.objects.get_or_create(usuario=user)
-                pj.nome_fantasia = nome
-                pj.save()
-                user.perfil_pj = pj
+        # O nome do usuário não pode mais ser alterado de forma livre (futuramente via chamado)
 
         if telefone is not None:
             telefone_limpo = re.sub(r'\D', '', str(telefone).strip()) or None
