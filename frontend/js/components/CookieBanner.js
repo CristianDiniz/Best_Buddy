@@ -11,8 +11,8 @@ function bbInitCookieBanner() {
   }
 
   const consent = localStorage.getItem("bb_cookie_consent");
-  // Permanece na tela ate que haja uma escolha explicita (accepted, declined ou legado true)
-  if (consent === "accepted" || consent === "declined" || consent === "true") {
+  // Permanece na tela ate que haja uma escolha explicita (accepted, necessary ou legado true)
+  if (consent === "accepted" || consent === "necessary" || consent === "true") {
     return;
   }
 
@@ -60,11 +60,10 @@ function bbInitCookieBanner() {
             Privacidade e Armazenamento Local
           </h4>
           <p style="font-size: 0.78125rem; color: #475569; line-height: 1.5; margin: 0;">
-            Utilizamos armazenamento estritamente necessário para manter sua conta segura e preferências salvas. Você pode aceitar todos os recursos ou descartar preferências adicionais.
+            Utilizamos armazenamento estritamente necessário para manter sua conta segura e preferências salvas. Você pode aceitar todos os recursos ou manter apenas os necessários.
           </p>
         </div>
       </div>
-      <button id="bb-cookie-close-x" type="button" style="background: transparent; border: none; color: #94a3b8; font-size: 1.25rem; line-height: 1; cursor: pointer; padding: 0.125rem 0.25rem; border-radius: 0.25rem;" title="Descartar">&times;</button>
     </div>
 
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; border-top: 1px solid #f1f5f9; padding-top: 0.75rem;">
@@ -73,12 +72,12 @@ function bbInitCookieBanner() {
         Política de Privacidade
       </a>
       <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <button id="bb-cookie-discard-btn"
+        <button id="bb-cookie-necessary-btn"
                 type="button"
                 style="background: transparent; color: #475569; font-size: 0.75rem; font-weight: 600; padding: 0.45rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s;"
                 onmouseover="this.style.backgroundColor='#f1f5f9'; this.style.color='#0f172a';"
                 onmouseout="this.style.backgroundColor='transparent'; this.style.color='#475569';">
-          Descartar
+          Apenas Necessários
         </button>
         <button id="bb-cookie-accept-btn"
                 type="button"
@@ -107,15 +106,11 @@ function bbInitCookieBanner() {
     acceptBtn.addEventListener("click", () => closeBanner("accepted"));
   }
 
-  const discardBtn = document.getElementById("bb-cookie-discard-btn");
-  if (discardBtn) {
-    discardBtn.addEventListener("click", () => closeBanner("declined"));
+  const necessaryBtn = document.getElementById("bb-cookie-necessary-btn");
+  if (necessaryBtn) {
+    necessaryBtn.addEventListener("click", () => closeBanner("necessary"));
   }
 
-  const closeXBtn = document.getElementById("bb-cookie-close-x");
-  if (closeXBtn) {
-    closeXBtn.addEventListener("click", () => closeBanner("declined"));
-  }
 }
 
 // Auto-inicializa quando o DOM estiver pronto
