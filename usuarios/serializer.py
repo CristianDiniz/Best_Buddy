@@ -62,7 +62,7 @@ class RegisterUsuarioSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
     tipo = serializers.ChoiceField(choices=Usuario.TipoUsuario.choices, default="PF")
-    telefone = serializers.CharField(required=True, allow_blank=False, allow_null=True)
+    telefone = serializers.CharField(required=True, allow_blank=False, allow_null=False)
     termos_aceitos = serializers.BooleanField(write_only=True, required=False, default=True)
 
     # PF
@@ -78,9 +78,9 @@ class RegisterUsuarioSerializer(serializers.Serializer):
         return value
 
     def validate_telefone(self, value):
-        if not value:
-            return None
-        digits = re.sub(r'\D', '', value)
+        if not value or not str(value).strip():
+            raise serializers.ValidationError("Informe seu número de telefone.")
+        digits = re.sub(r'\D', '', str(value))
         if len(digits) not in (10, 11):
             raise serializers.ValidationError("Informe um número de telefone com DDD válido (10 ou 11 dígitos).")
         
@@ -90,13 +90,6 @@ class RegisterUsuarioSerializer(serializers.Serializer):
         if Usuario.objects.filter(telefone=digits).exists():
             raise serializers.ValidationError("Este número de telefone já está cadastrado em outra conta.")
         return digits
-
-    def validate_password(self, value):
-        if len(value) < 8:
-            raise serializers.ValidationError("A senha deve ter no mínimo 8 caracteres.")
-        if not re.search(r'[A-Za-z]', value) or not re.search(r'[0-9]', value):
-            raise serializers.ValidationError("A senha deve conter ao menos uma letra e um número.")
-        return value
 
     def validate_nome(self, value):
         if value is not None and value != "":
@@ -112,6 +105,30 @@ class RegisterUsuarioSerializer(serializers.Serializer):
         if Usuario.objects.filter(email__iexact=value).exists():
             raise serializers.ValidationError("Este email já está cadastrado.")
         return value.lower()
+
+    def validate_password(self, value):
+        if not value or len(value) < 8:
+            raise serializers.ValidationError("A senha deve ter no mínimo 8 caracteres.")
+        if not re.search(r'[A-Z]', value):
+            raise serializers.ValidationError("A senha deve conter pelo menos uma letra maiúscula.")
+        if not re.search(r'[a-z]', value):
+            raise serializers.ValidationError("A senha deve conter pelo menos uma letra minúscula.")
+        if not re.search(r'[0-9]', value):
+            raise serializers.ValidationError("A senha deve conter pelo menos um número.")
+        if not re.search(r'[^A-Za-z0-9]', value):
+            raise serializers.ValidationError("A senha deve conter pelo menos um caractere especial.")
+        return value
+
+    def validate(self, attrs):
+        tipo = attrs.get("tipo", "PF")
+        if tipo == "PF":
+            nome = (attrs.get("nome") or "").strip()
+            if not nome:
+                raise serializers.ValidationError({"nome": "O nome é obrigatório."})
+            if len(nome) < 3:
+                raise serializers.ValidationError({"nome": "O nome deve ter no mínimo 3 caracteres."})
+            attrs["nome"] = nome
+        return attrs
 
     def create(self, validated_data):
         tipo = validated_data.get("tipo", "PF")

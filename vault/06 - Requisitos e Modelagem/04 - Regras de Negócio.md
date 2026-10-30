@@ -54,8 +54,10 @@ As Regras de Negócio estabelecem as diretrizes funcionais e restrições mandat
 
 ### `RN08` — Segurança e Confirmação na Edição de Perfil
 * **Regra:**
-  1. **Alteração de Email:** Exige a confirmação da senha atual. Validação estrita de formato de email e unicidade no banco.
-  2. **Alteração de Senha:** Exige a confirmação da senha atual antes de autorizar a substituição pela nova senha. A nova senha deve cumprir obrigatoriamente os mesmos critérios do cadastro: mínimo de 8 caracteres contendo ao menos uma letra e um número.
+  1. **Imutabilidade do Nome:** O nome do usuário não pode ser alterado após a criação da conta, garantindo a integridade dos cadastros e prevenindo fraudes.
+  2. **Alteração de Email com Duplo Fator (2FA):** Exige confirmação da senha atual (1º fator) e validação de token enviado para o novo e-mail (2º fator) antes da efetivação da troca no sistema.
+  3. **Alteração de Telefone com Duplo Fator (2FA):** Exige solicitação do usuário autenticado (1º fator) e confirmação de código OTP enviado via WhatsApp (2º fator) antes do novo número ser salvo no perfil.
+  4. **Alteração de Senha:** Exige a confirmação da senha atual antes de autorizar a substituição pela nova senha, a qual deve cumprir os critérios de senha forte (mínimo de 8 caracteres, contendo maiúscula, minúscula, número e caractere especial).
 
 ---
 

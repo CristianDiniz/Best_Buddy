@@ -26,6 +26,7 @@ const bbAdoptionCelebrationToast = document.getElementById("bb-adoption-celebrat
 // Filtros e Abas
 const tabAllPets = document.getElementById("tab-all-pets");
 const tabMyPets = document.getElementById("tab-my-pets");
+const filterBuscarPorSelect = document.getElementById("filter-buscar-por");
 const filterEstadoSelect = document.getElementById("filter-estado");
 const filterCidadeInput = document.getElementById("filter-cidade");
 const filterCidadesDatalist = document.getElementById("filter-cidades-list");
@@ -116,6 +117,7 @@ let adoptedGalleryOpen = false;
 let lostExpanded = false;
 let adoptExpanded = false;
 let activeTab = "all"; // "all" | "my"
+let filterBuscarPor = "";
 let filterEstado = "";
 let filterCidade = "";
 let filterTipoAnimal = "";
@@ -201,10 +203,32 @@ async function bbLoadAnimals() {
   if (filterTempo) commonParams.tempo = filterTempo;
   if (activeTab === "my" && currentUser) commonParams.tutor_id = currentUser.id;
 
+  const bbLostSection = document.getElementById("bb-lost-section");
+  const bbAdoptSection = document.getElementById("bb-adopt-section");
+
+  if (bbLostSection) {
+    if (filterBuscarPor === "ADOCAO") {
+      bbLostSection.classList.add("hidden");
+    } else {
+      bbLostSection.classList.remove("hidden");
+    }
+  }
+
+  if (bbAdoptSection) {
+    if (filterBuscarPor === "PERDIDO") {
+      bbAdoptSection.classList.add("hidden");
+    } else {
+      bbAdoptSection.classList.remove("hidden");
+    }
+  }
+
   try {
+    const fetchLost = filterBuscarPor !== "ADOCAO";
+    const fetchAdopt = filterBuscarPor !== "PERDIDO";
+
     const [lostList, adoptList, stats] = await Promise.all([
-      animalService.list({ ...commonParams, tipo_servico: "PERDIDO" }),
-      animalService.list({ ...commonParams, tipo_servico: "ADOCAO" }),
+      fetchLost ? animalService.list({ ...commonParams, tipo_servico: "PERDIDO" }) : Promise.resolve([]),
+      fetchAdopt ? animalService.list({ ...commonParams, tipo_servico: "ADOCAO" }) : Promise.resolve([]),
       animalService.getStats().catch(() => null),
     ]);
 
@@ -299,6 +323,7 @@ if (bbCloseAdoptedGalleryBtn && bbAdoptedShowcaseSectionEl) {
 
 // Ações de Filtro (RF08)
 function applyFilters() {
+  filterBuscarPor = filterBuscarPorSelect ? filterBuscarPorSelect.value : "";
   filterEstado = filterEstadoSelect ? filterEstadoSelect.value : "";
   filterCidade = filterCidadeInput ? filterCidadeInput.value.trim() : "";
   filterTipoAnimal = filterTipoAnimalSelect ? filterTipoAnimalSelect.value : "";
@@ -309,6 +334,7 @@ function applyFilters() {
 }
 
 filterApplyBtn.addEventListener("click", applyFilters);
+if (filterBuscarPorSelect) filterBuscarPorSelect.addEventListener("change", applyFilters);
 filterCidadeInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") applyFilters();
 });
@@ -340,6 +366,7 @@ if (filterEstadoSelect) {
 }
 
 filterClearBtn.addEventListener("click", () => {
+  if (filterBuscarPorSelect) filterBuscarPorSelect.value = "";
   if (filterEstadoSelect) filterEstadoSelect.value = "";
   if (filterCidadesDatalist) filterCidadesDatalist.innerHTML = "";
   if (filterCidadeInput) {
@@ -348,6 +375,7 @@ filterClearBtn.addEventListener("click", () => {
   }
   if (filterTipoAnimalSelect) filterTipoAnimalSelect.value = "";
   if (filterTempoSelect) filterTempoSelect.value = "";
+  filterBuscarPor = "";
   filterEstado = "";
   filterCidade = "";
   filterTipoAnimal = "";
@@ -1039,7 +1067,18 @@ document.addEventListener("click", async (e) => {
   }
 });
 
-// Suporte para abrir edição direto via URL query param: ?edit=<id>
+// Suporte para filtros e edição via URL query params
+function checkUrlFilters() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const buscarPor = (urlParams.get("buscar_por") || urlParams.get("tipo_servico") || "").toUpperCase();
+  if (buscarPor === "ADOCAO" || buscarPor === "PERDIDO") {
+    filterBuscarPor = buscarPor;
+    if (filterBuscarPorSelect) {
+      filterBuscarPorSelect.value = buscarPor;
+    }
+  }
+}
+
 async function checkUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
   const editId = urlParams.get("edit");
@@ -1064,4 +1103,6 @@ function initIbgeUI() {
 
 // Carregamento inicial
 initIbgeUI();
+checkUrlFilters();
 bbLoadAnimals().then(() => checkUrlParams());
+

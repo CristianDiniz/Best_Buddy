@@ -107,7 +107,7 @@ bbRegisterForm.addEventListener("submit", async (event) => {
     nome: [
       { test: bbValidation.isRequired, message: "Informe seu nome." },
       { test: (v) => bbValidation.minLength(v, 3), message: "O nome deve ter no mínimo 3 caracteres." },
-      { test: bbValidation.isAlphanumericName, message: "O nome deve conter apenas letras e números, sem caracteres especiais proibidos." },
+      { test: bbValidation.isAlphanumericName, message: "O nome deve conter apenas letras, sem caracteres especiais proibidos." },
     ],
     email: [
       { test: bbValidation.isRequired, message: "Informe seu email." },
@@ -119,7 +119,11 @@ bbRegisterForm.addEventListener("submit", async (event) => {
     ],
     senha: [
       { test: bbValidation.isRequired, message: "Informe sua senha." },
-      { test: bbValidation.isStrongPassword, message: "A senha deve ter no mínimo 8 caracteres e conter pelo menos uma letra e um número." },
+      { test: (v) => bbValidation.minLength(v, 8), message: "A senha deve ter no mínimo 8 caracteres." },
+      { test: (v) => /[A-Z]/.test(v || ""), message: "A senha deve conter ao menos uma letra maiúscula." },
+      { test: (v) => /[a-z]/.test(v || ""), message: "A senha deve conter ao menos uma letra minúscula." },
+      { test: (v) => /[0-9]/.test(v || ""), message: "A senha deve conter ao menos um número." },
+      { test: (v) => /[^A-Za-z0-9]/.test(v || ""), message: "A senha deve conter ao menos um caractere especial (ex: @, #, $, !)." },
     ],
     confirmar_senha: [
       { test: bbValidation.isRequired, message: "Confirme sua senha." },
@@ -185,6 +189,11 @@ bbRegisterForm.addEventListener("submit", async (event) => {
     // Trata erros de campo retornados pelo backend (DRF)
     let handledField = false;
     if (err.payload && typeof err.payload === "object") {
+      if (err.payload.nome) {
+        const msg = Array.isArray(err.payload.nome) ? err.payload.nome.join(" ") : String(err.payload.nome);
+        bbShowFieldError("nome", msg);
+        handledField = true;
+      }
       if (err.payload.telefone) {
         const msg = Array.isArray(err.payload.telefone) ? err.payload.telefone.join(" ") : String(err.payload.telefone);
         bbShowFieldError("telefone", msg);

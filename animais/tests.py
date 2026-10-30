@@ -221,8 +221,15 @@ class AnimaisAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(res.data), 1)
 
-    def test_criar_animal_autenticado_com_telefone(self):
+    @patch('animais.serializers.validar_imagem_pet_e_seguranca', return_value=(True, "OK", "OK"))
+    def test_criar_animal_autenticado_com_telefone(self, _mock_val):
         self.client.force_authenticate(user=self.tutor)
+        img = Image.new('RGB', (100, 100), color='white')
+        buf = io.BytesIO()
+        img.save(buf, format='JPEG')
+        buf.seek(0)
+        img_file = SimpleUploadedFile("bidu.jpg", buf.getvalue(), content_type="image/jpeg")
+
         payload = {
             "nome": "Bidu",
             "tipo_servico": "ADOCAO",
@@ -230,9 +237,10 @@ class AnimaisAPITests(TestCase):
             "estado": "SP",
             "cidade": "Campinas",
             "telefone_contato": "11988887777",
-            "sexo": "M"
+            "sexo": "M",
+            "imagem": img_file
         }
-        res = self.client.post("/api/animais/", payload, format="json")
+        res = self.client.post("/api/animais/", payload, format="multipart")
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(res.data["nome"], "Bidu")
         self.assertEqual(res.data["tutor_id"], self.tutor.id)

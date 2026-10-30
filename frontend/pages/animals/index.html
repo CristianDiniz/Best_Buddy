@@ -115,8 +115,16 @@
               </button>
             </div>
 
-            <!-- Filtros: Estado, Cidade e Tipo de Animal -->
+            <!-- Filtros: Buscar por (Serviço), Estado, Cidade e Tipo de Animal -->
             <div class="flex flex-wrap items-center gap-3">
+              <div>
+                <select id="filter-buscar-por" class="bb-input text-xs md:text-sm py-2 font-medium" aria-label="Buscar por">
+                  <option value="">Buscar por: Todos</option>
+                  <option value="ADOCAO">🐾 Buscar por: Adoção</option>
+                  <option value="PERDIDO">🚨 Buscar por: Animais Perdidos</option>
+                </select>
+              </div>
+
               <div>
                 <select id="filter-estado" class="bb-input text-xs md:text-sm py-2">
                   <option value="">Todos os estados</option>

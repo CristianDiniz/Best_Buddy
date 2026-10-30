@@ -30,8 +30,13 @@ const bbValidation = {
 
   isStrongPassword(value) {
     if (!value || typeof value !== "string") return false;
-    // Mínimo de 8 caracteres contendo ao menos uma letra e um número
-    return value.length >= 8 && /[A-Za-z]/.test(value) && /[0-9]/.test(value);
+    return (
+      value.length >= 8 &&
+      /[A-Z]/.test(value) &&
+      /[a-z]/.test(value) &&
+      /[0-9]/.test(value) &&
+      /[^A-Za-z0-9]/.test(value)
+    );
   },
 
   isValidBrazilianPhone(value) {

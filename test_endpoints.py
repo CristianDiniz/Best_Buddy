@@ -20,7 +20,7 @@ def run_tests():
     res_reg = client.post('/api/usuarios/register/', {
         'nome': 'Novo Usuário',
         'email': 'novo_sem_cpf@teste.com',
-        'password': 'password123',
+        'password': 'SenhaForte@123',
         'telefone': '11988887777',
         'tipo': 'PF'
     }, format='json')
@@ -34,7 +34,7 @@ def run_tests():
     res_dup = client.post('/api/usuarios/register/', {
         'nome': 'Outro Usuário',
         'email': 'outro_com_mesmo_tel@teste.com',
-        'password': 'password123',
+        'password': 'SenhaForte@123',
         'telefone': '11988887777',
         'tipo': 'PF'
     }, format='json')
