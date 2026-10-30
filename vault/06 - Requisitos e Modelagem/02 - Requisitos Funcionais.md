@@ -8,11 +8,12 @@ Este documento cataloga os Requisitos Funcionais do sistema **Best Buddy**, orga
 ## 🔐 Módulo 1: Autenticação, Perfil e Controle de Acesso
 
 ### `RF01` — Cadastro de Usuário
-* **Descrição:** Formulário ágil de criação de conta contendo:
-  - `email` (válido, normalizado e único).
-  - `senha` (mínimo de 8 caracteres, com hash seguro no backend).
-  - `confirmação_de_senha`.
-  - `telefone` (celular com DDD, opcional no registro inicial).
+* **Descrição:** Formulário ágil de criação de conta contendo os seguintes campos na mesma ordem da interface:
+  - `nome`: Obrigatório, texto alfanumérico, mínimo 3 caracteres e sem caracteres especiais proibidos.
+  - `email`: Obrigatório, formato de e-mail válido, normalizado (lowercase) e único no banco.
+  - `telefone` (ou WhatsApp): Obrigatório com DDD (10 ou 11 dígitos numéricos), higienizado e vinculado às publicações.
+  - `senha`: Mínimo de 8 caracteres contendo ao menos uma letra e um número (hash seguro bcrypt/argon2 no backend).
+  - `confirmacao_senha`: Obrigatório e idêntico à senha digitada.
 
 ### `RF02` — Autenticação de Usuário (Login)
 * **Descrição:** Autenticação via email e senha retornando par de tokens JWT (`access` e `refresh`) e dados essenciais do usuário (`id`, `email`, `telefone`).
@@ -25,8 +26,9 @@ Este documento cataloga os Requisitos Funcionais do sistema **Best Buddy**, orga
 ### `RF04` — Gestão de Perfil do Tutor ("Editar Perfil")
 * **Descrição:** Interface autenticada para o usuário gerenciar suas credenciais e contato:
   1. **Alteração de Email:** Exige confirmação da senha atual e validação de formato do novo email.
-  2. **Alteração de Senha:** Exige confirmação da senha atual para permitir a definição da nova senha.
+  2. **Alteração de Senha:** Exige confirmação da senha atual para permitir a definição da nova senha, a qual deve cumprir os mesmos critérios de segurança do cadastro (mínimo de 8 caracteres contendo ao menos uma letra e um número).
   3. **Atualização de Telefone:** Permite inserir ou atualizar o número de telefone de contato (celular com DDD).
+  4. **Consulta e Imutabilidade de Nome:** O nome cadastrado permanece visível para consulta, porém bloqueado para alteração direta na interface e na API (futura alteração mediante abertura de chamado de suporte).
 
 ---
 

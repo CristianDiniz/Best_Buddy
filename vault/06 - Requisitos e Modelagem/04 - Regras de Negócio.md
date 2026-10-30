@@ -55,7 +55,7 @@ As Regras de Negócio estabelecem as diretrizes funcionais e restrições mandat
 ### `RN08` — Segurança e Confirmação na Edição de Perfil
 * **Regra:**
   1. **Alteração de Email:** Exige a confirmação da senha atual. Validação estrita de formato de email e unicidade no banco.
-  2. **Alteração de Senha:** Exige a confirmação da senha atual antes de autorizar a substituição pela nova senha.
+  2. **Alteração de Senha:** Exige a confirmação da senha atual antes de autorizar a substituição pela nova senha. A nova senha deve cumprir obrigatoriamente os mesmos critérios do cadastro: mínimo de 8 caracteres contendo ao menos uma letra e um número.
 
 ---
 

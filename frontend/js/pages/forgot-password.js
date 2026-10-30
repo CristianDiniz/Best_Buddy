@@ -60,8 +60,12 @@ bbConfirmForm.addEventListener("submit", async (event) => {
     document.getElementById("pin-error").textContent = "Informe o PIN recebido.";
     return;
   }
-  if (!bbValidation.minLength(novaSenha, 6)) {
-    document.getElementById("nova-senha-error").textContent = "Senha deve ter ao menos 6 caracteres.";
+  if (!bbValidation.isRequired(novaSenha)) {
+    document.getElementById("nova-senha-error").textContent = "Informe a nova senha.";
+    return;
+  }
+  if (!bbValidation.isStrongPassword(novaSenha)) {
+    document.getElementById("nova-senha-error").textContent = "A senha deve ter no mínimo 8 caracteres e conter pelo menos uma letra e um número.";
     return;
   }
 

@@ -101,10 +101,14 @@ const ibgeService = {
       }
 
       const rawData = await response.json();
-      const cidades = rawData.map((item) => ({
-        id: item.id,
-        nome: item.nome,
-      }));
+      const cidades = Array.isArray(rawData)
+        ? rawData
+            .filter((item) => item && item.nome)
+            .map((item) => ({
+              id: item.id,
+              nome: item.nome,
+            }))
+        : [];
 
       _memoryCache.set(cleanUf, cidades);
 

@@ -12,6 +12,17 @@ const bbLostToggleBtn = document.getElementById("bb-lost-toggle-btn");
 const bbAdoptToggleBtn = document.getElementById("bb-adopt-toggle-btn");
 const bbAnimalsAlertEl = document.getElementById("bb-animals-alert");
 
+// Elementos de Estatísticas & Animais Adotados
+const bbAdoptedCountEl = document.getElementById("bb-adopted-count");
+const bbAdoptedSubcountEl = document.getElementById("bb-adopted-subcount");
+const bbStatAvailableCountEl = document.getElementById("bb-stat-available-count");
+const bbStatLostCountEl = document.getElementById("bb-stat-lost-count");
+const bbAdoptedShowcaseSectionEl = document.getElementById("bb-adopted-showcase-section");
+const bbAdoptedGridEl = document.getElementById("bb-adopted-grid");
+const bbToggleAdoptedGalleryBtn = document.getElementById("bb-toggle-adopted-gallery-btn");
+const bbCloseAdoptedGalleryBtn = document.getElementById("bb-close-adopted-gallery-btn");
+const bbAdoptionCelebrationToast = document.getElementById("bb-adoption-celebration-toast");
+
 // Filtros e Abas
 const tabAllPets = document.getElementById("tab-all-pets");
 const tabMyPets = document.getElementById("tab-my-pets");
@@ -71,28 +82,37 @@ function resetImageInput() {
     petImageInput.value = "";
     petImageInput.classList.remove("bb-input--error");
   }
+  const photoImg = document.getElementById("adopt-photo-img");
+  if (photoImg) photoImg.innerHTML = "🐾";
+  if (petImageFilename) petImageFilename.textContent = "Nenhuma foto selecionada";
+  if (petImageFilesize) petImageFilesize.textContent = "JPEG, PNG ou WebP • máx 50MB (otimizada automaticamente)";
+  if (petImageClearBtn) petImageClearBtn.classList.add("hidden");
   if (petImagePreviewWrap) {
     petImagePreviewWrap.classList.add("hidden");
     petImagePreviewWrap.style.display = "none";
   }
   if (petImagePreview) petImagePreview.src = "";
-  if (petImageFilename) petImageFilename.textContent = "";
-  if (petImageFilesize) petImageFilesize.textContent = "";
 }
 
 function setImagePreview(src, name, sizeText) {
-  if (!petImagePreviewWrap) return;
-  petImagePreview.src = src;
-  petImageFilename.textContent = name || "Foto do pet";
-  petImageFilesize.textContent = sizeText || "";
-  petImagePreviewWrap.classList.remove("hidden");
-  petImagePreviewWrap.style.display = "flex";
+  const photoImg = document.getElementById("adopt-photo-img");
+  if (photoImg) {
+    photoImg.innerHTML = `<img src="${src}" alt="Foto do pet" style="width:100%;height:100%;object-fit:cover;" />`;
+  }
+  if (petImageFilename) petImageFilename.textContent = name || "Foto do pet";
+  if (petImageFilesize) petImageFilesize.textContent = sizeText || "";
+  if (petImageClearBtn) petImageClearBtn.classList.remove("hidden");
+  if (petImagePreviewWrap) {
+    petImagePreview.src = src;
+  }
 }
 
 // Estado
 const INITIAL_LIMIT = 4;
 let allLostAnimals = [];
 let allAdoptAnimals = [];
+let allAdoptedAnimals = [];
+let adoptedGalleryOpen = false;
 let lostExpanded = false;
 let adoptExpanded = false;
 let activeTab = "all"; // "all" | "my"
@@ -132,8 +152,8 @@ function renderAdopt() {
 
   if (!allAdoptAnimals.length) {
     bbAdoptGridEl.innerHTML = bbStateHtml({
-      title: "Nenhum animal para adoção encontrado.",
-      description: "Tente ajustar ou limpar seus filtros para ver mais pets.",
+      title: "Nenhum animal para adoção disponível no momento.",
+      description: "Todos os pets cadastrados já encontraram um lar amoroso ou não há pets para os filtros selecionados!",
     });
     bbAdoptToggleWrapEl.classList.add("hidden");
     return;
@@ -153,6 +173,20 @@ function renderAdopt() {
   }
 }
 
+function renderAdopted() {
+  if (!bbAdoptedGridEl) return;
+
+  if (!allAdoptedAnimals.length) {
+    bbAdoptedGridEl.innerHTML = bbStateHtml({
+      title: "Nenhum animal adotado registrado ainda.",
+      description: "Assim que um tutor marcar o anúncio como ADOTADO, a história de sucesso aparecerá aqui!",
+    });
+    return;
+  }
+
+  bbAdoptedGridEl.innerHTML = allAdoptedAnimals.map(bbAnimalCardHtml).join("");
+}
+
 async function bbLoadAnimals() {
   bbLostGridEl.innerHTML = bbSkeletonGridHtml(INITIAL_LIMIT);
   bbAdoptGridEl.innerHTML = bbSkeletonGridHtml(INITIAL_LIMIT);
@@ -168,9 +202,10 @@ async function bbLoadAnimals() {
   if (activeTab === "my" && currentUser) commonParams.tutor_id = currentUser.id;
 
   try {
-    const [lostList, adoptList] = await Promise.all([
+    const [lostList, adoptList, stats] = await Promise.all([
       animalService.list({ ...commonParams, tipo_servico: "PERDIDO" }),
       animalService.list({ ...commonParams, tipo_servico: "ADOCAO" }),
+      animalService.getStats().catch(() => null),
     ]);
 
     let rawLost = Array.isArray(lostList) ? lostList : [];
@@ -187,11 +222,35 @@ async function bbLoadAnimals() {
       rawAdopt = rawAdopt.filter((a) => !a.created_at || new Date(a.created_at).getTime() >= monthAgo);
     }
 
+    // REGRA DE NEGÓCIO: Animais adotados saem da lista de animais para adoção!
+    const availablePets = rawAdopt.filter((a) => (a.status || "").toUpperCase() !== "ADOTADO");
+    const adoptedPets = rawAdopt.filter((a) => (a.status || "").toUpperCase() === "ADOTADO");
+
     allLostAnimals = rawLost;
-    allAdoptAnimals = rawAdopt;
+    allAdoptAnimals = availablePets;
+    allAdoptedAnimals = adoptedPets;
+
+    // Atualização dos Contadores em Destaque
+    const adoptedTotal = stats && typeof stats.total_adotados === "number"
+      ? stats.total_adotados
+      : adoptedPets.length;
+
+    if (bbAdoptedCountEl) {
+      bbAdoptedCountEl.textContent = adoptedTotal;
+    }
+    if (bbAdoptedSubcountEl) {
+      bbAdoptedSubcountEl.textContent = adoptedTotal;
+    }
+    if (bbStatAvailableCountEl) {
+      bbStatAvailableCountEl.textContent = availablePets.length;
+    }
+    if (bbStatLostCountEl) {
+      bbStatLostCountEl.textContent = allLostAnimals.length;
+    }
 
     renderLost();
     renderAdopt();
+    renderAdopted();
   } catch (err) {
     bbLostGridEl.innerHTML = bbStateHtml({
       title: "Não foi possível carregar os animais desaparecidos.",
@@ -216,6 +275,27 @@ bbAdoptToggleBtn.addEventListener("click", () => {
   adoptExpanded = !adoptExpanded;
   renderAdopt();
 });
+
+// Alternar Galeria de Pets Adotados (Finais Felizes)
+if (bbToggleAdoptedGalleryBtn && bbAdoptedShowcaseSectionEl) {
+  bbToggleAdoptedGalleryBtn.addEventListener("click", () => {
+    adoptedGalleryOpen = !adoptedGalleryOpen;
+    if (adoptedGalleryOpen) {
+      bbAdoptedShowcaseSectionEl.classList.remove("hidden");
+      renderAdopted();
+      bbAdoptedShowcaseSectionEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      bbAdoptedShowcaseSectionEl.classList.add("hidden");
+    }
+  });
+}
+
+if (bbCloseAdoptedGalleryBtn && bbAdoptedShowcaseSectionEl) {
+  bbCloseAdoptedGalleryBtn.addEventListener("click", () => {
+    adoptedGalleryOpen = false;
+    bbAdoptedShowcaseSectionEl.classList.add("hidden");
+  });
+}
 
 // Ações de Filtro (RF08)
 function applyFilters() {
@@ -330,16 +410,124 @@ function applyPhoneMask(input) {
 
 applyPhoneMask(petPhoneInput);
 
+// Controle de Abas do Modal de Criação / Anúncio (#adopt-modal)
+const adoptTabs = Array.from(document.querySelectorAll("#adopt-tabs .bb-edit-tab"));
+const adoptPanels = [
+  document.getElementById("adopt-panel-0"),
+  document.getElementById("adopt-panel-1"),
+  document.getElementById("adopt-panel-2"),
+];
+const adoptPrevBtn = document.getElementById("adopt-prev-btn");
+const adoptNextBtn = document.getElementById("adopt-next-btn");
+const adoptPhotoChooseBtn = document.getElementById("adopt-photo-choose-btn");
+const petDescInput = document.getElementById("pet-descricao");
+const petDescCount = document.getElementById("pet-descricao-count");
+let activeAdoptTab = 0;
+
+function goToAdoptTab(index) {
+  activeAdoptTab = Math.max(0, Math.min(index, adoptPanels.length - 1));
+  adoptTabs.forEach((tab, i) => {
+    const active = i === activeAdoptTab;
+    tab.classList.toggle("is-active", active);
+    tab.setAttribute("aria-selected", active ? "true" : "false");
+  });
+  adoptPanels.forEach((panel, i) => {
+    if (panel) panel.classList.toggle("is-active", i === activeAdoptTab);
+  });
+
+  if (adoptPrevBtn) adoptPrevBtn.classList.toggle("hidden", activeAdoptTab === 0);
+  if (adoptNextBtn) adoptNextBtn.classList.toggle("hidden", activeAdoptTab === adoptPanels.length - 1);
+  if (modalSubmitBtn) modalSubmitBtn.classList.toggle("hidden", activeAdoptTab !== adoptPanels.length - 1);
+
+  const body = document.querySelector("#adopt-modal .bb-edit-body");
+  if (body) body.scrollTop = 0;
+}
+
+adoptTabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    goToAdoptTab(Number(tab.dataset.adoptTab || 0));
+  });
+});
+
+if (adoptPrevBtn) {
+  adoptPrevBtn.addEventListener("click", () => goToAdoptTab(activeAdoptTab - 1));
+}
+
+if (adoptNextBtn) {
+  adoptNextBtn.addEventListener("click", () => {
+    modalAlertEl.innerHTML = "";
+    if (activeAdoptTab === 0) {
+      const nome = document.getElementById("pet-nome")?.value.trim();
+      const desc = document.getElementById("pet-descricao")?.value.trim();
+      if (!nome) {
+        modalAlertEl.innerHTML = '<div class="bb-alert bb-alert--error">Informe o nome do pet antes de avançar.</div>';
+        document.getElementById("pet-nome")?.focus();
+        return;
+      }
+      if (!desc) {
+        modalAlertEl.innerHTML = '<div class="bb-alert bb-alert--error">Escreva uma breve descrição antes de avançar.</div>';
+        document.getElementById("pet-descricao")?.focus();
+        return;
+      }
+    } else if (activeAdoptTab === 1) {
+      const estado = document.getElementById("pet-estado")?.value;
+      const cidade = document.getElementById("pet-cidade")?.value.trim();
+      const servico = document.getElementById("pet-servico")?.value;
+      const local = document.getElementById("pet-local")?.value.trim();
+      if (servico === "PERDIDO" && !local) {
+        modalAlertEl.innerHTML = '<div class="bb-alert bb-alert--error">Informe o último local onde o pet foi visto.</div>';
+        document.getElementById("pet-local")?.focus();
+        return;
+      }
+      if (!estado) {
+        modalAlertEl.innerHTML = '<div class="bb-alert bb-alert--error">Selecione o estado (UF) antes de avançar.</div>';
+        document.getElementById("pet-estado")?.focus();
+        return;
+      }
+      if (!cidade) {
+        modalAlertEl.innerHTML = '<div class="bb-alert bb-alert--error">Informe a cidade antes de avançar.</div>';
+        document.getElementById("pet-cidade")?.focus();
+        return;
+      }
+    }
+    goToAdoptTab(activeAdoptTab + 1);
+  });
+}
+
+if (adoptPhotoChooseBtn && petImageInput) {
+  adoptPhotoChooseBtn.addEventListener("click", () => petImageInput.click());
+}
+
+if (petDescInput && petDescCount) {
+  petDescInput.addEventListener("input", () => {
+    petDescCount.textContent = `${petDescInput.value.length}/255`;
+  });
+}
+
 // Atualização de UI conforme o serviço (Adoção vs Animal Perdido)
 function updateModalServiceUI(service) {
-  const modalHeading = document.querySelector("#adopt-modal h2");
+  const modalHeading = document.getElementById("modal-adopt-title");
   const modalDesc = document.getElementById("modal-adopt-desc");
+  const modalThumb = document.getElementById("modal-adopt-thumb");
+  const modalChip = document.getElementById("modal-adopt-chip");
+  const modalEyebrow = document.getElementById("modal-adopt-eyebrow");
+  const headerWrap = document.getElementById("adopt-header-wrap");
+
   if (service === "PERDIDO") {
     if (wrapPetLocal) wrapPetLocal.classList.remove("hidden");
     if (petLocalInput) petLocalInput.required = true;
     if (modalHeading) modalHeading.textContent = "Reportar Animal Perdido";
+    if (modalThumb) modalThumb.textContent = "🚨";
+    if (modalEyebrow) modalEyebrow.textContent = "🚨 ANIMAL DESAPARECIDO";
+    if (modalChip) {
+      modalChip.className = "bb-edit-chip bb-edit-chip--perdido";
+      modalChip.textContent = "🚨 Animal Perdido";
+    }
+    if (headerWrap) {
+      headerWrap.style.background = "linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(255, 255, 255, 0) 70%)";
+    }
     if (modalDesc) modalDesc.textContent = "Preencha as informações do animal desaparecido para que a comunidade possa ajudar a localizá-lo.";
-    modalSubmitBtn.textContent = "Publicar Animal Perdido";
+    if (modalSubmitBtn) modalSubmitBtn.textContent = "Publicar Animal Perdido";
   } else {
     if (wrapPetLocal) wrapPetLocal.classList.add("hidden");
     if (petLocalInput) {
@@ -347,8 +535,17 @@ function updateModalServiceUI(service) {
       petLocalInput.value = "";
     }
     if (modalHeading) modalHeading.textContent = "Anunciar Pet para Adoção";
+    if (modalThumb) modalThumb.textContent = "🐾";
+    if (modalEyebrow) modalEyebrow.textContent = "🐾 NOVO ANÚNCIO";
+    if (modalChip) {
+      modalChip.className = "bb-edit-chip bb-edit-chip--adocao";
+      modalChip.textContent = "🐾 Adoção";
+    }
+    if (headerWrap) {
+      headerWrap.style.background = "linear-gradient(135deg, rgba(47, 138, 224, 0.08) 0%, rgba(255, 255, 255, 0) 70%)";
+    }
     if (modalDesc) modalDesc.textContent = "Preencha os dados do animal. O telefone informado será o canal direto para interessados entrarem em contato via WhatsApp.";
-    modalSubmitBtn.textContent = "Publicar Anúncio";
+    if (modalSubmitBtn) modalSubmitBtn.textContent = "Publicar Anúncio";
   }
 }
 
@@ -363,9 +560,13 @@ async function openAdoptModal(defaultService = "ADOCAO") {
   modalAlertEl.innerHTML = "";
   formAdoptPet.reset();
   resetImageInput();
+  goToAdoptTab(0);
+
+  if (petDescCount) petDescCount.textContent = "0/255";
+
   const labelImg = document.getElementById("label-pet-imagem");
   if (labelImg) {
-    labelImg.textContent = "Foto do Pet * (JPEG, PNG ou WebP, máx 50MB - otimizada automaticamente)";
+    labelImg.textContent = "Foto Principal * (JPEG, PNG ou WebP, máx 50MB - otimizada automaticamente)";
   }
 
   if (wrapPetStatus) wrapPetStatus.classList.add("hidden");
@@ -418,101 +619,12 @@ async function openAdoptModal(defaultService = "ADOCAO") {
   document.body.style.overflow = "hidden";
 }
 
-// Modal de Edição de Anúncio de Animal
-async function openEditPetModal(animal) {
-  if (!bbStorage.isAuthenticated()) {
-    window.location.href = `/pages/auth/login.html?next=${encodeURIComponent(window.location.pathname)}`;
-    return;
+// Edição de Anúncio: usa o pop-up dedicado (#edit-modal), definido em js/pages/animals-edit.js.
+// Ele confere se o usuário logado é o dono do anúncio antes de abrir e antes de salvar.
+function openEditPetModal(animalOrId) {
+  if (typeof window.bbOpenEditModal === "function") {
+    window.bbOpenEditModal(animalOrId);
   }
-
-  currentEditingAnimalId = animal.id;
-  modalAlertEl.innerHTML = "";
-  formAdoptPet.reset();
-
-  const modalHeading = document.querySelector("#adopt-modal h2");
-  const modalDesc = document.getElementById("modal-adopt-desc");
-  if (modalHeading) modalHeading.textContent = "Editar Anúncio do Pet";
-  if (modalDesc) modalDesc.textContent = "Atualize os dados e o status do anúncio do seu animal.";
-  if (modalSubmitBtn) modalSubmitBtn.textContent = "Salvar Alterações";
-
-  if (wrapPetStatus) wrapPetStatus.classList.remove("hidden");
-  if (petStatusSelect) petStatusSelect.value = animal.status || "DISPONIVEL";
-
-  if (petServicoSelect) {
-    petServicoSelect.value = animal.tipo_servico || "ADOCAO";
-    updateModalServiceUI(animal.tipo_servico || "ADOCAO");
-    if (modalHeading) modalHeading.textContent = "Editar Anúncio do Pet";
-    if (modalSubmitBtn) modalSubmitBtn.textContent = "Salvar Alterações";
-  }
-
-  // Preenche dados do animal no formulário
-  const nomeEl = document.getElementById("pet-nome");
-  if (nomeEl) nomeEl.value = animal.nome || "";
-
-  const tipoEl = document.getElementById("pet-tipo");
-  if (tipoEl) tipoEl.value = animal.tipo_animal || "CACHORRO";
-
-  const sexoEl = document.getElementById("pet-sexo");
-  if (sexoEl) sexoEl.value = animal.sexo || "M";
-
-  const racaEl = document.getElementById("pet-raca");
-  if (racaEl) racaEl.value = animal.raca || "";
-
-  const idadeEl = document.getElementById("pet-idade");
-  if (idadeEl) idadeEl.value = animal.idade_aproximada || "";
-
-  const castradoEl = document.getElementById("pet-castrado");
-  if (castradoEl) castradoEl.value = animal.castrado || "";
-
-  const medEl = document.getElementById("pet-medicamento");
-  if (medEl) medEl.value = animal.medicamento || "";
-
-  const descEl = document.getElementById("pet-descricao");
-  if (descEl) descEl.value = animal.descricao || "";
-
-  resetImageInput();
-  const labelImgEdit = document.getElementById("label-pet-imagem");
-  if (labelImgEdit) {
-    labelImgEdit.textContent = "Foto do Pet (opcional se já possuir foto cadastrada)";
-  }
-  if (animal.imagem) {
-    setImagePreview(animal.imagem, "Foto cadastrada", "");
-  }
-
-  if (animal.local && petLocalInput) petLocalInput.value = animal.local;
-
-  const phoneWarningEdit = document.getElementById("pet-telefone-warning");
-  if (phoneWarningEdit) phoneWarningEdit.classList.add("hidden");
-  if (petPhoneInput) {
-    const phoneVal = animal.contato || animal.telefone_contato || currentProfilePhone || "";
-    petPhoneInput.value = phoneVal ? bbValidation.formatPhone(phoneVal) : "";
-  }
-
-  // Preenche Estado e Cidade
-  if (petEstadoSelect && animal.estado) {
-    petEstadoSelect.value = animal.estado;
-    try {
-      const cidades = await ibgeService.getCidadesPorEstado(animal.estado);
-      if (petCidadesDatalist) {
-        petCidadesDatalist.innerHTML = cidades.map((c) => `<option value="${c.nome}">`).join("");
-      }
-      if (petCidadeInput) {
-        petCidadeInput.disabled = false;
-        petCidadeInput.value = animal.cidade || "";
-      }
-    } catch (_) {
-      if (petCidadeInput) {
-        petCidadeInput.disabled = false;
-        petCidadeInput.value = animal.cidade || "";
-      }
-    }
-  } else if (petCidadeInput) {
-    petCidadeInput.disabled = false;
-    petCidadeInput.value = animal.cidade || "";
-  }
-
-  if (adoptModal) adoptModal.classList.remove("hidden");
-  document.body.style.overflow = "hidden";
 }
 
 function closeAdoptModal() {
@@ -655,21 +767,57 @@ formAdoptPet.addEventListener("submit", async (e) => {
     effectivePhone = petPhoneInput ? petPhoneInput.value.trim() : "";
   }
 
+  const nomeVal = document.getElementById("pet-nome")?.value.trim() || "";
+  const tipoVal = document.getElementById("pet-tipo")?.value || "CACHORRO";
+  const sexoVal = document.getElementById("pet-sexo")?.value || "M";
+  const racaVal = document.getElementById("pet-raca")?.value.trim() || "";
+  const idadeVal = document.getElementById("pet-idade")?.value.trim() || "";
+  const descVal = document.getElementById("pet-descricao")?.value.trim() || "";
+  const castradoVal = document.getElementById("pet-castrado")?.value.trim() || "";
+  const medVal = document.getElementById("pet-medicamento")?.value.trim() || "";
+  const localVal = document.getElementById("pet-local")?.value.trim() || "";
+
+  if (!nomeVal) {
+    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">Por favor, informe o nome do pet.</div>`;
+    goToAdoptTab(0);
+    document.getElementById("pet-nome")?.focus();
+    return;
+  }
+
+  if (!descVal) {
+    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">Por favor, escreva uma breve descrição do pet.</div>`;
+    goToAdoptTab(0);
+    document.getElementById("pet-descricao")?.focus();
+    return;
+  }
+
+  if (servico === "PERDIDO" && !localVal) {
+    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">Por favor, informe o último local onde o pet foi visto.</div>`;
+    goToAdoptTab(1);
+    document.getElementById("pet-local")?.focus();
+    return;
+  }
+
   if (!effectivePhone && !isEdit) {
     const errorMsg = "É necessário ter um telefone cadastrado na sua conta para anunciar um animal.";
-    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error font-semibold">${errorMsg} <a href="/pages/auth/profile.html" class="underline font-bold text-brand-300 ml-1">Cadastrar no Perfil &rarr;</a></div>`;
+    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error font-semibold">⚠️ ${errorMsg} <a href="/pages/auth/profile.html" class="underline font-bold text-brand-300 ml-1">Cadastrar no Perfil →</a></div>`;
+    goToAdoptTab(1);
     return;
   }
 
   const estado = (document.getElementById("pet-estado")?.value || "").trim().toUpperCase();
-  const cidade = document.getElementById("pet-cidade").value.trim();
+  const cidade = document.getElementById("pet-cidade")?.value.trim() || "";
 
   if (!estado) {
     modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">Por favor, selecione o Estado (UF).</div>`;
+    goToAdoptTab(1);
+    document.getElementById("pet-estado")?.focus();
     return;
   }
   if (!cidade) {
     modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">Por favor, selecione ou informe a Cidade.</div>`;
+    goToAdoptTab(1);
+    document.getElementById("pet-cidade")?.focus();
     return;
   }
 
@@ -682,9 +830,9 @@ formAdoptPet.addEventListener("submit", async (e) => {
   // A foto é obrigatória ao criar um novo anúncio
   if (!isEdit && !selectedFile && !optimizedImageFile) {
     modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">A foto do animal é obrigatória para publicar o anúncio.</div>`;
+    goToAdoptTab(2);
     if (petImageInput) {
       petImageInput.classList.add("bb-input--error");
-      petImageInput.focus();
     }
     modalAlertEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
     return;
@@ -693,26 +841,16 @@ formAdoptPet.addEventListener("submit", async (e) => {
   if (selectedFile) {
     if (!isValidImageType(selectedFile)) {
       modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">Formato de arquivo inválido. Apenas imagens JPEG, PNG ou WebP (.jpg, .jpeg, .png, .webp) são permitidas.</div>`;
-      petImageInput.focus();
+      goToAdoptTab(2);
       return;
     }
     if (selectedFile.size > MAX_IMAGE_SIZE_BYTES) {
       const sizeMB = (selectedFile.size / (1024 * 1024)).toFixed(2);
       modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">O arquivo de imagem excede o tamanho máximo de 50 MB (${sizeMB} MB).</div>`;
-      petImageInput.focus();
+      goToAdoptTab(2);
       return;
     }
   }
-
-  const nomeVal = document.getElementById("pet-nome").value.trim();
-  const tipoVal = document.getElementById("pet-tipo").value;
-  const sexoVal = document.getElementById("pet-sexo").value;
-  const racaVal = document.getElementById("pet-raca").value.trim();
-  const idadeVal = document.getElementById("pet-idade").value.trim();
-  const descVal = document.getElementById("pet-descricao").value.trim();
-  const castradoVal = document.getElementById("pet-castrado")?.value.trim();
-  const medVal = document.getElementById("pet-medicamento")?.value.trim();
-  const localVal = document.getElementById("pet-local")?.value.trim();
 
   let fileToUpload = selectedFile;
   if (selectedFile) {
@@ -815,16 +953,31 @@ document.addEventListener("click", async (e) => {
   if (finishBtn) {
     const id = finishBtn.dataset.id;
     const targetStatus = finishBtn.dataset.status;
-    const confirmMsg = targetStatus === "ENCONTRADO"
+    const isPerdido = targetStatus === "ENCONTRADO";
+    const confirmMsg = isPerdido
       ? "Deseja marcar este pet como ENCONTRADO? O anúncio será dado como concluído."
-      : "Deseja marcar este pet como ADOTADO? O anúncio será dado como concluído.";
+      : "Deseja marcar este pet como ADOTADO? Ele sairá da lista de animais para adoção e entrará no contador de adotados.";
 
     if (!confirm(confirmMsg)) return;
 
     finishBtn.disabled = true;
     try {
       await animalService.update(id, { status: targetStatus });
-      bbLoadAnimals();
+
+      if (targetStatus === "ADOTADO") {
+        if (bbAdoptionCelebrationToast) {
+          bbAdoptionCelebrationToast.classList.remove("hidden");
+          bbAdoptionCelebrationToast.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        if (bbAdoptedCountEl) {
+          bbAdoptedCountEl.classList.add("scale-125", "transition-transform", "duration-300");
+          setTimeout(() => {
+            bbAdoptedCountEl.classList.remove("scale-125");
+          }, 600);
+        }
+      }
+
+      await bbLoadAnimals();
     } catch (err) {
       alert("Erro ao atualizar anúncio: " + err.message);
       finishBtn.disabled = false;
@@ -836,7 +989,7 @@ document.addEventListener("click", async (e) => {
   const editBtn = e.target.closest(".btn-edit-animal");
   if (editBtn) {
     const id = editBtn.dataset.id;
-    const allPets = [...allLostAnimals, ...allAdoptAnimals];
+    const allPets = [...allLostAnimals, ...allAdoptAnimals, ...allAdoptedAnimals];
     let animal = allPets.find((a) => String(a.id) === String(id));
     if (!animal) {
       try {
@@ -891,14 +1044,7 @@ async function checkUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
   const editId = urlParams.get("edit");
   if (editId) {
-    try {
-      const animal = await animalService.getById(editId);
-      if (animal) {
-        openEditPetModal(animal);
-      }
-    } catch (err) {
-      console.warn("Erro ao abrir pet via URL param:", err);
-    }
+    openEditPetModal(editId);
   }
 }
 

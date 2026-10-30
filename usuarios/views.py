@@ -3,11 +3,11 @@ from django.conf import settings
 from django.core import signing
 from django.core.mail import send_mail
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser, BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Usuario
+from .models import Usuario, PessoaFisica, PessoaJuridica
 from .serializer import (
     AlterarEmailSerializer,
     AlterarSenhaSerializer,
@@ -58,17 +58,9 @@ class PerfilView(APIView):
 
     def patch(self, request):
         user = request.user
-        nome = request.data.get("nome")
         telefone = request.data.get("telefone")
 
-        if nome is not None:
-            nome = str(nome).strip()
-            if user.tipo == "PF" and hasattr(user, "perfil_pf"):
-                user.perfil_pf.nome = nome
-                user.perfil_pf.save()
-            elif user.tipo == "PJ" and hasattr(user, "perfil_pj"):
-                user.perfil_pj.nome_fantasia = nome
-                user.perfil_pj.save()
+        # O nome do usuário não pode mais ser alterado de forma livre (futuramente via chamado)
 
         if telefone is not None:
             telefone_limpo = re.sub(r'\D', '', str(telefone).strip()) or None
@@ -87,12 +79,14 @@ class PerfilView(APIView):
                 user.telefone = telefone_limpo
                 user.save()
 
-            if user.tipo == "PF" and hasattr(user, "perfil_pf"):
-                user.perfil_pf.telefone = (telefone_limpo or "")[:15]
-                user.perfil_pf.save()
-            elif user.tipo == "PJ" and hasattr(user, "perfil_pj"):
-                user.perfil_pj.telefone = (telefone_limpo or "")[:15]
-                user.perfil_pj.save()
+            if user.tipo == "PF" or not user.tipo:
+                pf, _ = PessoaFisica.objects.get_or_create(usuario=user)
+                pf.telefone = (telefone_limpo or "")[:15]
+                pf.save()
+            elif user.tipo == "PJ":
+                pj, _ = PessoaJuridica.objects.get_or_create(usuario=user)
+                pj.telefone = (telefone_limpo or "")[:15]
+                pj.save()
 
         return self.get(request)
 
@@ -117,11 +111,14 @@ class AlterarEmailView(APIView):
         request.user.email = novo_email
         request.user.save()
 
-        return Response({
+        resp_data = {
             "message": "E-mail alterado com sucesso!",
             "email": novo_email,
-            "token_dev": token
-        }, status=status.HTTP_200_OK)
+        }
+        if settings.DEBUG and token:
+            resp_data["token_dev"] = token
+
+        return Response(resp_data, status=status.HTTP_200_OK)
 
 
 class ConfirmarEmailView(APIView):
@@ -270,16 +267,21 @@ class TwilioVerificarCodigoView(APIView):
         return Response({"error": "Código de verificação incorreto ou expirado."}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class IsSelfOrAdmin(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return bool(request.user and (request.user.is_staff or request.user.pk == obj.pk))
+
+
 class UsuariosView(generics.ListCreateAPIView):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
 
 
 class UsuariosDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSelfOrAdmin]
 
 
 class RecuperarSenhaView(APIView):
@@ -311,10 +313,13 @@ class RecuperarSenhaView(APIView):
             except Exception:
                 pass
 
-        return Response({
-            "message": "Se o e-mail informado estiver cadastrado, as instruções para redefinição foram enviadas.",
-            "token_dev": token
-        }, status=status.HTTP_200_OK)
+        resp_data = {
+            "message": "Se o e-mail informado estiver cadastrado, as instruções para redefinição foram enviadas."
+        }
+        if settings.DEBUG and token:
+            resp_data["token_dev"] = token
+
+        return Response(resp_data, status=status.HTTP_200_OK)
 
 
 class RedefinirSenhaView(APIView):
