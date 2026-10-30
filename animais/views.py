@@ -36,6 +36,10 @@ class AnimaisViewSet(generics.ListCreateAPIView):
         if status_param:
             queryset = queryset.filter(status__iexact=status_param)
 
+        exclude_status = self.request.query_params.get('exclude_status')
+        if exclude_status:
+            queryset = queryset.exclude(status__iexact=exclude_status)
+
         tutor_id = self.request.query_params.get('tutor_id')
         if tutor_id:
             queryset = queryset.filter(tutor_id=tutor_id)
@@ -78,3 +82,23 @@ class AnimaisDetailView(generics.RetrieveUpdateDestroyAPIView):
         if instance.tutor != user and not user.is_staff and not user.is_superuser:
             raise exceptions.PermissionDenied("Você só tem permissão para remover seus próprios anúncios.")
         instance.delete()
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+class AnimaisEstatisticasView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        total_adotados = Animal.objects.filter(status='ADOTADO').count()
+        total_disponiveis = Animal.objects.filter(tipo_servico='ADOCAO', status='DISPONIVEL').count()
+        total_perdidos = Animal.objects.filter(tipo_servico='PERDIDO', status='PERDIDO').count()
+        total_encontrados = Animal.objects.filter(status='ENCONTRADO').count()
+        return Response({
+            'total_adotados': total_adotados,
+            'total_disponiveis': total_disponiveis,
+            'total_perdidos': total_perdidos,
+            'total_encontrados': total_encontrados,
+            'total_geral': Animal.objects.count(),
+        })

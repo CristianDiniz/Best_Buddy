@@ -22,6 +22,23 @@ const bbValidation = {
     return a === b;
   },
 
+  isAlphanumericName(value) {
+    if (!value || typeof value !== "string") return false;
+    // Permite letras (incluindo acentuação latina), números e espaços
+    return /^[A-Za-zÀ-ÿ0-9\s]+$/.test(value.trim());
+  },
+
+  isStrongPassword(value) {
+    if (!value || typeof value !== "string") return false;
+    return (
+      value.length >= 8 &&
+      /[A-Z]/.test(value) &&
+      /[a-z]/.test(value) &&
+      /[0-9]/.test(value) &&
+      /[^A-Za-z0-9]/.test(value)
+    );
+  },
+
   isValidBrazilianPhone(value) {
     if (!value || typeof value !== "string" || !value.trim()) return false;
     const digits = value.replace(/\D/g, "");

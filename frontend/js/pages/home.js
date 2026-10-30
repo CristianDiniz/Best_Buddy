@@ -79,13 +79,31 @@ function renderHomePets() {
       e.stopPropagation();
       const id = btn.getAttribute("data-id");
       const targetStatus = btn.getAttribute("data-status") || "ADOTADO";
+      const isPerdido = targetStatus === "ENCONTRADO";
+      const confirmMsg = isPerdido
+        ? "Deseja marcar este pet como ENCONTRADO? O anúncio será dado como concluído."
+        : "Deseja marcar este pet como ADOTADO? Ele sairá da lista de animais disponíveis e somará no contador de adotados.";
+      if (!confirm(confirmMsg)) return;
+
+      btn.disabled = true;
       try {
-        await animalService.updateStatus(id, targetStatus);
-        const p = allHomePets.find((item) => String(item.id) === String(id));
-        if (p) p.status = targetStatus;
+        await animalService.update(id, { status: targetStatus });
+        // REGRA DE NEGÓCIO: animal adotado sai imediatamente da lista de animais!
+        allHomePets = allHomePets.filter((item) => String(item.id) !== String(id));
         renderHomePets();
+
+        if (targetStatus === "ADOTADO") {
+          const adoptedCountEl = document.getElementById("bb-home-adopted-count");
+          if (adoptedCountEl) {
+            const current = parseInt(adoptedCountEl.textContent, 10) || 0;
+            adoptedCountEl.textContent = current + 1;
+            adoptedCountEl.classList.add("scale-125", "transition-transform", "duration-300");
+            setTimeout(() => adoptedCountEl.classList.remove("scale-125"), 600);
+          }
+        }
       } catch (err) {
         alert("Erro ao atualizar status: " + err.message);
+        btn.disabled = false;
       }
     });
   });
@@ -134,9 +152,19 @@ async function bbLoadHomePets() {
   `;
 
   try {
-    const list = await animalService.list({ tipo_servico: "ADOCAO" });
-    allHomePets = Array.isArray(list) ? list : [];
+    const [list, stats] = await Promise.all([
+      animalService.list({ tipo_servico: "ADOCAO", exclude_status: "ADOTADO" }),
+      animalService.getStats().catch(() => null),
+    ]);
+    // REGRA DE NEGÓCIO: animais adotados saem da vitrine de pets esperando por um lar!
+    const rawList = Array.isArray(list) ? list : [];
+    allHomePets = rawList.filter((pet) => (pet.status || "").toUpperCase() !== "ADOTADO");
     renderHomePets();
+
+    const adoptedCountEl = document.getElementById("bb-home-adopted-count");
+    if (adoptedCountEl && stats && typeof stats.total_adotados === "number") {
+      adoptedCountEl.textContent = stats.total_adotados;
+    }
   } catch (err) {
     bbHomePetsEl.innerHTML = `
       <div class="col-span-full py-10 text-center text-danger">

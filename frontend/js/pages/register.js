@@ -104,17 +104,29 @@ bbRegisterForm.addEventListener("submit", async (event) => {
   };
 
   const errors = bbValidation.runRules(data, {
-    nome: [{ test: bbValidation.isRequired, message: "Informe seu nome." }],
+    nome: [
+      { test: bbValidation.isRequired, message: "Informe seu nome." },
+      { test: (v) => bbValidation.minLength(v, 3), message: "O nome deve ter no mínimo 3 caracteres." },
+      { test: bbValidation.isAlphanumericName, message: "O nome deve conter apenas letras, sem caracteres especiais proibidos." },
+    ],
     email: [
       { test: bbValidation.isRequired, message: "Informe seu email." },
-      { test: bbValidation.isEmail, message: "Email inválido." },
+      { test: bbValidation.isEmail, message: "Informe um email válido." },
     ],
     telefone: [
       { test: bbValidation.isRequired, message: "Informe seu número de telefone." },
       { test: bbValidation.isValidBrazilianPhone, message: "Informe um telefone válido com DDD (ex: (11) 99999-9999)." },
     ],
-    senha: [{ test: (v) => bbValidation.minLength(v, 6), message: "Senha deve ter ao menos 6 caracteres." }],
+    senha: [
+      { test: bbValidation.isRequired, message: "Informe sua senha." },
+      { test: (v) => bbValidation.minLength(v, 8), message: "A senha deve ter no mínimo 8 caracteres." },
+      { test: (v) => /[A-Z]/.test(v || ""), message: "A senha deve conter ao menos uma letra maiúscula." },
+      { test: (v) => /[a-z]/.test(v || ""), message: "A senha deve conter ao menos uma letra minúscula." },
+      { test: (v) => /[0-9]/.test(v || ""), message: "A senha deve conter ao menos um número." },
+      { test: (v) => /[^A-Za-z0-9]/.test(v || ""), message: "A senha deve conter ao menos um caractere especial (ex: @, #, $, !)." },
+    ],
     confirmar_senha: [
+      { test: bbValidation.isRequired, message: "Confirme sua senha." },
       { test: (v, all) => bbValidation.passwordsMatch(v, all.senha), message: "As senhas não coincidem." },
     ],
   });
@@ -162,7 +174,7 @@ bbRegisterForm.addEventListener("submit", async (event) => {
   try {
     await authService.register({
       nome: data.nome,
-      email: data.email,
+      email: data.email.toLowerCase(),
       telefone: data.telefone.replace(/\D/g, ""),
       password: data.senha,
       tipo: "PF",
@@ -177,6 +189,11 @@ bbRegisterForm.addEventListener("submit", async (event) => {
     // Trata erros de campo retornados pelo backend (DRF)
     let handledField = false;
     if (err.payload && typeof err.payload === "object") {
+      if (err.payload.nome) {
+        const msg = Array.isArray(err.payload.nome) ? err.payload.nome.join(" ") : String(err.payload.nome);
+        bbShowFieldError("nome", msg);
+        handledField = true;
+      }
       if (err.payload.telefone) {
         const msg = Array.isArray(err.payload.telefone) ? err.payload.telefone.join(" ") : String(err.payload.telefone);
         bbShowFieldError("telefone", msg);

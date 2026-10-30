@@ -25,7 +25,6 @@ RUN chmod +x /entrypoint.sh && sed -i 's/\r$//' /entrypoint.sh
 COPY . /app/
 RUN chmod +x /app/entrypoint.sh && sed -i 's/\r$//' /app/entrypoint.sh
 
-EXPOSE 8000
-
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+
