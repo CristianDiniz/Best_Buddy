@@ -16,8 +16,12 @@ class NoCacheHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Expires', '0')
         super().end_headers()
 
+class ThreadingHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+    request_queue_size = 128
+
 if __name__ == '__main__':
-    socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(('127.0.0.1', PORT), NoCacheHTTPRequestHandler) as httpd:
+    with ThreadingHTTPServer(('127.0.0.1', PORT), NoCacheHTTPRequestHandler) as httpd:
         print(f"Servidor frontend ativo em http://127.0.0.1:{PORT} (Cache desabilitado)")
         httpd.serve_forever()

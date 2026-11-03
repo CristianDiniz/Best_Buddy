@@ -1,5 +1,5 @@
-bbRenderNavigation("#bb-nav", "adoption");
-bbRenderFooter("#bb-footer");
+if (typeof bbRenderNavigation === "function") bbRenderNavigation("#bb-nav", "adoption");
+if (typeof bbRenderFooter === "function") bbRenderFooter("#bb-footer");
 
 const bbAnimalId = new URLSearchParams(window.location.search).get("animal_id");
 const bbSummaryEl = document.getElementById("bb-animal-summary");

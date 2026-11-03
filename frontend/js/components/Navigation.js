@@ -76,7 +76,9 @@ function bbRenderNavigation(targetSelector, activePage) {
     }
   });
 
-  bbInitHeaderScrollEffect(el.querySelector(".bb-header"));
+  if (typeof bbInitHeaderScrollEffect === "function") {
+    bbInitHeaderScrollEffect(el.querySelector(".bb-header"));
+  }
 
   if (!window._bbNavAuthListenerAttached) {
     window._bbNavAuthListenerAttached = true;

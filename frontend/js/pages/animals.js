@@ -1,5 +1,5 @@
-bbRenderNavigation("#bb-nav", "animals");
-bbRenderFooter("#bb-footer");
+if (typeof bbRenderNavigation === "function") bbRenderNavigation("#bb-nav", "animals");
+if (typeof bbRenderFooter === "function") bbRenderFooter("#bb-footer");
 
 // Elementos principais
 const bbLostGridEl = document.getElementById("bb-lost-grid");
