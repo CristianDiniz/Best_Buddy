@@ -79,7 +79,7 @@ bbLoginForm.addEventListener("submit", async (event) => {
   const consentGiven = (checkboxEl && checkboxEl.checked) || bbHasCookieConsent();
 
   if (!consentGiven) {
-    const errorMsg = "Para poder utilizar este recurso, precisamos que aceite os termos de cookies e armazenamento.";
+    const errorMsg = "Para poder utilizar este recurso, precisamos que aceite os termos de uso e armazenamento.";
     const errorEl = document.getElementById("cookie-consent-error");
     if (errorEl) {
       errorEl.textContent = errorMsg;
