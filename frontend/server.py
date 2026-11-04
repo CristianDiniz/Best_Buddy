@@ -17,11 +17,15 @@ class NoCacheHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Expires', '0')
         super().end_headers()
 
+class ThreadingHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+    request_queue_size = 128
+
 if __name__ == '__main__':
     port = int(sys.argv[1]) if len(sys.argv) > 1 else PORT
-    socketserver.TCPServer.allow_reuse_address = True
     print(f"[*] Best Buddy - Frontend Server rodando em http://localhost:{port}/ com Cache Desativado")
-    with socketserver.TCPServer(("", port), NoCacheHTTPRequestHandler) as httpd:
+    with ThreadingHTTPServer(("", port), NoCacheHTTPRequestHandler) as httpd:
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:

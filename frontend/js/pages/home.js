@@ -1,6 +1,12 @@
-bbRenderNavigation("#bb-nav", "home");
-bbRenderFooter("#bb-footer");
-bbRenderHeroCarousel("#bb-hero");
+if (typeof bbRenderNavigation === "function") {
+  bbRenderNavigation("#bb-nav", "home");
+}
+if (typeof bbRenderFooter === "function") {
+  bbRenderFooter("#bb-footer");
+}
+if (typeof bbRenderHeroCarousel === "function") {
+  bbRenderHeroCarousel("#bb-hero");
+}
 
 const bbHomePetsEl = document.getElementById("bb-home-pets");
 const bbHomeFiltersEl = document.getElementById("bb-home-filters");
