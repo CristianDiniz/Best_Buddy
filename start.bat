@@ -50,7 +50,7 @@ echo [+] [1/5] Ambiente virtual venv detectado.
 call "%~dp0venv\Scripts\activate.bat"
 
 :: 3. VERIFICAR/INSTALAR DEPENDENCIAS (PIP)
-python -c "import django" >nul 2>&1
+python -c "import django, onnxruntime" >nul 2>&1
 if not errorlevel 1 goto deps_ready
 echo [*] [2/5] Instalando dependencias do requirements.txt...
 pip install -r "%~dp0requirements.txt"
@@ -63,7 +63,7 @@ echo [+] Dependencias instaladas com sucesso!
 goto deps_done
 
 :deps_ready
-echo [+] [2/5] Dependencias Django, DRF e IA prontas.
+echo [+] [2/5] Dependencias Django, DRF e ONNX Runtime prontas.
 
 :deps_done
 

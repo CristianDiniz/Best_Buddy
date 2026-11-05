@@ -22,6 +22,7 @@ staticfiles/
 vault/assets/
 *.pt
 *.onnx
+!yolov8n.onnx
 *.h5
 
 # Environment variables
