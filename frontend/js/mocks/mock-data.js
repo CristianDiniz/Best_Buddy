@@ -123,5 +123,23 @@ const BB_MOCK_ANIMALS = [
     descricao: "Filhotinha resgatada, cheia de energia e muito carinhosa.",
     status: "DISPONIVEL",
     imagem: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: 7,
+    nome: "Pipoca",
+    tipo_servico: "ADOCAO",
+    tipo_animal: "CACHORRO",
+    raca: "Beagle",
+    sexo: "M",
+    porte: "Médio",
+    idade_aproximada: "2 anos",
+    cidade: "São Carlos",
+    estado: "SP",
+    telefone_contato: "(16) 93333-0007",
+    medicamento: "Não",
+    castrado: "Sim",
+    descricao: "Encontrou uma família maravilhosa e agora tem um lar cheio de carinho!",
+    status: "ADOTADO",
+    imagem: "https://images.unsplash.com/photo-1505628346881-b72b27e84530?auto=format&fit=crop&w=600&q=80"
   }
 ];

@@ -20,7 +20,7 @@ def run_tests():
     res_reg = client.post('/api/usuarios/register/', {
         'nome': 'Novo Usuário',
         'email': 'novo_sem_cpf@teste.com',
-        'password': 'password123',
+        'password': 'SenhaForte@123',
         'telefone': '11988887777',
         'tipo': 'PF'
     }, format='json')
@@ -34,7 +34,7 @@ def run_tests():
     res_dup = client.post('/api/usuarios/register/', {
         'nome': 'Outro Usuário',
         'email': 'outro_com_mesmo_tel@teste.com',
-        'password': 'password123',
+        'password': 'SenhaForte@123',
         'telefone': '11988887777',
         'tipo': 'PF'
     }, format='json')
@@ -113,11 +113,19 @@ def run_tests():
     }, format='json')
     assert res_err.status_code == 400, "Deveria barrar senha incorreta"
 
-    # Tentativa com senha correta
-    res_pwd = client.post('/api/usuarios/alterar-senha/', {
+    # Tentativa com senha fraca (< 8 caracteres ou sem letras/números) - deve ser barrada
+    res_weak = client.post('/api/usuarios/alterar-senha/', {
         'senha_atual': '123456',
         'nova_senha': '123456',
         'confirmar_nova_senha': '123456'
+    }, format='json')
+    assert res_weak.status_code == 400, "Deveria barrar senha que não cumpre critérios (mínimo 8 caracteres, letras e números)"
+
+    # Tentativa com senha correta e forte (8+ chars com letras e números)
+    res_pwd = client.post('/api/usuarios/alterar-senha/', {
+        'senha_atual': '123456',
+        'nova_senha': 'SenhaForte123',
+        'confirmar_nova_senha': 'SenhaForte123'
     }, format='json')
     assert res_pwd.status_code == 200
     print("OK! Senha alterada e validada com sucesso.")
@@ -129,7 +137,7 @@ def run_tests():
 
     res_email = client.post('/api/usuarios/alterar-email/', {
         'novo_email': test_email,
-        'senha_atual': '123456'
+        'senha_atual': 'SenhaForte123'
     }, format='json')
     assert res_email.status_code == 200, f"Falha ao solicitar alteração de email: {res_email.data}"
     token_email = res_email.data.get('token_dev')
@@ -140,9 +148,10 @@ def run_tests():
     assert res_conf.status_code == 200, f"Falha ao confirmar email: {res_conf.data}"
     print(f"OK! E-mail confirmado com sucesso: {res_conf.data['email']}")
 
-    # Restaura o email original para manter consistência
+    # Restaura o email e senha originais para manter consistência
     u = Usuario.objects.get(pk=user_id)
     u.email = 'usuario@bestbuddy.com'
+    u.set_password('123456')
     u.save()
 
     # 6. Listagem de Animais (Tabela Unificada)
@@ -373,6 +382,19 @@ def run_tests():
 
     tutor_mgmt.delete()
     outro_user.delete()
+
+    # 15. Testando Estatísticas e Exclusão de Animais Adotados
+    print("\n15. Testando GET /api/animais/estatisticas/ e ?exclude_status=ADOTADO ...")
+    res_stats = client.get('/api/animais/estatisticas/')
+    assert res_stats.status_code == 200
+    assert 'total_adotados' in res_stats.data
+    assert 'total_disponiveis' in res_stats.data
+    print(f"OK! Estatísticas retornadas com sucesso: {res_stats.data}")
+
+    res_excl = client.get('/api/animais/?exclude_status=ADOTADO')
+    assert res_excl.status_code == 200
+    assert not any(p['status'] == 'ADOTADO' for p in res_excl.data)
+    print("OK! Animais adotados removidos com sucesso da lista com exclude_status=ADOTADO.")
 
     print("\n=== TODOS OS TESTES PASSARAM COM SUCESSO! ===")
 

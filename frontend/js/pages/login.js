@@ -13,7 +13,7 @@ const bbConsentError = document.getElementById("cookie-consent-error");
 
 function bbHasCookieConsent() {
   const c = localStorage.getItem("bb_cookie_consent");
-  return c === "accepted" || c === "true";
+  return c === "accepted" || c === "necessary" || c === "true";
 }
 
 // Sincroniza o checkbox com o status atual de consentimento
@@ -79,7 +79,7 @@ bbLoginForm.addEventListener("submit", async (event) => {
   const consentGiven = (checkboxEl && checkboxEl.checked) || bbHasCookieConsent();
 
   if (!consentGiven) {
-    const errorMsg = "Para poder utilizar este recurso, precisamos que aceite os termos de cookies e armazenamento.";
+    const errorMsg = "Para poder utilizar este recurso, precisamos que aceite os termos de uso e armazenamento.";
     const errorEl = document.getElementById("cookie-consent-error");
     if (errorEl) {
       errorEl.textContent = errorMsg;

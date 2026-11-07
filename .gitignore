@@ -1,13 +1,43 @@
-node_modules/
-old/
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Django
+*.log
+logs/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# AI / Models
 vault/assets/
 *.pt
 *.onnx
 *.h5
-logs/
-*.log
-media/
-venv/
+
+# Environment variables
 .env
+.env.*
+!.env.example
+
+# Node / Frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Old / Legacy
+old/
+
+# IDE / OS
+.DS_Store
+Thumbs.db

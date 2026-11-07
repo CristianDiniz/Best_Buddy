@@ -192,12 +192,14 @@ const bbClickLimiter = {
   autoProtectAll(options = {}) {
     if (typeof document === "undefined") return;
 
-    const selector = options.selector || "button[type='submit'], .bb-btn--primary, .bb-btn--secondary, form button";
+    // Protege apenas botões de submissão de formulários para evitar spam/repetição,
+    // nunca botões comuns de interface (type="button") ou links de navegação.
+    const selector = options.selector || "button[type='submit'], input[type='submit'], form button:not([type])";
     const buttons = document.querySelectorAll(selector);
 
     buttons.forEach((btn, index) => {
-      // Ignora botões de fechar, cancelar ou expressamente desmarcados com data-no-limit
-      if (btn.matches("[data-no-limit], .modal-close, [title='Fechar'], [title='Limpar filtros'], #modal-adopt-cancel-btn, #modal-adopt-close-btn, #btn-remove-avatar")) {
+      // Ignora links normais, abas, botões de modal ou expressamente desmarcados com data-no-limit
+      if (btn.tagName === "A" || btn.type === "button" || btn.matches("a, [data-no-limit], .modal-close")) {
         return;
       }
 
