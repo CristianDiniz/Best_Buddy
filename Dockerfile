@@ -17,7 +17,9 @@ RUN sed -i 's|http://|https://|g' /etc/apt/sources.list.d/debian.sources 2>/dev/
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+# Instala PyTorch CPU primeiro (reduz download de ~1GB para ~180MB e evita estouro de timeout no Docker)
+RUN pip install --no-cache-dir --default-timeout=1000 torch torchvision --index-url https://download.pytorch.org/whl/cpu
+RUN pip install --no-cache-dir --default-timeout=1000 --retries 10 -r requirements.txt
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh && sed -i 's/\r$//' /entrypoint.sh
