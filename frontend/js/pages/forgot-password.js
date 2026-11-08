@@ -65,7 +65,7 @@ bbConfirmForm.addEventListener("submit", async (event) => {
     return;
   }
   if (!bbValidation.isStrongPassword(novaSenha)) {
-    document.getElementById("nova-senha-error").textContent = "A senha deve ter no mínimo 8 caracteres e conter pelo menos uma letra e um número.";
+    document.getElementById("nova-senha-error").textContent = "A senha deve ter no mínimo 8 caracteres, contendo letra maiúscula, minúscula, número e caractere especial.";
     return;
   }
 

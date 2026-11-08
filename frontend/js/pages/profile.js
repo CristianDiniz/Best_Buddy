@@ -215,12 +215,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (btnSendWhatsappCode) {
     whatsappLimiter = typeof bbClickLimiter !== "undefined"
       ? bbClickLimiter.attach(btnSendWhatsappCode, {
-          storageKey: "whatsapp_send_code",
-          blockedText: "Aguarde {s}s para reenviar",
-          onUnlocked: () => {
-            if (btnSendWhatsappCode) btnSendWhatsappCode.textContent = "Reenviar Código";
-          }
-        })
+        storageKey: "whatsapp_send_code",
+        blockedText: "Aguarde {s}s para reenviar",
+        onUnlocked: () => {
+          if (btnSendWhatsappCode) btnSendWhatsappCode.textContent = "Reenviar Código";
+        }
+      })
       : null;
 
     btnSendWhatsappCode.addEventListener("click", async () => {
@@ -444,7 +444,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           ],
           "new-password": [
             { test: bbValidation.isRequired, message: "Informe a nova senha." },
-            { test: bbValidation.isStrongPassword, message: "A nova senha deve ter no mínimo 8 caracteres e conter pelo menos uma letra e um número." },
+            { test: bbValidation.isStrongPassword, message: "A nova senha deve ter no mínimo 8 caracteres, contendo letra maiúscula, minúscula, número e caractere especial." },
           ],
           "confirm-new-password": [
             { test: bbValidation.isRequired, message: "Confirme a nova senha." },
