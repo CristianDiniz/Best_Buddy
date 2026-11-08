@@ -53,14 +53,14 @@ class UsuarioAuthTests(TestCase):
         self.assertIn("nome", res_curto.data)
 
     def test_registro_falha_senha_fraca(self):
-        senhas_fracas = [
-            "Abc@1",            # Menos de 8 caracteres
-            "senhademais@123",  # Sem maiúscula
-            "SENHADEMAIS@123",  # Sem minúscula
-            "SenhaForteSemNum!",# Sem número
-            "SenhaForte12345",  # Sem caractere especial
+        casos_invalidos = [
+            ("Abc@1", "mínimo 8 caracteres"),            # Menos de 8 caracteres
+            ("senhademais@123", "letra maiúscula"),      # Sem maiúscula
+            ("SENHADEMAIS@123", "letra minúscula"),      # Sem minúscula
+            ("SenhaForteSemNum!", "um número"),          # Sem número
+            ("SenhaForte12345", "caractere especial"),   # Sem caractere especial
         ]
-        for idx, senha in enumerate(senhas_fracas):
+        for idx, (senha, trecho_esperado) in enumerate(casos_invalidos):
             payload = {
                 "nome": f"Teste Senha {idx}",
                 "email": f"teste_pwd_{idx}@teste.com",
@@ -71,6 +71,7 @@ class UsuarioAuthTests(TestCase):
             res = self.client.post(self.register_url, payload, format="json")
             self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST, f"Senha '{senha}' deveria ser rejeitada")
             self.assertIn("password", res.data)
+            self.assertIn(trecho_esperado, str(res.data["password"][0]))
 
     def test_bloqueio_telefone_duplicado_no_registro(self):
         Usuario.objects.create_user(
@@ -237,4 +238,76 @@ class UsuarioAuthTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
         # Conta da vítima permanece intacta
         self.assertTrue(Usuario.objects.filter(id=vitima.id).exists())
+
+    def test_alterar_senha_valida_todos_criterios_senha_forte(self):
+        user = Usuario.objects.create_user(
+            email="alterar_pwd@teste.com",
+            password="SenhaAtual@123",
+            telefone="11922221111",
+            tipo="PF"
+        )
+        self.client.force_authenticate(user=user)
+
+        casos_invalidos = [
+            ("Abc@1", "mínimo 8 caracteres"),
+            ("senhademais@123", "letra maiúscula"),
+            ("SENHADEMAIS@123", "letra minúscula"),
+            ("SenhaForteSemNum!", "um número"),
+            ("SenhaForte12345", "caractere especial"),
+        ]
+
+        for senha_fraca, trecho_esperado in casos_invalidos:
+            res = self.client.post("/api/usuarios/alterar-senha/", {
+                "senha_atual": "SenhaAtual@123",
+                "nova_senha": senha_fraca,
+                "confirmar_nova_senha": senha_fraca,
+            }, format="json")
+            self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST, f"Deveria rejeitar '{senha_fraca}'")
+            self.assertIn("nova_senha", res.data)
+            self.assertIn(trecho_esperado, str(res.data["nova_senha"][0]))
+
+        # Caso de sucesso com senha forte válida
+        res_ok = self.client.post("/api/usuarios/alterar-senha/", {
+            "senha_atual": "SenhaAtual@123",
+            "nova_senha": "NovaSenha@456",
+            "confirmar_nova_senha": "NovaSenha@456",
+        }, format="json")
+        self.assertEqual(res_ok.status_code, status.HTTP_200_OK)
+
+    def test_redefinir_senha_valida_todos_criterios_senha_forte(self):
+        from django.core import signing
+
+        user = Usuario.objects.create_user(
+            email="redefinir_pwd@teste.com",
+            password="SenhaAntiga@123",
+            telefone="11911110000",
+            tipo="PF"
+        )
+        token = signing.dumps({"user_id": user.id, "email": user.email}, salt="recuperar-senha")
+
+        casos_invalidos = [
+            ("Abc@1", "mínimo 8 caracteres"),
+            ("senhademais@123", "letra maiúscula"),
+            ("SENHADEMAIS@123", "letra minúscula"),
+            ("SenhaForteSemNum!", "um número"),
+            ("SenhaForte12345", "caractere especial"),
+        ]
+
+        for senha_fraca, trecho_esperado in casos_invalidos:
+            res = self.client.post("/api/usuarios/redefinir-senha/", {
+                "token": token,
+                "nova_senha": senha_fraca,
+                "confirmar_nova_senha": senha_fraca,
+            }, format="json")
+            self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST, f"Deveria rejeitar '{senha_fraca}'")
+            self.assertIn("nova_senha", res.data)
+            self.assertIn(trecho_esperado, str(res.data["nova_senha"][0]))
+
+        # Caso de sucesso com senha forte válida
+        res_ok = self.client.post("/api/usuarios/redefinir-senha/", {
+            "token": token,
+            "nova_senha": "SenhaRedefinida#789",
+            "confirmar_nova_senha": "SenhaRedefinida#789",
+        }, format="json")
+        self.assertEqual(res_ok.status_code, status.HTTP_200_OK)
 
