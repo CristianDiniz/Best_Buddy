@@ -35,7 +35,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
             "termos_aceitos_em",
             "versao_termos",
         ]
-        read_only_fields = ["id", "telefone_validado", "created_at", "termos_aceitos_em", "versao_termos"]
+        read_only_fields = ["id", "email", "telefone", "telefone_validado", "created_at", "termos_aceitos_em", "versao_termos"]
 
 
 class PessoaFisicaSerializer(serializers.ModelSerializer):

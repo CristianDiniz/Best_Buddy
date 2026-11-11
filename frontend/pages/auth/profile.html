@@ -84,7 +84,8 @@
                 </div>
                 <input class="bb-input opacity-75 cursor-not-allowed bg-surface-800 text-ink-200" type="text"
                   id="edit-profile-name" name="edit-profile-name" placeholder="Seu nome completo" readonly disabled />
-                <p class="text-xs text-ink-300 mt-1">Por regras de integridade cadastral (RF04), o nome não pode ser alterado após a criação da conta.</p>
+                <p class="text-xs text-ink-300 mt-1">Por regras de integridade cadastral (RF04), o nome não pode ser
+                  alterado após a criação da conta.</p>
               </div>
 
               <button class="bb-btn bb-btn--primary" type="submit" id="btn-save-basic-profile">
@@ -127,12 +128,14 @@
                 <span>📱</span> Alterar Telefone / WhatsApp (Duplo Fator)
               </h3>
               <p class="text-xs text-ink-300 mb-3" id="whatsapp-verify-desc">
-                A alteração do telefone exige autenticação por duplo fator: digite o novo número com DDD e confirme o código enviado via WhatsApp.
+                A alteração do telefone exige autenticação por duplo fator: digite o novo número com DDD e confirme o
+                código enviado via WhatsApp.
               </p>
 
               <div class="space-y-3">
                 <div class="flex flex-col sm:flex-row gap-2">
-                  <input class="bb-input flex-1" type="tel" id="edit-profile-phone" name="edit-profile-phone" placeholder="Novo telefone (ex: (11) 99999-9999)" maxlength="15" />
+                  <input class="bb-input flex-1" type="tel" id="edit-profile-phone" name="edit-profile-phone"
+                    placeholder="Novo telefone (ex: (11) 99999-9999)" maxlength="15" />
                   <button type="button" class="bb-btn bb-btn--secondary whitespace-nowrap" id="btn-send-whatsapp-code">
                     Enviar Código via WhatsApp
                   </button>
@@ -140,9 +143,12 @@
                 <div class="bb-error-text text-xs" id="edit-profile-phone-error"></div>
 
                 <!-- 2º Fator: Digitação e Validação do Código -->
-                <div id="box-code-whatsapp" class="p-3 bg-surface-700/80 rounded-lg border border-border flex flex-col sm:flex-row gap-2 hidden animate-fade-in-down">
-                  <input class="bb-input flex-1 text-sm py-1.5" type="text" id="whatsapp-confirmation-code" placeholder="Código de 6 dígitos recebido" maxlength="6" />
-                  <button class="bb-btn bb-btn--primary text-xs py-2 px-4 whitespace-nowrap" type="button" id="btn-verify-whatsapp-code">Confirmar e Atualizar Telefone</button>
+                <div id="box-code-whatsapp"
+                  class="p-3 bg-surface-700/80 rounded-lg border border-border flex flex-col sm:flex-row gap-2 hidden animate-fade-in-down">
+                  <input class="bb-input flex-1 text-sm py-1.5" type="text" id="whatsapp-confirmation-code"
+                    placeholder="Código de 6 dígitos recebido" maxlength="6" />
+                  <button class="bb-btn bb-btn--primary text-xs py-2 px-4 whitespace-nowrap" type="button"
+                    id="btn-verify-whatsapp-code">Confirmar e Atualizar Telefone</button>
                 </div>
                 <div class="bb-error-text mt-1 text-xs" id="whatsapp-verify-error"></div>
               </div>
@@ -155,7 +161,8 @@
               <span>✉️</span> Alterar E-mail (Duplo Fator)
             </h2>
             <p class="text-xs text-ink-300 mb-4">
-              A alteração de e-mail exige duplo fator de segurança: 1º fator: confirmação da sua senha atual; 2º fator: validação por token enviado ao novo e-mail.
+              A alteração de e-mail exige duplo fator de segurança: 1º fator: confirmação da sua senha atual; 2º fator:
+              validação por token enviado ao novo e-mail.
             </p>
 
             <form id="form-change-email" class="space-y-4" novalidate>
@@ -167,7 +174,8 @@
               </div>
               <div class="bb-field">
                 <label class="bb-label" for="current-password-email">Senha Atual (1º Fator de Segurança)</label>
-                <input class="bb-input" type="password" id="current-password-email" name="current-password-email" required placeholder="Digite sua senha atual" />
+                <input class="bb-input" type="password" id="current-password-email" name="current-password-email"
+                  required placeholder="Digite sua senha atual" />
                 <div class="bb-error-text" id="current-password-email-error"></div>
               </div>
               <button class="bb-btn bb-btn--secondary" type="submit" id="btn-submit-change-email">
@@ -176,9 +184,11 @@
             </form>
 
             <!-- 2º Fator: Confirmação do Token de E-mail -->
-            <div id="box-confirm-email" class="mt-4 p-4 bg-surface-700/60 rounded-lg border border-border hidden animate-fade-in-down">
+            <div id="box-confirm-email"
+              class="mt-4 p-4 bg-surface-700/60 rounded-lg border border-border hidden animate-fade-in-down">
               <h3 class="text-sm font-semibold text-ink-100 mb-2">2º Fator: Confirmar Novo E-mail</h3>
-              <p class="text-xs text-ink-300 mb-3" id="confirm-email-instruction">Insira o token de confirmação recebido em sua caixa postal para validar a alteração:</p>
+              <p class="text-xs text-ink-300 mb-3" id="confirm-email-instruction">Insira o token de confirmação recebido
+                em sua caixa postal para validar a alteração:</p>
               <div class="flex gap-2">
                 <input class="bb-input flex-1" type="text" id="email-confirmation-token"
                   placeholder="Cole o token recebido" />
@@ -209,7 +219,7 @@
                 <div class="bb-field">
                   <label class="bb-label" for="new-password">Nova Senha</label>
                   <input class="bb-input" type="password" id="new-password" name="new-password" required minlength="8"
-                    placeholder="Mínimo 8 caracteres (letras e números)" />
+                    placeholder="Mín. 8 caracteres (maiúscula, minúscula, número e símbolo)" />
                   <div class="bb-error-text" id="new-password-error"></div>
                 </div>
                 <div class="bb-field">
