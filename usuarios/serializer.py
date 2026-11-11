@@ -5,6 +5,23 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
+REGRAS_SENHA_REGEX = [
+    (r'[A-Z]', "A senha deve conter pelo menos uma letra maiúscula."),
+    (r'[a-z]', "A senha deve conter pelo menos uma letra minúscula."),
+    (r'[0-9]', "A senha deve conter pelo menos um número."),
+    (r'[^A-Za-z0-9]', "A senha deve conter pelo menos um caractere especial."),
+]
+
+
+def validar_forca_senha(value):
+    if not value or len(value) < 8:
+        raise serializers.ValidationError("A senha deve ter no mínimo 8 caracteres.")
+    for padrao, mensagem in REGRAS_SENHA_REGEX:
+        if not re.search(padrao, value):
+            raise serializers.ValidationError(mensagem)
+    return value
+
+
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
@@ -18,7 +35,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
             "termos_aceitos_em",
             "versao_termos",
         ]
-        read_only_fields = ["id", "telefone_validado", "created_at", "termos_aceitos_em", "versao_termos"]
+        read_only_fields = ["id", "email", "telefone", "telefone_validado", "created_at", "termos_aceitos_em", "versao_termos"]
 
 
 class PessoaFisicaSerializer(serializers.ModelSerializer):
@@ -107,17 +124,7 @@ class RegisterUsuarioSerializer(serializers.Serializer):
         return value.lower()
 
     def validate_password(self, value):
-        if not value or len(value) < 8:
-            raise serializers.ValidationError("A senha deve ter no mínimo 8 caracteres.")
-        if not re.search(r'[A-Z]', value):
-            raise serializers.ValidationError("A senha deve conter pelo menos uma letra maiúscula.")
-        if not re.search(r'[a-z]', value):
-            raise serializers.ValidationError("A senha deve conter pelo menos uma letra minúscula.")
-        if not re.search(r'[0-9]', value):
-            raise serializers.ValidationError("A senha deve conter pelo menos um número.")
-        if not re.search(r'[^A-Za-z0-9]', value):
-            raise serializers.ValidationError("A senha deve conter pelo menos um caractere especial.")
-        return value
+        return validar_forca_senha(value)
 
     def validate(self, attrs):
         tipo = attrs.get("tipo", "PF")
@@ -195,11 +202,7 @@ class AlterarSenhaSerializer(serializers.Serializer):
     confirmar_nova_senha = serializers.CharField(write_only=True)
 
     def validate_nova_senha(self, value):
-        if len(value) < 8:
-            raise serializers.ValidationError("A nova senha deve ter no mínimo 8 caracteres.")
-        if not re.search(r'[A-Za-z]', value) or not re.search(r'[0-9]', value):
-            raise serializers.ValidationError("A nova senha deve conter ao menos uma letra e um número.")
-        return value
+        return validar_forca_senha(value)
 
     def validate(self, attrs):
         if attrs["nova_senha"] != attrs["confirmar_nova_senha"]:
@@ -235,11 +238,7 @@ class RedefinirSenhaSerializer(serializers.Serializer):
     confirmar_nova_senha = serializers.CharField(write_only=True)
 
     def validate_nova_senha(self, value):
-        if len(value) < 8:
-            raise serializers.ValidationError("A nova senha deve ter no mínimo 8 caracteres.")
-        if not re.search(r'[A-Za-z]', value) or not re.search(r'[0-9]', value):
-            raise serializers.ValidationError("A nova senha deve conter ao menos uma letra e um número.")
-        return value
+        return validar_forca_senha(value)
 
     def validate(self, attrs):
         if attrs["nova_senha"] != attrs["confirmar_nova_senha"]:
