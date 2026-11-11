@@ -46,8 +46,8 @@ if exist "%~dp0.venv\Scripts\activate.bat" (
     goto check_deps
 )
 
-:: Se o Python do sistema ja possui Django + DRF + Ultralytics instalados, reutiliza direto
-"%PYTHON_CMD%" -c "import django, rest_framework, ultralytics" >nul 2>&1
+:: Se o Python do sistema ja possui Django + DRF + ONNX Runtime instalados, reutiliza direto
+"%PYTHON_CMD%" -c "import django, rest_framework, onnxruntime" >nul 2>&1
 if not errorlevel 1 (
     echo [+] [1/5] Ambiente Python global ja possui todas as dependencias prontas.
     goto deps_ready
@@ -66,7 +66,7 @@ echo [+] Ambiente virtual venv criado com sucesso!
 
 :check_deps
 :: 3. VERIFICAR COMPILADOR C++ E INSTALAR DEPENDENCIAS (PIP)
-python -c "import django, rest_framework" >nul 2>&1
+python -c "import django, rest_framework, onnxruntime" >nul 2>&1
 if not errorlevel 1 goto deps_ready
 
 echo [*] Verificando Microsoft Visual C++ Build Tools para pacotes nativos...
@@ -86,8 +86,7 @@ if "!HAS_CPP!"=="1" (
     winget install --id Microsoft.VisualStudio.2022.BuildTools -e --accept-source-agreements --accept-package-agreements --override "--passive --wait --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended" >nul 2>&1
 )
 
-echo [*] [2/5] Instalando PyTorch CPU otimizado e dependencias do requirements.txt...
-pip install --no-cache-dir --default-timeout=1000 torch torchvision --index-url https://download.pytorch.org/whl/cpu
+echo [*] [2/5] Instalando dependencias do requirements.txt...
 pip install --no-cache-dir --default-timeout=1000 -r "%~dp0requirements.txt"
 if errorlevel 1 (
     echo [!] Aviso: Falha ao compilar mysqlclient nativo. Instalando dependencias para modo SQLite + IA...
@@ -108,7 +107,7 @@ echo [+] Dependencias instaladas com sucesso!
 goto deps_done
 
 :deps_ready
-echo [+] [2/5] Dependencias Django, DRF e IA prontas.
+echo [+] [2/5] Dependencias Django, DRF e ONNX Runtime prontas.
 
 :deps_done
 
