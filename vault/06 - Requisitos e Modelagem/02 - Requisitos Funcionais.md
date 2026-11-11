@@ -53,10 +53,24 @@ Este documento cataloga os Requisitos Funcionais do sistema **Best Buddy**, orga
   - **Tipo de animal:** Cachorro, Gato, Outro.
 
 ### `RF07` — Cadastro de Pet para Adoção
-* **Descrição:** Formulário para usuário logado anunciar um animal para adoção (`tipo_servico='ADOCAO'`):
+* **Descrição:** Formulário estruturado em etapas (abas) para o usuário autenticado anunciar um animal para adoção (`tipo_servico='ADOCAO'`), organizado na mesma ordem dos campos da interface:
   - **Pré-requisito:** Usuário deve estar autenticado.
-  - **Campos Obrigatórios:** Foto do animal (anexo PNG ou JPG), tipo de animal (`CACHORRO`, `GATO`, `OUTRO`), cidade, estado (UF), descrição (máx. 255 caracteres) e telefone de contato (preenchido automaticamente caso o usuário já possua número no perfil, ou disponibilizado para digitação caso contrário).
-  - **Campos Opcionais:** Nome, raça, sexo (`M`, `F`, `I`), idade aproximada (`Filhote`, `Adulto`, `Idoso`), medicação (`Sim`, `Não`, `Não sei`), vacinação (`Sim`, `Não`, `Não sei`).
+  - **Etapa 1 — Sobre o Pet:**
+    - `tipo_servico`: Obrigatório, finalidade do anúncio (`ADOCAO` ou `PERDIDO`).
+    - `nome`: Obrigatório, nome do animal (texto).
+    - `tipo_animal`: Obrigatório, categoria do pet (`CACHORRO`, `GATO`, `OUTRO`).
+    - `sexo`: Obrigatório (`M` para Macho, `F` para Fêmea, `I` para Indeterminado).
+    - `raca`: Opcional, raça do pet (texto).
+    - `idade_aproximada`: Opcional (`Filhote`, `Adulto`, `Idoso`).
+    - `descricao`: Obrigatório, temperamento e características (máx. 255 caracteres).
+  - **Etapa 2 — Local & Contato:**
+    - `estado`: Obrigatório, Estado / UF (select com lista oficial do IBGE).
+    - `cidade`: Obrigatório, Cidade (com autocompletar baseado na UF).
+    - `telefone_contato`: Obrigatório, telefone/WhatsApp de contato (vinculado e carregado automaticamente do perfil do tutor autenticado).
+  - **Etapa 3 — Saúde & Foto:**
+    - `castrado`: Opcional (`Sim`, `Não`, `Não sei`).
+    - `medicamento`: Opcional, uso contínuo de medicamentos (`Sim`, `Não`, `Não sei`).
+    - `imagem`: Obrigatório, foto principal do pet (anexo em formato JPEG, PNG ou WebP de até 15 MB, validada por IA e otimizada automaticamente).
 
 ### `RF08` — Vínculo de Propriedade e Contato Flexível
 * **Descrição:** Todo animal cadastrado é associado automaticamente à chave estrangeira `tutor_id` do anunciante logado. A definição do telefone de contato do anúncio segue a regra:

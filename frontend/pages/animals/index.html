@@ -118,7 +118,8 @@
             <!-- Filtros: Buscar por (Serviço), Estado, Cidade e Tipo de Animal -->
             <div class="flex flex-wrap items-center gap-3">
               <div>
-                <select id="filter-buscar-por" class="bb-input text-xs md:text-sm py-2 font-medium" aria-label="Buscar por">
+                <select id="filter-buscar-por" class="bb-input text-xs md:text-sm py-2 font-medium"
+                  aria-label="Buscar por">
                   <option value="">Buscar por: Todos</option>
                   <option value="ADOCAO">🐾 Buscar por: Adoção</option>
                   <option value="PERDIDO">🚨 Buscar por: Animais Perdidos</option>
@@ -316,7 +317,7 @@
           </button>
         </div>
 
-        <form id="form-adopt-pet">
+        <form id="form-adopt-pet" style="display: contents;">
           <div class="bb-modal-body bb-edit-body">
             <div id="modal-adopt-alert"></div>
 
@@ -356,6 +357,7 @@
                   <div>
                     <label class="bb-label" for="pet-sexo">Sexo <span class="bb-edit-required">*</span></label>
                     <select class="bb-input" id="pet-sexo" required>
+                      <option value="" selected disabled>Selecione...</option>
                       <option value="M">Macho</option>
                       <option value="F">Fêmea</option>
                       <option value="I">Indeterminado</option>
@@ -601,12 +603,13 @@
               </div>
 
               <div class="bb-edit-field">
-                <span class="bb-label">Sexo</span>
-                <div class="bb-edit-segmented" id="edit-sexo-group">
-                  <label><input type="radio" name="edit-sexo" value="M" /><span>♂ Macho</span></label>
-                  <label><input type="radio" name="edit-sexo" value="F" /><span>♀ Fêmea</span></label>
-                  <label><input type="radio" name="edit-sexo" value="I" /><span>Não sei</span></label>
-                </div>
+                <label class="bb-label" for="edit-sexo">Sexo <span class="bb-edit-required">*</span></label>
+                <select class="bb-input" id="edit-sexo" name="edit-sexo" required>
+                  <option value="" selected disabled>Selecione...</option>
+                  <option value="M">Macho</option>
+                  <option value="F">Fêmea</option>
+                  <option value="I">Indeterminado</option>
+                </select>
               </div>
 
               <div class="bb-modal-grid-2 bb-edit-field">

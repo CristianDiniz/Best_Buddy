@@ -77,12 +77,13 @@
               </div>
 
               <div class="bb-edit-field">
-                <span class="bb-label">Sexo</span>
-                <div class="bb-edit-segmented" id="edit-sexo-group">
-                  <label><input type="radio" name="edit-sexo" value="M" /><span>♂ Macho</span></label>
-                  <label><input type="radio" name="edit-sexo" value="F" /><span>♀ Fêmea</span></label>
-                  <label><input type="radio" name="edit-sexo" value="I" /><span>Não sei</span></label>
-                </div>
+                <label class="bb-label" for="edit-sexo">Sexo <span class="bb-edit-required">*</span></label>
+                <select class="bb-input" id="edit-sexo" name="edit-sexo" required>
+                  <option value="" selected disabled>Selecione...</option>
+                  <option value="M">Macho</option>
+                  <option value="F">Fêmea</option>
+                  <option value="I">Indeterminado</option>
+                </select>
               </div>
 
               <div class="bb-modal-grid-2 bb-edit-field">
