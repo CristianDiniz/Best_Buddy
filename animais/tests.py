@@ -135,12 +135,12 @@ class AnimaisSerializerValidationTests(TestCase):
         buf.seek(0)
         img_file = SimpleUploadedFile("pet.jpg", buf.getvalue(), content_type="image/jpeg")
         serializer = AnimaisSerializer(data={
-
             "nome": "Rex",
             "tipo_servico": "ADOCAO",
             "tipo_animal": "CACHORRO",
             "estado": "SP",
             "cidade": "Campinas",
+            "descricao": "Cachorro dócil e vacinado.",
             "telefone_contato": "11988887777",
             "imagem": img_file
         })
@@ -157,11 +157,27 @@ class AnimaisSerializerValidationTests(TestCase):
             "tipo_animal": "GATO",
             "estado": "SP",
             "cidade": "Santos",
+            "descricao": "Gatinha muito carinhosa.",
             "telefone_contato": "11988887777"
         })
         self.assertFalse(serializer.is_valid())
         self.assertIn("imagem", serializer.errors)
         self.assertIn("A foto do animal é obrigatória para publicar o anúncio.", str(serializer.errors["imagem"]))
+
+    def test_serializer_exige_local_quando_perdido(self):
+        """Ao registrar um animal perdido (tipo_servico='PERDIDO'), o campo local deve ser obrigatório."""
+        serializer = AnimaisSerializer(data={
+            "nome": "Bolt",
+            "tipo_servico": "PERDIDO",
+            "tipo_animal": "CACHORRO",
+            "estado": "SP",
+            "cidade": "São Paulo",
+            "descricao": "Fugiu com coleira azul.",
+            "telefone_contato": "11988887777"
+        })
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("local", serializer.errors)
+        self.assertIn("Informe o último local onde o animal foi visto", str(serializer.errors["local"]))
 
     def test_serializer_permite_edicao_sem_reenviar_foto(self):
         """Ao editar um animal que já possui foto, não é necessário enviar o arquivo novamente."""
@@ -171,6 +187,7 @@ class AnimaisSerializerValidationTests(TestCase):
             tipo_animal=Animal.TipoAnimal.CACHORRO,
             estado=Animal.Estado.SP,
             cidade="Campinas",
+            descricao="Cão amigável.",
             telefone_contato="11988887777",
             imagem="animais/bidu.webp"
         )
@@ -215,6 +232,7 @@ class AnimaisAPITests(TestCase):
             tipo_animal=Animal.TipoAnimal.CACHORRO,
             estado=Animal.Estado.SP,
             cidade="São Paulo",
+            descricao="Cão dócil.",
             telefone_contato="11988887777"
         )
         res = self.client.get("/api/animais/")
@@ -236,6 +254,7 @@ class AnimaisAPITests(TestCase):
             "tipo_animal": "CACHORRO",
             "estado": "SP",
             "cidade": "Campinas",
+            "descricao": "Cachorro muito brincalhão e dócil.",
             "telefone_contato": "11988887777",
             "sexo": "M",
             "imagem": img_file
@@ -252,6 +271,7 @@ class AnimaisAPITests(TestCase):
             "tipo_animal": "GATO",
             "estado": "SP",
             "cidade": "Santos",
+            "descricao": "Gato dócil.",
             "telefone_contato": "11988887777"
         }
         res = self.client.post("/api/animais/", payload, format="json")
@@ -267,6 +287,7 @@ class AnimaisAPITests(TestCase):
                 tipo_animal=Animal.TipoAnimal.CACHORRO,
                 estado=Animal.Estado.SP,
                 cidade="São Paulo",
+                descricao="Pet para adoção.",
                 telefone_contato="11988887777",
                 status=Animal.StatusAnimal.DISPONIVEL
             )
@@ -277,6 +298,7 @@ class AnimaisAPITests(TestCase):
             "tipo_animal": "CACHORRO",
             "estado": "SP",
             "cidade": "São Paulo",
+            "descricao": "Pet excedente da cota.",
             "telefone_contato": "11988887777"
         }
         res = self.client.post("/api/animais/", payload, format="json")
@@ -291,6 +313,7 @@ class AnimaisAPITests(TestCase):
             tipo_animal=Animal.TipoAnimal.CACHORRO,
             estado=Animal.Estado.SP,
             cidade="Campinas",
+            descricao="Cão protetor.",
             telefone_contato="11988887777"
         )
         # Outro usuário tenta editar
