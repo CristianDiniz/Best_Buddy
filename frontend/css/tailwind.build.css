@@ -10,11 +10,32 @@
 .bb-auth-card{position:relative;z-index:10;width:100%;max-width:440px;margin:1.5rem auto 2.5rem auto;border-radius:1.5rem;background:rgba(255,255,255,0.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.8);box-shadow:0 25px 50px -12px rgba(0,0,0,0.4),0 0 0 1px rgba(0,0,0,0.05);padding:2rem 2.25rem;animation:scale-in 0.4s cubic-bezier(0.16,1,0.3,1) both}
 .bb-auth-footer-simple{position:relative;z-index:10;padding:1rem;text-align:center;font-size:0.75rem;color:rgba(255,255,255,0.7);text-shadow:0 1px 2px rgba(0,0,0,0.5)}
 @media (min-width:768px){.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:grid-cols-\[320px_1fr\]{grid-template-columns:320px 1fr}}
-#bb-home-pets { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 1.25rem; }
-@media (min-width: 640px) { #bb-home-pets { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 768px) { #bb-home-pets { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (min-width: 1024px) { #bb-home-pets { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-@media (min-width: 1280px) { #bb-home-pets { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+#bb-home-pets, .bb-home-carousel-strip { display: flex; flex-direction: row; flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; gap: 1.15rem; padding: 0.25rem 0.25rem 1rem 0.25rem; margin-left: -0.5rem; margin-right: -0.5rem; padding-left: 0.5rem; padding-right: 0.5rem; }
+@media (max-width: 767px) {
+  .bb-home-carousel-strip { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+  .bb-home-carousel-strip::-webkit-scrollbar { height: 5px; }
+  .bb-home-carousel-strip::-webkit-scrollbar-track { background: transparent; }
+  .bb-home-carousel-strip::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 9999px; }
+  .bb-home-carousel-strip > .bb-pet-card,
+  .bb-home-carousel-strip > .bb-animal-card,
+  .bb-home-carousel-strip > .bb-card--tight {
+    flex: 0 0 255px !important;
+    min-width: 255px !important;
+    max-width: 275px !important;
+    width: 255px !important;
+    scroll-snap-align: start;
+    scroll-snap-stop: normal;
+  }
+}
+@media (min-width: 768px) {
+  #bb-home-pets, .bb-home-carousel-strip { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow-x: visible; margin-left: 0; margin-right: 0; padding: 0; gap: 1.25rem; }
+}
+@media (min-width: 1024px) {
+  #bb-home-pets, .bb-home-carousel-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1280px) {
+  #bb-home-pets, .bb-home-carousel-strip { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
 .bb-filter-pill { transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; }
 .bb-filter-pill:hover:not(.active) { border-color: #2f8ae0; color: #16233a; transform: translateY(-1px); }
 
@@ -35,8 +56,8 @@
 .bb-adopt-btn:hover { background-color: #1a6edb; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(47, 128, 237, 0.35); }
 .bb-adopt-btn:active { transform: scale(0.98); }
 
-.bb-pets-section { margin-bottom: 5rem; }
-@media (min-width: 768px) { .bb-pets-section { margin-bottom: 7rem; } }
+.bb-pets-section { margin-bottom: 3.5rem; }
+@media (min-width: 768px) { .bb-pets-section { margin-bottom: 4.5rem; } }
 .bb-steps-section { margin-top: 5rem; margin-bottom: 6rem; }
 @media (min-width: 768px) { .bb-steps-section { margin-top: 7rem; margin-bottom: 8rem; } }
 
