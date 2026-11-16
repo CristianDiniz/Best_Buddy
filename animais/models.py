@@ -124,7 +124,7 @@ class Animal(models.Model):
         if self.tutor and self.tutor.telefone:
             return self.tutor.telefone
         return self.telefone_contato or ""
-    descricao = models.CharField(max_length=255, blank=True, null=True, verbose_name="Descrição / Informações extras")
+    descricao = models.CharField(max_length=255, verbose_name="Descrição / Informações extras")
     imagem = models.ImageField(
         upload_to='animais/',
         blank=True,
