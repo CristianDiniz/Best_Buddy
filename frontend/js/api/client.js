@@ -18,11 +18,13 @@ class BBApiError extends Error {
  */
 function bbExtractErrorMessage(data, fallback) {
   if (!data) return fallback;
+  if (typeof data.error === "string") return data.error;
   if (typeof data.detail === "string") return data.detail;
+  if (typeof data.message === "string") return data.message;
   if (typeof data === "object") {
     const parts = Object.entries(data).map(([field, msgs]) => {
       const text = Array.isArray(msgs) ? msgs.join(" ") : String(msgs);
-      return field === "non_field_errors" ? text : `${field}: ${text}`;
+      return field === "non_field_errors" || field === "error" || field === "detail" ? text : `${field}: ${text}`;
     });
     if (parts.length) return parts.join(" | ");
   }
@@ -30,10 +32,69 @@ function bbExtractErrorMessage(data, fallback) {
 }
 
 const bbClient = {
-  async request(path, { method = "GET", body, auth = true, _retry = false } = {}) {
-    const headers = { "Content-Type": "application/json" };
+  _refreshPromise: null,
+
+  async refreshAccessToken() {
+    if (this._refreshPromise) return this._refreshPromise;
+
+    this._refreshPromise = (async () => {
+      if (typeof bbStorage === "undefined") return null;
+
+      const refresh = bbStorage.getRefreshToken();
+      if (!refresh || bbStorage.isTokenExpired(refresh)) {
+        return null;
+      }
+
+      try {
+        const response = await fetch(`${window.BB_CONFIG.API_BASE_URL}/token/refresh/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refresh }),
+        });
+
+        if (!response.ok) {
+          return null;
+        }
+
+        const data = await response.json();
+        if (data && data.access) {
+          bbStorage.setAccessToken(data.access);
+          return data.access;
+        }
+      } catch (_) {
+        return null;
+      } finally {
+        this._refreshPromise = null;
+      }
+      return null;
+    })();
+
+    return this._refreshPromise;
+  },
+
+  async request(path, { method = "GET", body, auth = true, isRetry = false } = {}) {
+    const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+    const headers = {};
+    if (!isFormData) {
+      headers["Content-Type"] = "application/json";
+    }
+
     if (auth && typeof bbStorage !== "undefined") {
-      const token = bbStorage.getAccessToken();
+      let token = bbStorage.getAccessToken();
+
+      // Se o token de acesso estiver expirado, tenta renovar silenciosamente antes de disparar
+      if (token && bbStorage.isTokenExpired(token) && !isRetry) {
+        token = await this.refreshAccessToken();
+        if (!token) {
+          bbStorage.handleSessionExpired();
+          // Se for requisição GET (como listar animais públicos), tenta novamente sem auth
+          if (method === "GET") {
+            return this.request(path, { method, body, auth: false, isRetry: true });
+          }
+          throw new BBApiError("Sessão expirada. Faça login novamente.", 401, null);
+        }
+      }
+
       if (token) headers.Authorization = `Bearer ${token}`;
     }
 
@@ -42,52 +103,28 @@ const bbClient = {
       response = await fetch(`${window.BB_CONFIG.API_BASE_URL}${path}`, {
         method,
         headers,
-        body: body ? JSON.stringify(body) : undefined,
+        body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
       });
     } catch (networkError) {
       throw new BBApiError("Não foi possível conectar ao servidor.", 0, null);
     }
 
-    // Se receber 401 (token expirado/inválido) e tivermos um refresh token, tenta renovar automaticamente
-    if (response.status === 401 && auth && !_retry && typeof bbStorage !== "undefined") {
-      const refreshToken = bbStorage.getRefreshToken();
-      if (refreshToken) {
-        try {
-          const refreshRes = await fetch(`${window.BB_CONFIG.API_BASE_URL}/token/refresh/`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ refresh: refreshToken }),
-          });
-          if (refreshRes.ok) {
-            const refreshData = await refreshRes.json();
-            if (refreshData.access) {
-              const currentSession = {
-                access: refreshData.access,
-                refresh: refreshData.refresh || refreshToken,
-                user: bbStorage.getUser(),
-              };
-              bbStorage.setSession(currentSession);
-              // Repete a requisição original com o novo token de acesso
-              return this.request(path, { method, body, auth, _retry: true });
-            }
-          }
-        } catch (_) {
-          // falha no refresh
+    // Se receber 401 Unauthorized em requisição autenticada
+    if (response.status === 401 && auth && !isRetry && !path.includes("/token/")) {
+      const refreshedToken = await this.refreshAccessToken();
+      if (refreshedToken) {
+        // Tenta novamente a requisição original com o novo token
+        return this.request(path, { method, body, auth, isRetry: true });
+      } else {
+        // Refresh token expirou ou falhou: encerra a sessão e redireciona se necessário
+        if (typeof bbStorage !== "undefined") {
+          bbStorage.handleSessionExpired();
         }
-      }
-
-      // Se a sessão expirou completamente:
-      bbStorage.clearSession();
-
-      // Se for requisição GET (como listar animais públicos), tenta novamente sem auth
-      if (method === "GET") {
-        return this.request(path, { method, body, auth: false, _retry: true });
-      }
-
-      // Se for rota estritamente privada (ex: perfil), redireciona para login
-      if (window.location.pathname.includes("/profile.html")) {
-        window.location.href = `/pages/auth/login.html?next=${encodeURIComponent(window.location.pathname)}`;
-        return;
+        // Se for requisição GET pública, tenta sem auth em vez de travar a tela
+        if (method === "GET") {
+          return this.request(path, { method, body, auth: false, isRetry: true });
+        }
+        throw new BBApiError("Sua sessão expirou.", 401, null);
       }
     }
 

@@ -17,8 +17,6 @@ frontend/
 ├── index.html                     # Ponto de entrada (redireciona para home ou login)
 ├── package.json                   # Scripts de compilação do Tailwind CLI
 ├── tailwind.config.js             # Configuração de design tokens (cores, fontes, animações)
-├── API_CONTRACT.md                # Especificação dos endpoints esperados
-├── ARCHITECTURE.md                # Documentação interna arquivo por arquivo
 ├── README.md                      # Instruções de execução local
 ├── .github/
 │   └── workflows/

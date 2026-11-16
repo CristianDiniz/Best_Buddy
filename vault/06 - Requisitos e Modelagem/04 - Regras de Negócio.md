@@ -1,103 +1,75 @@
 # ⚖️ Regras de Negócio (RN)
 tags: #regras-de-negocio #rn #politicas #validacoes #best-buddy
 
-As Regras de Negócio estabelecem as diretrizes funcionais e restrições mandatórias do sistema **Best Buddy**. Elas devem ser rigorosamente validadas tanto na camada de apresentação (frontend) quanto, obrigatoriamente, na camada de persistência e validação da API (backend).
+As Regras de Negócio estabelecem as diretrizes funcionais e restrições mandatórias do sistema **Best Buddy** para o MVP. Elas devem ser rigorosamente validadas tanto na camada de apresentação (frontend) quanto, obrigatoriamente, na camada de persistência e validação da API (backend).
+
+> [!NOTE]
+> Regras relacionadas a validação Twilio WhatsApp, contas de ONG, credenciamento de serviços e sistema de denúncias foram migradas para [[08 - Implementações futuras]].
 
 ---
 
-## 📋 Catálogo de Regras de Negócio
+## 📋 Catálogo de Regras de Negócio Ativas
 
 ### `RN01` — Acesso e Navegação Pública
-* **Regra:** O visitante não autenticado tem direito pleno de navegar, filtrar e visualizar todos os cards do sistema (animais para adoção, animais perdidos, catálogo de serviços e notícias institucionais), bem como acessar o link direto para falar com o tutor via WhatsApp.
-* **Fundamentação:** O propósito da plataforma é dar máxima visibilidade aos animais que precisam de um lar e aos pets perdidos. Exigir login para visualização reduziria o alcance das adoções e resgates.
+* **Regra:** O visitante não autenticado tem direito pleno de navegar, filtrar e visualizar todos os cards do sistema (animais para adoção e animais perdidos), bem como acessar o link direto para falar com o tutor via WhatsApp.
+* **Fundamentação:** O propósito da plataforma é dar máxima visibilidade aos animais que precisam de um lar e aos pets perdidos. Exigir login para visualização reduziria drasticamente o alcance das adoções e resgates.
 
 ---
 
 ### `RN02` — Ações Ativas Exigem Autenticação
-* **Regra:** Qualquer ação ativa no sistema (anunciar animal para adoção, reportar animal perdido, solicitar serviço credenciado, pedir upgrade de ONG ou registrar denúncia) exige autenticação ativa do usuário.
-* **Comportamento:** Os botões de ação continuam visíveis para o visitante. Ao clicar deslogado, é direcionado para a tela de login/cadastro com preservação da rota de retorno.
+* **Regra:** Qualquer ação ativa no sistema (anunciar animal para adoção, reportar animal perdido) exige autenticação ativa do usuário.
+* **Comportamento:** Os botões de ação continuam visíveis para o visitante. Ao clicar deslogado, é direcionado para a tela de login/cadastro preservando a rota de retorno (`next=/...`).
 
 ---
 
-### `RN03` — Cota de 5 Animais Ativos para Usuários Comuns
-* **Regra:** Um usuário com perfil Comum só pode manter ativos simultaneamente no máximo **5 registros de animais** (somatório de anúncios para adoção com status `Disponível` e animais perdidos com status `Perdido`) na tabela unificada `Animal`.
-* **Enforcement:** Ao tentar cadastrar o 6º animal ativo, o backend retorna HTTP 400 informando que o limite foi atingido e sugerindo a solicitação de uma conta de ONG caso se trate de entidade com alto volume de animais.
+### `RN03` — Cota de 5 Animais Ativos para Usuários
+* **Regra:** Cada usuário só pode manter ativos simultaneamente no máximo **5 registros de animais** (somatório de anúncios para adoção com status `Disponível` e animais perdidos com status `Perdido`) na tabela unificada `Animal`.
+* **Enforcement:** Ao tentar cadastrar o 6º animal ativo, o backend retorna HTTP 400 informando que o limite foi atingido.
 
 ---
 
-### `RN04` — Cota Ilimitada Exclusiva para ONGs
-* **Regra:** Usuários com perfil validado de ONG (`tipo_usuario == 'ONG'`) possuem permissão para cadastrar animais para adoção e perdidos sem qualquer limitação numérica, mantendo a exigência de WhatsApp previamente validado.
-
----
-
-### `RN05` — Titularidade e Isolamento de Edição
+### `RN04` — Titularidade e Isolamento de Edição
 * **Regra:** Cada usuário possui controle exclusivo apenas sobre os registros que ele próprio criou (`registro.tutor_id == request.user.id`). Usuários comuns não podem alterar nem excluir cards de terceiros.
 
 ---
 
-### `RN06` — Validação de WhatsApp via Twilio Vinculada ao Usuário
-* **Regra:** Nenhum animal (seja adoção ou perdido) pode ser cadastrado por usuário com `telefone_validado == False`.
-* **Mecanismo:**
-  1. O usuário pode criar a conta sem número de telefone de imediato.
-  2. Para habilitar o cadastro de animais, o usuário deve informar o telefone e validá-lo via **Twilio Verify (canal WhatsApp)**.
-  3. Ao inserir o PIN correto retornado pelo WhatsApp, o número fica vinculado ao usuário e a flag `telefone_validado` é ativada (`True`).
-  4. O formulário de animal **não permite digitar outro número**: o contato público é resolvido diretamente via Chave Estrangeira com o cadastro do tutor (`animal.tutor.telefone`).
-  5. Se o tutor solicitar alteração de número no perfil, deve revalidar o novo número via Twilio. Após aprovado, o novo número substitui o anterior e reflete automaticamente em todos os anúncios de animais ativos do tutor.
-  6. Não existe tabela local de validação de WhatsApp; o serviço é integralmente gerenciado pela API Twilio Verify.
+### `RN05` — Contato Obrigatório e Adoção Direta Peer-to-Peer
+* **Regra:** 
+  1. **Telefone Obrigatório:** O anúncio de qualquer animal (seja para adoção ou perdido) **deve obrigatoriamente possuir um telefone de contato com DDD**, pois essa é a única via de contato entre interessados e anunciantes.
+  2. **Validação Bloqueante no Frontend:** O frontend valida a presença de DDD brasileiro válido (11 a 99) e tamanho total (10 a 11 dígitos numéricos). Se o campo for inválido, emite o popup `alert("É necessário um número de contato para cadastrar o animal.");` e bloqueia a submissão sem chamar a rota da API.
+  3. **Persistência no Backend:** O modelo `Animal.telefone_contato` é obrigatório. Caso uma chamada de API omita o campo, o serializer herda automaticamente o telefone cadastrado no perfil do tutor; se nenhum existir, a API rejeita com HTTP 400.
+  4. **Sem Burocracia Intermediária:** A plataforma não retém nem intermedeia propostas via formulários burocráticos internos. O interessado clica no botão "Falar com o Tutor no WhatsApp" e combina diretamente. O tutor altera o status para `Adotado` ou `Encontrado` no seu painel.
 
 ---
 
-### `RN07` — Adoção Direta Peer-to-Peer (Sem Intermediação)
-* **Regra:** A plataforma não retém nem intermedeia propostas de adoção através de formulários burocráticos internos. O interessado entra em contato diretamente com o tutor pelo WhatsApp validado. O próprio tutor avalia o adotante e, após a entrega, altera o status do animal para `Adotado` no painel.
-
----
-
-### `RN08` — Homologação em Duas Etapas para ONGs
-* **Regra:** Nenhuma conta se torna ONG de forma automática. O usuário submete formulário institucional com CNPJ, Razão Social e endereço; a solicitação entra com status `Pendente` e só é promovida a `ONG` após homologação formal da Staff.
-
----
-
-### `RN09` — Homologação em Duas Etapas para Serviços
-* **Regra:** Nenhum prestador de serviço ou clínica veterinária é publicado de imediato na vitrine. A proposta entra como `Pendente` e passa por análise da Staff no painel Django antes de se tornar `Aprovado`.
-
----
-
-### `RN10` — Restrições Operacionais Estritas da Staff
-* **Regra:** A Staff atua na moderação com limitações de segurança:
-  1. Não pode alterar dados cadastrais de serviços de outros usuários (apenas suspender ou aprovar).
-  2. Não pode alterar ou excluir contas de outros membros da Staff ou de SuperUsers.
-  3. Não visualiza colunas de auditoria (`created_at` e `updated_at`) no painel.
-
----
-
-### `RN11` — Denúncias Rastreáveis e Categorizadas
-* **Regra:** Toda denúncia exige autenticação obrigatória do denunciante (`denunciante_id NOT NULL`), seleção de categoria via Enum (Maus-tratos, Fraude/Golpe, Dados Falsos, Animal já adotado, Exercício ilegal da profissão, Spam/Ofensivo ou Outro) e justificativa textual. Alvos permitidos: `ADOCAO`, `PERDIDO`, `SERVICO` *(alvo `POST` descontinuado)*.
-
----
-
-### `RN12` — Ciclo de Vida e Expiração (90 + 30 Dias)
+### `RN06` — Ciclo de Vida e Expiração (90 + 30 Dias)
 * **Regra:** Anúncios de animais para adoção inativam-se automaticamente aos 90 dias caso não adotados. O tutor possui uma janela de 30 dias (do 91º ao 120º dia) para reativar o anúncio. Aos 120 dias, registros não reativados são permanentemente expurgados por comando automatizado.
 
 ---
 
-### `RN13` — Limite de Tamanho de Textos (255 Caracteres)
-* **Regra:** Limite máximo estrito de 255 caracteres para a descrição de animais para adoção, informações de animais perdidos e detalhes de serviços profissionais.
+### `RN07` — Limite de Tamanho de Textos (255 Caracteres)
+* **Regra:** Limite máximo estrito de 255 caracteres para a descrição de animais para adoção e informações de animais perdidos.
 
 ---
 
-### `RN14` — Exigência de CRMV para Serviços Veterinários
-* **Regra:** Se a proposta de serviço marcar a opção "Serviço Veterinário", o preenchimento do campo `CRMV` é estritamente obrigatório.
-
----
-
-### `RN15` — Segurança e Confirmação na Edição de Perfil
+### `RN08` — Segurança e Confirmação na Edição de Perfil
 * **Regra:**
-  1. **Alteração de Email:** Exige a confirmação da senha atual. O novo email permanece pendente de confirmação até que o usuário clique no link de revalidação com token criptograficamente assinado.
-  2. **Alteração de Senha:** Exige a confirmação da senha atual antes de autorizar a substituição pela nova senha.
+  1. **Imutabilidade do Nome:** O nome do usuário não pode ser alterado após a criação da conta, garantindo a integridade dos cadastros e prevenindo fraudes.
+  2. **Alteração de Email com Duplo Fator (2FA):** Exige confirmação da senha atual (1º fator) e validação de token enviado para o novo e-mail (2º fator) antes da efetivação da troca no sistema.
+  3. **Alteração de Telefone com Duplo Fator (2FA):** Exige solicitação do usuário autenticado (1º fator) e confirmação de código OTP enviado via WhatsApp (2º fator) antes do novo número ser salvo no perfil.
+  4. **Alteração de Senha:** Exige a confirmação da senha atual antes de autorizar a substituição pela nova senha, a qual deve cumprir os critérios de senha forte (mínimo de 8 caracteres, contendo maiúscula, minúscula, número e caractere especial).
+
+---
+
+### `RN09` — Padronização Geográfica (Estado e Cidade)
+* **Regra:**
+  1. **Estado (UF):** Deve ser validado estritamente através do conjunto fechado das 27 Unidades Federativas (Enum de 2 caracteres).
+  2. **Cidade:** Não deve aceitar grafias livres inconsistentes; deve ser preenchida de forma padronizada (via consulta de CEP/ViaCEP com preenchimento em modo leitura ou via catálogo oficial de municípios do IBGE).
 
 ---
 
 ## 🔗 Próximas Notas Relacionadas
 - [[01 - Atores e Matriz de Permissões]] — Perfis e privilégios.
-- [[05 - Modelagem de Dados e Relacionamentos]] — Implementação das regras no schema SQL.
 - [[02 - Requisitos Funcionais]] — Especificação funcional completa.
+- [[05 - Modelagem de Dados e Relacionamentos]] — Implementação das regras no schema SQL.
+- [[08 - Implementações futuras]] — Regras e módulos postergados.

@@ -1,5 +1,5 @@
-bbRenderNavigation("#bb-nav", "adoption");
-bbRenderFooter("#bb-footer");
+if (typeof bbRenderNavigation === "function") bbRenderNavigation("#bb-nav", "adoption");
+if (typeof bbRenderFooter === "function") bbRenderFooter("#bb-footer");
 
 const bbAnimalId = new URLSearchParams(window.location.search).get("animal_id");
 const bbSummaryEl = document.getElementById("bb-animal-summary");
@@ -28,7 +28,7 @@ async function bbLoadSummary() {
         <div>
           <strong class="text-ink-100">${animal.nome}</strong>
           <p class="mt-1 mb-0 text-ink-300 text-sm">
-            ${animal.raca || "SRD"} · ${animal.idade_aproximada}
+            ${animal.raca || "SRD"} | ${animal.idade_aproximada}
           </p>
         </div>
       </div>

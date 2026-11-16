@@ -2,65 +2,107 @@ function bbAnimalCardHtml(animal) {
   const isPerdido = animal.tipo_servico === "PERDIDO";
   const sexoLabel = animal.sexo === "M" ? "Macho" : animal.sexo === "F" ? "Fêmea" : "Indeterminado";
   const currentUser = typeof bbStorage !== "undefined" && bbStorage.getUser();
-  const isOwner = currentUser && animal.tutor_id && Number(currentUser.id) === Number(animal.tutor_id);
+  const isOwner = currentUser && (
+    (animal.tutor_id && currentUser.id && Number(currentUser.id) === Number(animal.tutor_id)) ||
+    (currentUser.email && animal.tutor_email && currentUser.email.toLowerCase() === animal.tutor_email.toLowerCase())
+  );
 
   let statusBadge = "";
   if (animal.status === "ADOTADO") {
-    statusBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">✅ Adotado</span>`;
+    statusBadge = `<span class="bb-status-badge bb-status-badge--adotado">Adotado</span>`;
   } else if (animal.status === "ENCONTRADO") {
-    statusBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">🎉 Encontrado</span>`;
+    statusBadge = `<span class="bb-status-badge bb-status-badge--encontrado">Encontrado</span>`;
   } else if (isPerdido) {
-    statusBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">🚨 Desaparecido</span>`;
+    statusBadge = `<span class="bb-status-badge bb-status-badge--perdido">Desaparecido</span>`;
   } else {
-    statusBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-brand-500/20 text-brand-300 border border-brand-500/30">🐾 Para Adoção</span>`;
+    statusBadge = `<span class="bb-status-badge bb-status-badge--adocao">Para Adoção</span>`;
   }
 
   const imageHtml = animal.imagem
-    ? `<img src="${animal.imagem}" alt="${animal.nome || 'Pet'}" class="w-full h-full object-cover transition-transform duration-500 ease-out-expo group-hover:scale-110" loading="lazy" />`
-    : `<span class="text-[0.7rem] tracking-wide uppercase text-ink-500 mt-1">Sem foto</span>`;
+    ? `<img src="${animal.imagem}" alt="${animal.nome || 'Pet'}" class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105" loading="lazy" onerror="this.parentElement.classList.add('bb-animal-card__image--empty'); this.remove();" />`
+    : `<span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Sem foto</span>`;
+
+  const cleanPhone = (animal.telefone_contato || animal.contato || "").replace(/\D/g, "");
+  const petNome = animal.nome || "pet";
+  const waMsg = isPerdido
+    ? `Olá! Vi o anúncio do pet ${encodeURIComponent(petNome)} no Best Buddy e tenho informações!`
+    : `Olá! Vi o anúncio do pet ${encodeURIComponent(petNome)} para adoção no Best Buddy e tenho interesse em adotá-lo!`;
+  const waLink = cleanPhone ? `https://wa.me/55${cleanPhone}?text=${waMsg}` : `/pages/animals/detail.html?id=${animal.id}`;
 
   let ownerActionsHtml = "";
   if (isOwner) {
     const isFinished = animal.status === "ADOTADO" || animal.status === "ENCONTRADO";
-    const finishBtnText = isPerdido ? "🎉 Marcar Encontrado" : "✅ Marcar Adotado";
+    const finishBtnText = isPerdido ? "Marcar Encontrado" : "Marcar Adotado";
     const targetStatus = isPerdido ? "ENCONTRADO" : "ADOTADO";
 
     ownerActionsHtml = `
-      <div class="mt-3 pt-3 border-t border-border/60 flex items-center justify-between gap-2" onclick="event.stopPropagation();">
+      <div class="bb-owner-actions mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-1.5 flex-wrap">
         ${!isFinished ? `
-          <button type="button" class="bb-btn bb-btn--xs bb-btn--primary flex-1 btn-finish-animal" data-id="${animal.id}" data-status="${targetStatus}">
+          <button type="button" class="bb-btn-primary-card flex-1 min-w-[110px] text-xs py-1.5 px-2.5 rounded-lg btn-finish-animal" data-id="${animal.id}" data-status="${targetStatus}">
             ${finishBtnText}
           </button>
-        ` : `<span class="text-xs text-ink-400 font-medium">Anúncio concluído</span>`}
-        <button type="button" class="bb-btn bb-btn--xs bb-btn--secondary text-rose-400 hover:text-rose-300 btn-delete-animal" data-id="${animal.id}" title="Excluir anúncio">
-          🗑️
+        ` : `<span class="text-xs text-slate-400 font-medium py-1 px-2 rounded bg-slate-100">Anúncio concluído</span>`}
+        <button type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors btn-edit-animal" data-id="${animal.id}" data-no-limit onclick="event.stopPropagation();if(window.bbOpenEditModal){window.bbOpenEditModal('${animal.id}');}else{window.location.href='/pages/animals/index.html?edit=${animal.id}';}" title="Editar informações">
+          ✏️ Editar
+        </button>
+        <button type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-500 bg-rose-50 hover:bg-rose-100 transition-colors btn-delete-animal" data-id="${animal.id}" title="Excluir anúncio">
+          Excluir
         </button>
       </div>
     `;
   }
 
+  const actionButtonHtml = !isOwner ? `
+    <a href="${waLink}" ${cleanPhone ? 'target="_blank" rel="noopener noreferrer"' : ''} class="bb-adopt-btn" onclick="event.stopPropagation()">
+      ${isPerdido ? 'Vi este pet' : 'Quero adotar'}
+    </a>
+  ` : '';
+
   return `
-    <div class="group bb-animal-card relative flex flex-col justify-between cursor-pointer ${isPerdido ? 'border-amber-500/30 hover:border-amber-500/60' : ''}" onclick="window.location.href='/pages/animals/detail.html?id=${animal.id}'">
-      <div>
-        <div class="bb-animal-card__image flex-col gap-1 relative overflow-hidden${animal.imagem ? "" : " bb-animal-card__image--empty"}">
+    <div class="bb-pet-card bb-animal-card group" data-card-id="${animal.id}">
+      <div class="bb-pet-card__header">
+        <div class="bb-pet-card__image-wrap${animal.imagem ? "" : " bb-animal-card__image--empty"}">
           ${imageHtml}
-          <div class="absolute top-2 left-2 z-10">
+          <div class="bb-pet-card__badge">
             ${statusBadge}
           </div>
         </div>
-        <div class="bb-animal-card__body">
-          <div class="flex items-center justify-between mb-1">
-            <span class="bb-animal-card__name font-bold text-base text-ink-100">${animal.nome || (isPerdido ? "Pet Perdido" : "Pet sem nome")}</span>
-            ${animal.cidade ? `<span class="text-xs text-ink-400">📍 ${animal.cidade}</span>` : ""}
+
+        <div class="bb-pet-card__body">
+          <h3 class="bb-pet-card__title">
+            ${animal.nome || (isPerdido ? "Pet Perdido" : "Pet sem nome")}
+          </h3>
+          <p class="bb-pet-card__subtitle">
+            ${animal.raca || "Vira-lata"}
+          </p>
+
+          <div class="bb-pet-card__tags">
+            ${animal.idade_aproximada ? `
+              <span class="bb-pet-tag">${animal.idade_aproximada}</span>
+            ` : ''}
+            ${animal.porte ? `
+              <span class="bb-pet-tag">${animal.porte}</span>
+            ` : ''}
+            <span class="bb-pet-tag">${sexoLabel}</span>
+            ${animal.cidade ? `
+              <span class="bb-pet-tag bb-pet-tag--location" title="${animal.cidade}${animal.estado ? ` - ${animal.estado}` : ''}">
+                ${animal.cidade}${animal.estado ? ` - ${animal.estado}` : ''}
+              </span>
+            ` : ''}
           </div>
-          <span class="bb-animal-card__meta text-xs text-ink-300 block mb-0.5">
-            ${animal.raca || "SRD"} · ${animal.idade_aproximada || "Idade não inf."} · ${sexoLabel}
-          </span>
-          ${isPerdido && animal.local ? `<span class="text-[11px] text-amber-300/90 block truncate" title="${animal.local}">Visto em: ${animal.local}</span>` : ""}
-          ${animal.descricao ? `<p class="text-xs text-ink-400 mt-2 line-clamp-2 leading-relaxed">${animal.descricao}</p>` : ""}
+
+          ${isPerdido && animal.local ? `
+            <p class="text-[11px] text-amber-600 font-medium mt-1 truncate" title="${animal.local}">
+              Visto em: ${animal.local}
+            </p>
+          ` : ""}
         </div>
       </div>
-      ${ownerActionsHtml}
+
+      <div class="bb-pet-card__footer">
+        ${actionButtonHtml}
+        ${ownerActionsHtml}
+      </div>
     </div>
   `;
 }

@@ -1,8 +1,10 @@
 function bbStateHtml({ title, description, isError = false }) {
-  const icon = isError ? "⚠️" : "🐾";
+  const icon = isError
+    ? `<div class="w-10 h-10 mx-auto mb-3 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center font-bold text-lg">!</div>`
+    : `<div class="w-10 h-10 mx-auto mb-3 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center font-bold text-lg">&bull;</div>`;
   return `
     <div class="bb-state" role="status">
-      <div class="text-3xl mb-3 opacity-70">${icon}</div>
+      ${icon}
       <p class="bb-state__title${isError ? " text-danger" : ""}">${title}</p>
       ${description ? `<p>${description}</p>` : ""}
     </div>
@@ -12,7 +14,7 @@ function bbStateHtml({ title, description, isError = false }) {
 const bbLoadingHtml = bbStateHtml({ title: "Carregando...", description: "" });
 
 /**
- * Skeleton de cards para grids enquanto os dados carregam — evita o "pulo"
+ * Skeleton de cards para grids enquanto os dados carregam - evita o "pulo"
  * de layout entre o estado de loading e o conteúdo real.
  */
 function bbSkeletonGridHtml(count = 4) {

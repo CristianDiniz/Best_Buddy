@@ -13,13 +13,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   const displayPhone = document.getElementById("user-display-phone");
   const displayTipo = document.getElementById("user-display-tipo");
 
-  // Elementos de edição de foto e nome
+  // Elementos de edição de foto, nome e telefone
   const editNameInput = document.getElementById("edit-profile-name");
+  const editPhoneInput = document.getElementById("edit-profile-phone");
   const avatarInput = document.getElementById("input-profile-avatar");
   const avatarImg = document.getElementById("profile-avatar-img");
   const avatarInitials = document.getElementById("profile-avatar-initials");
   const btnRemoveAvatar = document.getElementById("btn-remove-avatar");
   const formBasicProfile = document.getElementById("form-edit-basic-profile");
+
+  // Elementos de validação de WhatsApp
+  const phoneStatusBadge = document.getElementById("user-phone-status-badge");
+  const boxVerifyWhatsapp = document.getElementById("box-verify-whatsapp");
+  const btnSendWhatsappCode = document.getElementById("btn-send-whatsapp-code");
+  const boxCodeWhatsapp = document.getElementById("box-code-whatsapp");
+  const whatsappCodeInput = document.getElementById("whatsapp-confirmation-code");
+  const btnVerifyWhatsappCode = document.getElementById("btn-verify-whatsapp-code");
+  const whatsappVerifyError = document.getElementById("whatsapp-verify-error");
 
   let currentAvatarData = null;
 
@@ -30,10 +40,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       : "bg-rose-500/10 border-rose-500/40 text-rose-300";
     alertContainer.innerHTML = `
       <div class="bb-alert border p-3 rounded-lg mb-6 flex items-center gap-2 ${bg}">
-        <span>${isSuccess ? "✅" : "⚠️"}</span>
         <span>${msg}</span>
       </div>
     `;
+    if (isSuccess) {
+      alertContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
     setTimeout(() => {
       alertContainer.innerHTML = "";
     }, 6000);
@@ -75,19 +87,57 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  function updatePhoneUI(telefone, isValidated) {
+    const formatted = telefone ? bbValidation.formatPhone(telefone) : "";
+    if (displayPhone) {
+      displayPhone.textContent = formatted || "Não informado";
+    }
+    if (phoneStatusBadge) {
+      if (!telefone) {
+        phoneStatusBadge.classList.add("hidden");
+      } else if (isValidated) {
+        phoneStatusBadge.className = "text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
+        phoneStatusBadge.textContent = "Verificado";
+        phoneStatusBadge.classList.remove("hidden");
+      } else {
+        phoneStatusBadge.className = "text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30";
+        phoneStatusBadge.textContent = "Não validado";
+        phoneStatusBadge.classList.remove("hidden");
+      }
+    }
+    if (boxVerifyWhatsapp) {
+      if (telefone && !isValidated) {
+        boxVerifyWhatsapp.classList.remove("hidden");
+      } else {
+        boxVerifyWhatsapp.classList.add("hidden");
+      }
+    }
+  }
+
+  // Máscara de telefone
+  if (editPhoneInput) {
+    editPhoneInput.addEventListener("input", (e) => {
+      e.target.value = bbValidation.formatPhone(e.target.value);
+    });
+  }
+
   // 2. Carrega perfil atual
   let currentProfile = null;
   try {
     currentProfile = await authService.getProfile();
     const storedUser = bbStorage.getUser() || {};
     const effectiveName = currentProfile.nome || storedUser.nome || currentProfile.email?.split("@")[0] || "Usuário";
+    const effectivePhone = currentProfile.telefone || storedUser.telefone || "";
+    const isValidated = Boolean(currentProfile.telefone_validado ?? storedUser.telefone_validado);
 
     if (displayName) displayName.textContent = effectiveName;
     if (displayEmail) displayEmail.textContent = currentProfile.email || "";
-    if (displayPhone) displayPhone.textContent = currentProfile.telefone ? bbValidation.formatPhone(currentProfile.telefone) : "Não informado";
     if (displayTipo) displayTipo.textContent = currentProfile.tipo === "PJ" ? "Pessoa Jurídica (ONG / Clínica)" : "Pessoa Física";
 
+    updatePhoneUI(effectivePhone, isValidated);
+
     if (editNameInput) editNameInput.value = effectiveName;
+    if (editPhoneInput) editPhoneInput.value = "";
 
     // Carrega avatar do storage se existente
     updateAvatarPreview(storedUser.avatar, effectiveName);
@@ -128,49 +178,153 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // 4. Salvar Alterações de Nome e Foto
+  // 4. Salvar Alterações de Foto de Perfil (Nome é imutável, Telefone via 2FA)
   if (formBasicProfile) {
     formBasicProfile.addEventListener("submit", async (e) => {
       e.preventDefault();
       clearErrors();
 
-      const newName = editNameInput.value.trim();
-      if (!bbValidation.isRequired(newName)) {
-        showFieldError("edit-profile-name", "Informe seu nome completo.");
-        return;
-      }
-
       const btn = document.getElementById("btn-save-basic-profile");
       btn.disabled = true;
-      btn.innerHTML = '<span class="bb-btn__spinner" aria-hidden="true"></span> Salvando...';
+      btn.innerHTML = '<span class="bb-btn__spinner" aria-hidden="true"></span> Salvando foto...';
 
       try {
-        await authService.updateProfile({ nome: newName });
-
-        // Atualiza a sessão local
         const user = bbStorage.getUser() || {};
-        user.nome = newName;
         user.avatar = currentAvatarData;
         bbStorage.setUser(user);
 
-        if (displayName) displayName.textContent = newName;
-
-        // Re-renderiza a navegação superior para refletir a nova foto e nome imediatamente
+        // Re-renderiza a navegação superior para refletir a nova foto imediatamente
         if (typeof bbRenderNavigation === "function") {
           bbRenderNavigation("#bb-nav", "profile");
         }
 
-        showAlert("Dados do perfil e foto atualizados com sucesso!");
+        showAlert("Foto de perfil atualizada com sucesso!");
       } catch (err) {
-        showAlert(err.error || err.message || "Erro ao atualizar dados do perfil.", false);
+        showAlert("Erro ao salvar foto de perfil.", false);
       } finally {
         btn.disabled = false;
-        btn.textContent = "Salvar Dados do Perfil";
+        btn.textContent = "Salvar Foto de Perfil";
       }
     });
   }
 
-  // 5. Fluxo de Alteração de E-mail (RF01.1)
+  // 5. Alteração de Telefone via Duplo Fator (2FA WhatsApp)
+  let whatsappLimiter = null;
+  let phonePendingVerification = "";
+
+  if (btnSendWhatsappCode) {
+    whatsappLimiter = typeof bbClickLimiter !== "undefined"
+      ? bbClickLimiter.attach(btnSendWhatsappCode, {
+        storageKey: "whatsapp_send_code",
+        blockedText: "Aguarde {s}s para reenviar",
+        onUnlocked: () => {
+          if (btnSendWhatsappCode) btnSendWhatsappCode.textContent = "Reenviar Código";
+        }
+      })
+      : null;
+
+    btnSendWhatsappCode.addEventListener("click", async () => {
+      if (whatsappLimiter && whatsappLimiter.isBlocked()) {
+        return;
+      }
+
+      const telefone = editPhoneInput?.value?.trim() || "";
+      if (!telefone) {
+        showFieldError("edit-profile-phone", "Informe o novo número de telefone com DDD.");
+        return;
+      }
+
+      if (!bbValidation.isValidBrazilianPhone(telefone)) {
+        showFieldError("edit-profile-phone", "Informe um telefone válido com DDD (ex: (11) 99999-9999).");
+        return;
+      }
+
+      const user = bbStorage.getUser() || {};
+      const currentDigits = (user.telefone || "").replace(/\D/g, "");
+      const newDigits = telefone.replace(/\D/g, "");
+      if (currentDigits && currentDigits === newDigits && user.telefone_validado) {
+        showFieldError("edit-profile-phone", "Este já é o seu telefone verificado atual.");
+        return;
+      }
+
+      const errorEl = document.getElementById("edit-profile-phone-error");
+      if (errorEl) errorEl.textContent = "";
+      if (whatsappVerifyError) whatsappVerifyError.textContent = "";
+
+      btnSendWhatsappCode.disabled = true;
+      btnSendWhatsappCode.innerHTML = '<span class="bb-btn__spinner" aria-hidden="true"></span> Enviando...';
+
+      try {
+        const resp = await authService.enviarCodigoWhatsApp(telefone);
+        phonePendingVerification = telefone;
+        if (boxCodeWhatsapp) boxCodeWhatsapp.classList.remove("hidden");
+        showAlert(resp.message || "Código enviado via WhatsApp! Insira o código de 6 dígitos para validar o duplo fator.");
+
+        if (resp.codigo_dev && whatsappCodeInput) {
+          whatsappCodeInput.value = resp.codigo_dev;
+        }
+
+        if (whatsappLimiter) {
+          whatsappLimiter.recordClick();
+          whatsappLimiter.setOriginalText("Reenviar Código");
+        }
+      } catch (err) {
+        const msg = err.payload?.error || err.error || err.message || "Erro ao enviar código.";
+        showFieldError("edit-profile-phone", msg);
+      } finally {
+        if (!whatsappLimiter || !whatsappLimiter.isBlocked()) {
+          btnSendWhatsappCode.disabled = false;
+          btnSendWhatsappCode.textContent = "Reenviar Código";
+        }
+      }
+    });
+  }
+
+  if (btnVerifyWhatsappCode) {
+    btnVerifyWhatsappCode.addEventListener("click", async () => {
+      const telefone = phonePendingVerification || editPhoneInput?.value?.trim();
+      const codigo = whatsappCodeInput?.value?.trim();
+
+      if (!telefone) {
+        showFieldError("edit-profile-phone", "Informe o novo telefone antes de validar.");
+        return;
+      }
+
+      if (!codigo) {
+        if (whatsappVerifyError) whatsappVerifyError.textContent = "Digite o código recebido via WhatsApp.";
+        return;
+      }
+
+      btnVerifyWhatsappCode.disabled = true;
+      btnVerifyWhatsappCode.innerHTML = '<span class="bb-btn__spinner" aria-hidden="true"></span> Validando...';
+
+      try {
+        const resp = await authService.verificarCodigoWhatsApp({ telefone, codigo });
+        showAlert(resp.message || "Telefone atualizado com sucesso via duplo fator!");
+
+        const user = bbStorage.getUser() || {};
+        user.telefone = telefone.replace(/\D/g, "");
+        user.telefone_validado = true;
+        bbStorage.setUser(user);
+
+        updatePhoneUI(user.telefone, true);
+        if (whatsappLimiter) whatsappLimiter.reset();
+        if (boxCodeWhatsapp) boxCodeWhatsapp.classList.add("hidden");
+        if (whatsappCodeInput) whatsappCodeInput.value = "";
+        if (editPhoneInput) editPhoneInput.value = "";
+        phonePendingVerification = "";
+      } catch (err) {
+        if (whatsappVerifyError) {
+          whatsappVerifyError.textContent = err.payload?.error || err.error || err.message || "Código incorreto ou expirado.";
+        }
+      } finally {
+        btnVerifyWhatsappCode.disabled = false;
+        btnVerifyWhatsappCode.textContent = "Confirmar e Atualizar Telefone";
+      }
+    });
+  }
+
+  // 6. Fluxo de Alteração de E-mail via Duplo Fator (2FA)
   const formEmail = document.getElementById("form-change-email");
   const boxConfirmEmail = document.getElementById("box-confirm-email");
   const tokenInput = document.getElementById("email-confirmation-token");
@@ -192,7 +346,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             { test: bbValidation.isEmail, message: "Informe um e-mail válido (ex: seu@email.com)." },
           ],
           "current-password-email": [
-            { test: bbValidation.isRequired, message: "Informe sua senha atual para segurança." },
+            { test: bbValidation.isRequired, message: "Informe sua senha atual (1º fator de segurança)." },
           ],
         }
       );
@@ -204,7 +358,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const btn = document.getElementById("btn-submit-change-email");
       btn.disabled = true;
-      btn.innerHTML = '<span class="bb-btn__spinner" aria-hidden="true"></span> Enviando solicitação...';
+      btn.innerHTML = '<span class="bb-btn__spinner" aria-hidden="true"></span> Solicitando alteração...';
 
       try {
         const resp = await authService.alterarEmail({
@@ -212,13 +366,18 @@ document.addEventListener("DOMContentLoaded", async () => {
           senha_atual: currentPassword,
         });
 
-        showAlert(resp.message || "E-mail de confirmação enviado! Verifique sua caixa postal.");
-        boxConfirmEmail.classList.remove("hidden");
+        if (boxConfirmEmail) {
+          boxConfirmEmail.classList.remove("hidden");
+        }
+
         if (resp.token_dev && tokenInput) {
           tokenInput.value = resp.token_dev;
         }
+
+        showAlert(resp.message || "Código enviado! Insira o token de confirmação recebido por e-mail para validar o duplo fator.");
       } catch (err) {
-        showAlert(err.error || err.message || "Erro ao solicitar alteração de e-mail. Verifique sua senha atual.", false);
+        const errMsg = err.payload?.error || err.payload?.detail || err.error || err.message || "A senha atual informada está incorreta.";
+        showFieldError("current-password-email", errMsg);
       } finally {
         btn.disabled = false;
         btn.textContent = "Solicitar Alteração de E-mail";
@@ -230,27 +389,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     btnConfirmToken.addEventListener("click", async () => {
       const token = tokenInput ? tokenInput.value.trim() : "";
       if (!token) {
-        showAlert("Informe o token de confirmação.", false);
+        showFieldError("email-confirmation-token", "Informe o token de confirmação.");
         return;
       }
 
       btnConfirmToken.disabled = true;
-      btnConfirmToken.innerHTML = '<span class="bb-btn__spinner" aria-hidden="true"></span> Confirmando...';
+      btnConfirmToken.innerHTML = '<span class="bb-btn__spinner" aria-hidden="true"></span> Validando token...';
 
       try {
         const resp = await authService.confirmarEmail({ token });
-        showAlert(resp.message || "E-mail alterado com sucesso!");
-        if (displayEmail) displayEmail.textContent = resp.email;
-        boxConfirmEmail.classList.add("hidden");
-        formEmail.reset();
+        showAlert(resp.message || "E-mail atualizado com sucesso após validação de duplo fator!");
+
+        const updatedEmail = resp.email || document.getElementById("new-email")?.value.trim();
+        if (displayEmail) displayEmail.textContent = updatedEmail;
 
         const u = bbStorage.getUser();
         if (u) {
-          u.email = resp.email;
+          u.email = updatedEmail;
           bbStorage.setUser(u);
         }
+
+        if (boxConfirmEmail) boxConfirmEmail.classList.add("hidden");
+        formEmail.reset();
+        if (tokenInput) tokenInput.value = "";
       } catch (err) {
-        showAlert(err.error || err.message || "Token inválido ou expirado.", false);
+        showAlert(err.payload?.error || err.error || err.message || "Token inválido ou expirado.", false);
       } finally {
         btnConfirmToken.disabled = false;
         btnConfirmToken.textContent = "Validar E-mail";
@@ -280,9 +443,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             { test: bbValidation.isRequired, message: "Informe sua senha atual." },
           ],
           "new-password": [
-            { test: (v) => bbValidation.minLength(v, 6), message: "A nova senha deve ter ao menos 6 caracteres." },
+            { test: bbValidation.isRequired, message: "Informe a nova senha." },
+            { test: bbValidation.isStrongPassword, message: "A nova senha deve ter no mínimo 8 caracteres, contendo letra maiúscula, minúscula, número e caractere especial." },
           ],
           "confirm-new-password": [
+            { test: bbValidation.isRequired, message: "Confirme a nova senha." },
             { test: (v, all) => bbValidation.passwordsMatch(v, all["new-password"]), message: "As novas senhas não coincidem." },
           ],
         }
@@ -307,7 +472,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         showAlert(resp.message || "Senha atualizada com sucesso!");
         formPassword.reset();
       } catch (err) {
-        showAlert(err.error || err.message || "Erro ao atualizar senha. Verifique a senha atual.", false);
+        const errMsg = err.payload?.error || err.payload?.detail || err.error || err.message || "A senha atual informada está incorreta.";
+        showFieldError("current-password-pwd", errMsg);
       } finally {
         btn.disabled = false;
         btn.textContent = "Atualizar Senha";

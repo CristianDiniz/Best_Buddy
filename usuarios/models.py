@@ -27,12 +27,13 @@ class Usuario(AbstractUser):
     tipo = models.CharField(
         max_length=2,
         choices=TipoUsuario.choices,
+        default=TipoUsuario.PESSOA_FISICA,
         null=False,
         blank=False
-)
+    )
 
     email = models.EmailField(unique=True)
-    telefone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Telefone / WhatsApp")
+    telefone = models.CharField(max_length=20, blank=True, null=True, unique=True, verbose_name="Telefone / WhatsApp")
     telefone_validado = models.BooleanField(default=False, verbose_name="WhatsApp Validado")
 
     USERNAME_FIELD = "email"
@@ -40,6 +41,17 @@ class Usuario(AbstractUser):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    termos_aceitos_em = models.DateTimeField(
+        auto_now_add=True,
+        null=True,
+        blank=True,
+        verbose_name="Data de Aceite dos Termos e Privacidade"
+    )
+    versao_termos = models.CharField(
+        max_length=10,
+        default="1.0",
+        verbose_name="Versão dos Termos Aceitos"
+    )
 
     
 

@@ -1,9 +1,5 @@
 /**
  * Dados fake usados pelos services enquanto BB_CONFIG.USE_MOCKS = true.
- *
- * O formato aqui segue o CONTRATO desejado (ver API_CONTRACT.md),
- * não necessariamente o que o backend real devolve hoje —
- * a ideia é o front já nascer certo e o backend alcançar depois.
  */
 
 const BB_MOCK_USER = {
@@ -11,6 +7,7 @@ const BB_MOCK_USER = {
   email: "usuario@bestbuddy.com",
   tipo: "PF",
   nome: "Ana Souza",
+  telefone: "(16) 99999-0000",
 };
 
 const BB_MOCK_CREDENTIALS = {
@@ -19,25 +16,130 @@ const BB_MOCK_CREDENTIALS = {
 };
 
 const BB_MOCK_ANIMALS = [
-  { id: 1, nome: "Max", raca: "SRD", sexo: "M", idade_aproximada: "Adulto", medicamento: "Não", vacinacao: "Sim", contato: "(16) 99999-0001", descricao: "Dócil, adora brincar com bola.", imagem: null },
-  { id: 2, nome: "Luna", raca: "Vira-lata caramelo", sexo: "F", idade_aproximada: "Filhote", medicamento: "Não", vacinacao: "Não", contato: "(16) 99999-0002", descricao: "Muito brincalhona, ótima com crianças.", imagem: null },
-  { id: 3, nome: "Thor", raca: "Pastor Alemão", sexo: "M", idade_aproximada: "Adulto", medicamento: "Sim", vacinacao: "Sim", contato: "(16) 99999-0003", descricao: "Protetor, precisa de espaço para correr.", imagem: null },
-  { id: 4, nome: "Nina", raca: "SRD", sexo: "F", idade_aproximada: "Idoso", medicamento: "Sim", vacinacao: "Sim", contato: "(16) 99999-0004", descricao: "Calma, ideal para apartamento.", imagem: null },
-  { id: 5, nome: "Bidu", raca: "Poodle", sexo: "M", idade_aproximada: "Adulto", medicamento: "Não", vacinacao: "Sim", contato: "(16) 99999-0005", descricao: "Late pouco, já é castrado.", imagem: null },
-  { id: 6, nome: "Mel", raca: "SRD", sexo: "F", idade_aproximada: "Filhote", medicamento: "Não", vacinacao: "Não", contato: "(16) 99999-0006", descricao: "Resgatada há 1 semana, em observação.", imagem: null },
-];
-
-const BB_MOCK_COMMUNITY_POSTS = [
-  { id: 1, autor: "Carlos Lima", texto: "Hoje foi dia de campanha de castração no bairro Jardim Elite. Obrigado a todos que ajudaram!", created_at: "2026-07-28T14:00:00Z" },
-  { id: 2, autor: "Best Buddy ONG", texto: "Precisamos de doações de ração para os próximos 15 dias. Ponto de coleta na sede.", created_at: "2026-07-27T10:30:00Z" },
-];
-
-const BB_MOCK_MISSING_ANIMALS = [
-  { id: 1, nome: "Max", local: "Jardim Botânico, São Paulo, SP", contato: "(11) 91234-5678", descricao: "Sumiu durante um passeio, muito medroso com estranhos.", created_at: "2026-07-25T09:00:00Z" },
-  { id: 2, nome: "Bela", local: "Parque SP, Araraquara, SP", contato: "(16) 98888-1122", descricao: "Desapareceu após fogos de artifício.", created_at: "2026-07-24T18:20:00Z" },
-  { id: 3, nome: "Patrick Estrela", local: "Jd. Carmo, Araraquara, SP", contato: "(16) 97777-3344", descricao: "Última vez visto perto do mercado.", created_at: "2026-07-23T20:15:00Z" },
-];
-
-const BB_MOCK_NEWS = [
-  { id: 1, titulo: "Sorry, this image is missing", resumo: "Espaço reservado para notícias e informações da comunidade.", created_at: "2026-07-20T00:00:00Z" },
+  {
+    id: 1,
+    nome: "Bolinha",
+    tipo_servico: "ADOCAO",
+    tipo_animal: "CACHORRO",
+    raca: "Golden Retriever",
+    sexo: "M",
+    porte: "Grande",
+    idade_aproximada: "2 anos",
+    cidade: "São Carlos",
+    estado: "SP",
+    telefone_contato: "(16) 99999-0001",
+    medicamento: "Não",
+    castrado: "Sim",
+    descricao: "Super brincalhão, adora correr e convive muito bem com crianças.",
+    status: "DISPONIVEL",
+    imagem: "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: 2,
+    nome: "Nina",
+    tipo_servico: "ADOCAO",
+    tipo_animal: "CACHORRO",
+    raca: "Vira-lata",
+    sexo: "F",
+    porte: "Pequeno",
+    idade_aproximada: "1 ano",
+    cidade: "São Paulo",
+    estado: "SP",
+    telefone_contato: "(11) 98888-0002",
+    medicamento: "Não",
+    castrado: "Sim",
+    descricao: "Porte pequeno, calma e carinhosa, perfeita para apartamento.",
+    status: "DISPONIVEL",
+    imagem: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: 3,
+    nome: "Mingau",
+    tipo_servico: "ADOCAO",
+    tipo_animal: "GATO",
+    raca: "Siamês",
+    sexo: "M",
+    porte: "Médio",
+    idade_aproximada: "3 anos",
+    cidade: "Campinas",
+    estado: "SP",
+    telefone_contato: "(19) 97777-0003",
+    medicamento: "Não",
+    castrado: "Sim",
+    descricao: "Gato amoroso, castrado, adora um carinho e dormir ao sol.",
+    status: "DISPONIVEL",
+    imagem: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: 4,
+    nome: "Mel",
+    tipo_servico: "ADOCAO",
+    tipo_animal: "GATO",
+    raca: "Persa",
+    sexo: "F",
+    porte: "Médio",
+    idade_aproximada: "4 anos",
+    cidade: "Ribeirão Preto",
+    estado: "SP",
+    telefone_contato: "(16) 96666-0004",
+    medicamento: "Sim",
+    castrado: "Sim",
+    descricao: "Tranquila e manhosa, pelagem macia e bem cuidada.",
+    status: "DISPONIVEL",
+    imagem: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: 5,
+    nome: "Rex",
+    tipo_servico: "ADOCAO",
+    tipo_animal: "CACHORRO",
+    raca: "Labrador",
+    sexo: "M",
+    porte: "Grande",
+    idade_aproximada: "1 ano",
+    cidade: "Araraquara",
+    estado: "SP",
+    telefone_contato: "(16) 95555-0005",
+    medicamento: "Não",
+    castrado: "Sim",
+    descricao: "Alegre, companheiro para caminhadas e muito sociável.",
+    status: "DISPONIVEL",
+    imagem: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: 6,
+    nome: "Fofinha",
+    tipo_servico: "ADOCAO",
+    tipo_animal: "CACHORRO",
+    raca: "Vira-lata",
+    sexo: "F",
+    porte: "Pequeno",
+    idade_aproximada: "6 meses",
+    cidade: "São Carlos",
+    estado: "SP",
+    telefone_contato: "(16) 94444-0006",
+    medicamento: "Não",
+    castrado: "Não",
+    descricao: "Filhotinha resgatada, cheia de energia e muito carinhosa.",
+    status: "DISPONIVEL",
+    imagem: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: 7,
+    nome: "Pipoca",
+    tipo_servico: "ADOCAO",
+    tipo_animal: "CACHORRO",
+    raca: "Beagle",
+    sexo: "M",
+    porte: "Médio",
+    idade_aproximada: "2 anos",
+    cidade: "São Carlos",
+    estado: "SP",
+    telefone_contato: "(16) 93333-0007",
+    medicamento: "Não",
+    castrado: "Sim",
+    descricao: "Encontrou uma família maravilhosa e agora tem um lar cheio de carinho!",
+    status: "ADOTADO",
+    imagem: "https://images.unsplash.com/photo-1505628346881-b72b27e84530?auto=format&fit=crop&w=600&q=80"
+  }
 ];

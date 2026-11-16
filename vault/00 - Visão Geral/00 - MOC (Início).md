@@ -38,12 +38,14 @@ Este repositório de notas documenta tanto o **Backend Django REST** quanto o **
 - [[02 - Diagnóstico dos Bugs Atuais]] — Análise de causa raiz (RCA) dos problemas críticos (tabela SQLite, serializers, etc.).
 
 ### 🚀 05 - Tarefas & Roadmap
-- [[01 - Checklist de Correções Imediatas]] — Passo a passo prioritário para fazer Front e Back conversarem.
-- [[02 - Tarefas Backend (Django)]] — Especificação de código para models, views, serializers e URLs.
-- [[03 - Tarefas Frontend (Melhorias)]] — Ajustes na integração real, saudação do usuário e modal de desaparecidos.
-- [[04 - Guia de Execução e Testes]] — Como rodar ambos os projetos localmente e testar ponta a ponta.
+- [[00 - MOC Tarefas e Roadmap]] — Índice e síntese do módulo de execução e sprints.
+- [[01 - Checklist de Correções Imediatas]] — Passo a passo prioritário das correções imediatas (100% concluído).
+- [[02 - Tarefas Backend (Django)]] — Especificação técnica do código implementado e tarefas pendentes no Django.
+- [[03 - Tarefas Frontend (Melhorias)]] — Melhorias concluídas (UX, modais) e backlog de telas pendentes.
+- [[04 - Guia de Execução e Testes]] — Como rodar ambos os projetos localmente e executar a suíte de 14 testes.
 - [[05 - Configuração e Uso do Docker]] — Como executar todo o ecossistema (Django + MySQL + Nginx) via Docker Compose.
-- [[06 - Guia de Alinhamento da Equipe e Novo Roadmap]] — Guia para a reunião de alinhamento: permissões, tabelas, dúvidas e divisão de tarefas.
+- [[06 - Guia de Alinhamento da Equipe e Novo Roadmap]] — Guia de alinhamento com histórico de sprints e novo roadmap (Sprints 4 e 5).
+- [[07 - Otimizacao de Imagens (Pillow e WebP)]] — Arquitetura de compressão de fotos em Dupla Camada (Canvas API + Pillow WebP).
 
 ### 📋 06 - Requisitos & Modelagem (Auditado)
 - [[00 - MOC Requisitos e Modelagem]] — Índice central da especificação canônica do sistema.
@@ -54,7 +56,7 @@ Este repositório de notas documenta tanto o **Backend Django REST** quanto o **
 - [[05 - Modelagem de Dados e Relacionamentos]] — Diagrama ERD em Mermaid e Dicionário de 8 tabelas.
 - [[06 - Matriz de Gap Analysis (O que Adicionar, Ajustar e Remover)]] — Confronto direto: código atual vs requisitos.
 - [[07 - Plano de Ação e Roadmap de Implementação]] — Cronograma detalhado em 5 fases de execução.
-
+- [[09 - Privacidade, Dados Sensiveis (LGPD) e Termos de Adesao]] — Tratamento LGPD, dados sensíveis, cookies/storage e modais de consentimento.
 
 ---
 
@@ -63,12 +65,11 @@ Este repositório de notas documenta tanto o **Backend Django REST** quanto o **
 | Componente | Estado Atual | Detalhes / Última Atualização |
 | :--- | :--- | :--- |
 | **Frontend (Mock)** | 🟢 100% Funcional | Mantido como fallback offline em `js/mocks/`. |
-| **Frontend (API Real)** | 🟢 100% Integrado | `authService.login` captura `data.user`, exibindo nome e avatar no header. |
-| **Backend (Auth)** | 🟢 100% Funcional | Retorno de `user` no JWT (`CustomTokenObtainPairSerializer`) e CPF validado no registro. |
-| **Backend (Animais)** | 🟢 100% Funcional | Tabela `animais_animal` corrigida, campos `descricao` e `imagem` adicionados, leitura pública liberada. |
-| **Backend (Adoções)** | 🟢 100% Funcional | Modelo `Adocao` refatorado com `ForeignKey('Animal')` e dados do adotante integrados. |
-| **Backend (Comunidade)**| 🟢 100% Funcional | App `comunidade` criado com Notícias, Posts e Animais Desaparecidos. |
-| **Banco de Dados** | 🟢 SQLite + MySQL | SQLite migrado e populado com seed; MySQL 8.0 configurado no Docker com charset `utf8mb4`. |
+| **Frontend (API Real)** | 🟢 100% Integrado | Autenticação, navbar dinâmica, vitrines com filtros IBGE, modais Tailwind e compressão Canvas. |
+| **Backend (Auth & Perfil)** | 🟢 100% Funcional | Cadastro sem atrito, login JWT, edição de perfil, recuperação de senha e validação de WhatsApp Twilio. |
+| **Backend (Animais)** | 🟢 100% Funcional | Tabela unificada (`ADOCAO` e `PERDIDO`), herança de contato, controle de cota (5) e gestão pelo tutor. |
+| **Adoções & Comunidade** | 🟢 Consolidado | Intermediação burocrática substituída por WhatsApp direto; central única de animais na vitrine. |
+| **Banco de Dados** | 🟢 SQLite + MySQL | SQLite local e MySQL 8.0 `utf8mb4` no Docker totalmente operacionais e migrados. |
 | **Docker & DevOps** | 🟢 100% Operacional | `docker-compose.yml` orquestrando Nginx, Django e MySQL com seed e migrações automáticas. |
-| **Testes Automatizados** | 🟢 9/9 Passando | Suíte de testes `test_endpoints.py` validando todos os fluxos com código 0. |
+| **Testes Automatizados** | 🟢 14/14 Passando | Suíte de testes `test_endpoints.py` validando todos os fluxos com código 0. |
 

@@ -1,10 +1,12 @@
 from rest_framework import generics, permissions, exceptions
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from .models import Animal
 from .serializers import AnimaisSerializer
 
 
 class AnimaisViewSet(generics.ListCreateAPIView):
     serializer_class = AnimaisSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_permissions(self):
         if self.request.method == 'GET':
@@ -22,13 +24,21 @@ class AnimaisViewSet(generics.ListCreateAPIView):
         if tipo_animal:
             queryset = queryset.filter(tipo_animal__iexact=tipo_animal)
 
+        estado = self.request.query_params.get('estado')
+        if estado:
+            queryset = queryset.filter(estado__iexact=estado)
+
         cidade = self.request.query_params.get('cidade')
         if cidade:
-            queryset = queryset.filter(cidade__icontains=cidade)
+            queryset = queryset.filter(cidade__icontains=cidade.strip())
 
         status_param = self.request.query_params.get('status')
         if status_param:
             queryset = queryset.filter(status__iexact=status_param)
+
+        exclude_status = self.request.query_params.get('exclude_status')
+        if exclude_status:
+            queryset = queryset.exclude(status__iexact=exclude_status)
 
         tutor_id = self.request.query_params.get('tutor_id')
         if tutor_id:
@@ -53,6 +63,7 @@ class AnimaisViewSet(generics.ListCreateAPIView):
 class AnimaisDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Animal.objects.select_related('tutor').all()
     serializer_class = AnimaisSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_permissions(self):
         if self.request.method == 'GET':
@@ -71,3 +82,23 @@ class AnimaisDetailView(generics.RetrieveUpdateDestroyAPIView):
         if instance.tutor != user and not user.is_staff and not user.is_superuser:
             raise exceptions.PermissionDenied("Você só tem permissão para remover seus próprios anúncios.")
         instance.delete()
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+class AnimaisEstatisticasView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        total_adotados = Animal.objects.filter(status='ADOTADO').count()
+        total_disponiveis = Animal.objects.filter(tipo_servico='ADOCAO', status='DISPONIVEL').count()
+        total_perdidos = Animal.objects.filter(tipo_servico='PERDIDO', status='PERDIDO').count()
+        total_encontrados = Animal.objects.filter(status='ENCONTRADO').count()
+        return Response({
+            'total_adotados': total_adotados,
+            'total_disponiveis': total_disponiveis,
+            'total_perdidos': total_perdidos,
+            'total_encontrados': total_encontrados,
+            'total_geral': Animal.objects.count(),
+        })

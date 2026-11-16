@@ -1,12 +1,14 @@
+import re
+import sys
 from django.conf import settings
 from django.core import signing
 from django.core.mail import send_mail
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser, BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Usuario
+from .models import Usuario, PessoaFisica, PessoaJuridica
 from .serializer import (
     AlterarEmailSerializer,
     AlterarSenhaSerializer,
@@ -58,13 +60,43 @@ class PerfilView(APIView):
     def patch(self, request):
         user = request.user
         nome = request.data.get("nome")
+        telefone = request.data.get("telefone")
+
         if nome is not None:
+            nome_limpo = str(nome).strip()
+            nome_atual = ""
             if user.tipo == "PF" and hasattr(user, "perfil_pf"):
-                user.perfil_pf.nome = nome
-                user.perfil_pf.save()
+                nome_atual = user.perfil_pf.nome
             elif user.tipo == "PJ" and hasattr(user, "perfil_pj"):
-                user.perfil_pj.nome_fantasia = nome
-                user.perfil_pj.save()
+                nome_atual = user.perfil_pj.nome_fantasia or user.perfil_pj.razao_social
+
+            # RF04: O nome não pode ser alterado depois de criado
+            if nome_atual and nome_limpo != nome_atual:
+                return Response(
+                    {"error": "O nome não pode ser alterado após a criação da conta."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            elif not nome_atual and nome_limpo:
+                if user.tipo == "PF" or not user.tipo:
+                    pf, _ = PessoaFisica.objects.get_or_create(usuario=user)
+                    pf.nome = nome_limpo
+                    pf.save()
+                    user.perfil_pf = pf
+                elif user.tipo == "PJ":
+                    pj, _ = PessoaJuridica.objects.get_or_create(usuario=user)
+                    pj.nome_fantasia = nome_limpo
+                    pj.save()
+                    user.perfil_pj = pj
+
+        if telefone is not None:
+            telefone_limpo = re.sub(r'\D', '', str(telefone).strip()) or None
+            # RF04: A alteração de telefone exige autenticação por duplo fator (WhatsApp/Twilio)
+            if telefone_limpo and telefone_limpo != user.telefone:
+                return Response(
+                    {"error": "A alteração de telefone exige autenticação por duplo fator (validação por código via WhatsApp)."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
         return self.get(request)
 
 
@@ -78,28 +110,42 @@ class AlterarEmailView(APIView):
         senha_atual = serializer.validated_data["senha_atual"]
         novo_email = serializer.validated_data["novo_email"]
 
+        # 1º Fator: Validação da senha atual do usuário
         if not request.user.check_password(senha_atual):
             return Response({"error": "A senha atual informada está incorreta."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Gera token assinado com validade
+        if Usuario.objects.filter(email__iexact=novo_email).exclude(pk=request.user.pk).exists():
+            return Response({"error": "Este email já está sendo utilizado por outro usuário."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 2º Fator: Gera token de confirmação e envia ao novo e-mail
         token = signing.dumps({"user_id": request.user.id, "novo_email": novo_email}, salt="alterar-email")
 
-        # Dispara email de revalidação
-        subject = "Confirmação de alteração de e-mail - Best Buddy"
+        subject = "Confirmação de Alteração de E-mail - Best Buddy"
         message = (
             f"Olá!\n\nVocê solicitou a alteração do seu e-mail para {novo_email}.\n"
-            f"Use o seguinte token de confirmação ou acerte a validação no sistema:\n\n{token}\n\n"
-            f"Se você não solicitou esta alteração, ignore este e-mail."
+            f"Para concluir a alteração (duplo fator de segurança), utilize o token abaixo:\n\n{token}\n\n"
+            f"Se você não solicitou esta alteração, ignore esta mensagem."
         )
         try:
-            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL if hasattr(settings, "DEFAULT_FROM_EMAIL") else "no-reply@bestbuddy.org", [novo_email], fail_silently=True)
+            send_mail(
+                subject,
+                message,
+                getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@bestbuddy.org"),
+                [novo_email],
+                fail_silently=True
+            )
         except Exception:
             pass
 
-        return Response({
-            "message": f"Código de confirmação enviado para o e-mail {novo_email}.",
-            "token_dev": token
-        }, status=status.HTTP_200_OK)
+        resp_data = {
+            "message": f"Código de confirmação enviado para {novo_email}. Insira o token recebido para concluir o duplo fator.",
+            "novo_email": novo_email,
+            "requer_confirmacao": True,
+        }
+        if (settings.DEBUG or "test" in sys.argv) and token:
+            resp_data["token_dev"] = token
+
+        return Response(resp_data, status=status.HTTP_200_OK)
 
 
 class ConfirmarEmailView(APIView):
@@ -148,6 +194,12 @@ class AlterarSenhaView(APIView):
         return Response({"message": "Senha alterada com sucesso!"}, status=status.HTTP_200_OK)
 
 
+try:
+    from twilio.rest import Client
+except ImportError:
+    Client = None
+
+
 class TwilioEnviarCodigoView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -156,18 +208,30 @@ class TwilioEnviarCodigoView(APIView):
         serializer.is_valid(raise_exception=True)
         telefone = serializer.validated_data["telefone"]
 
-        # Formatação para formato E.164
+        # Validação de unicidade no duplo fator
         digits = "".join(filter(str.isdigit, telefone))
-        if not digits.startswith("55"):
-            digits = "55" + digits
-        formatted_whatsapp = f"whatsapp:+{digits}"
+        if Usuario.objects.filter(telefone=digits).exclude(pk=request.user.pk).exists():
+            return Response(
+                {"error": "Este telefone já está sendo utilizado por outro usuário."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        # Se houver credenciais reais de Twilio no settings, faz a chamada real
-        if settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_VERIFY_SERVICE_SID:
+        # Formatação para formato E.164
+        if not digits.startswith("55"):
+            digits_e164 = "55" + digits
+        else:
+            digits_e164 = digits
+        formatted_whatsapp = f"whatsapp:+{digits_e164}"
+
+        # Se houver credenciais reais de Twilio e a biblioteca estiver instalada, faz a chamada real
+        account_sid = getattr(settings, "TWILIO_ACCOUNT_SID", None)
+        auth_token = getattr(settings, "TWILIO_AUTH_TOKEN", None)
+        verify_sid = getattr(settings, "TWILIO_VERIFY_SERVICE_SID", None)
+
+        if Client and account_sid and auth_token and verify_sid:
             try:
-                from twilio.rest import Client
-                client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-                client.verify.v2.services(settings.TWILIO_VERIFY_SERVICE_SID).verifications.create(
+                client = Client(account_sid, auth_token)
+                client.verify.v2.services(verify_sid).verifications.create(
                     to=formatted_whatsapp,
                     channel="whatsapp"
                 )
@@ -192,18 +256,29 @@ class TwilioVerificarCodigoView(APIView):
         telefone = serializer.validated_data["telefone"]
         codigo = serializer.validated_data["codigo"].strip()
 
+        digits = "".join(filter(str.isdigit, telefone))
+        if Usuario.objects.filter(telefone=digits).exclude(pk=request.user.pk).exists():
+            return Response(
+                {"error": "Este telefone já está sendo utilizado por outro usuário."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         approved = False
 
-        if settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_VERIFY_SERVICE_SID:
-            try:
-                from twilio.rest import Client
-                digits = "".join(filter(str.isdigit, telefone))
-                if not digits.startswith("55"):
-                    digits = "55" + digits
-                formatted_whatsapp = f"whatsapp:+{digits}"
+        account_sid = getattr(settings, "TWILIO_ACCOUNT_SID", None)
+        auth_token = getattr(settings, "TWILIO_AUTH_TOKEN", None)
+        verify_sid = getattr(settings, "TWILIO_VERIFY_SERVICE_SID", None)
 
-                client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-                check = client.verify.v2.services(settings.TWILIO_VERIFY_SERVICE_SID).verification_checks.create(
+        if Client and account_sid and auth_token and verify_sid:
+            try:
+                if not digits.startswith("55"):
+                    digits_e164 = "55" + digits
+                else:
+                    digits_e164 = digits
+                formatted_whatsapp = f"whatsapp:+{digits_e164}"
+
+                client = Client(account_sid, auth_token)
+                check = client.verify.v2.services(verify_sid).verification_checks.create(
                     to=formatted_whatsapp,
                     code=codigo
                 )
@@ -215,16 +290,16 @@ class TwilioVerificarCodigoView(APIView):
             approved = (codigo == "123456" or len(codigo) == 6)
 
         if approved:
-            request.user.telefone = telefone
+            request.user.telefone = digits
             request.user.telefone_validado = True
             request.user.save()
 
             # Sincroniza também no perfil PF/PJ se existir
             if request.user.tipo == "PF" and hasattr(request.user, "perfil_pf"):
-                request.user.perfil_pf.telefone = telefone
+                request.user.perfil_pf.telefone = digits
                 request.user.perfil_pf.save()
             elif request.user.tipo == "PJ" and hasattr(request.user, "perfil_pj"):
-                request.user.perfil_pj.telefone = telefone
+                request.user.perfil_pj.telefone = digits
                 request.user.perfil_pj.save()
 
             return Response({
@@ -236,16 +311,21 @@ class TwilioVerificarCodigoView(APIView):
         return Response({"error": "Código de verificação incorreto ou expirado."}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class IsSelfOrAdmin(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return bool(request.user and (request.user.is_staff or request.user.pk == obj.pk))
+
+
 class UsuariosView(generics.ListCreateAPIView):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
 
 
 class UsuariosDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSelfOrAdmin]
 
 
 class RecuperarSenhaView(APIView):
@@ -277,10 +357,13 @@ class RecuperarSenhaView(APIView):
             except Exception:
                 pass
 
-        return Response({
-            "message": "Se o e-mail informado estiver cadastrado, as instruções para redefinição foram enviadas.",
-            "token_dev": token
-        }, status=status.HTTP_200_OK)
+        resp_data = {
+            "message": "Se o e-mail informado estiver cadastrado, as instruções para redefinição foram enviadas."
+        }
+        if settings.DEBUG and token:
+            resp_data["token_dev"] = token
+
+        return Response(resp_data, status=status.HTTP_200_OK)
 
 
 class RedefinirSenhaView(APIView):
@@ -304,3 +387,19 @@ class RedefinirSenhaView(APIView):
         user.save()
 
         return Response({"message": "Senha redefinida com sucesso! Você já pode entrar com a nova senha."}, status=status.HTTP_200_OK)
+
+class VerificarTelefoneView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        raw_phone = request.query_params.get("telefone", "")
+        digits = re.sub(r'\D', '', raw_phone)
+
+        if not digits:
+            return Response({"disponivel": True})
+            
+        existe = Usuario.objects.filter(telefone=digits).exists()
+        return Response({
+            "disponivel": not existe,
+            "message": "Este telefone já está em uso." if existe else "Telefone disponível."
+        })

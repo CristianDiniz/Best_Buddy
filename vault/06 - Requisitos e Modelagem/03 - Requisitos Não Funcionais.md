@@ -1,7 +1,7 @@
 # 🛡️ Requisitos Não Funcionais (RNF)
 tags: #requisitos-nao-funcionais #rnf #arquitetura #seguranca #desempenho #best-buddy
 
-Este documento detalha os **Requisitos Não Funcionais (RNF01 a RNF07)** que governam a qualidade técnica, arquitetura, usabilidade e segurança do **Best Buddy**.
+Este documento detalha os **Requisitos Não Funcionais (RNF01 a RNF08)** que governam a qualidade técnica, arquitetura, usabilidade e segurança do **Best Buddy**.
 
 ---
 
@@ -68,6 +68,11 @@ Este documento detalha os **Requisitos Não Funcionais (RNF01 a RNF07)** que gov
   - Separação estrita entre Frontend (Vanilla JS + Tailwind + Nginx) e Backend (Django REST Framework).
   - Estrutura do backend dividida em aplicações Django coesas (`usuarios`, `animais`, `servicos`, `comunidade`, `denuncias`, `adocoes`).
   - Frontend modularizado em serviços (`services/`), componentes (`components/`), utilitários (`utils/`) e páginas (`pages/`).
+### `RNF08` — Isolamento da Rota Administrativa
+* **Objetivo:** Blindagem de segurança de endpoints internos.
+* **Critérios de Aceitação:**
+  - A rota `/admin/` não deve possuir links visíveis na navegação pública da aplicação.
+  - Acesso restrito estritamente a usuários autenticados com `is_staff=True` ou `is_superuser=True`, retornando `403 Forbidden` ou redirecionando para login seguro.
 
 ---
 

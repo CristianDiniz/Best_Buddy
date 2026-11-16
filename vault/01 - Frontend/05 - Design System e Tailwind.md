@@ -51,6 +51,12 @@ Isso traz duas grandes vantagens:
 | `.bb-animal-card__image` | Container da imagem do pet com aspect-ratio 1:1 e suporte a placeholder. |
 | `.bb-skeleton` | Efeito shimmer animado para placeholders de carregamento. |
 | `.bb-stagger` | Animação escalonada em cascata para listas de cards. |
+| `.bb-modal` / `.bb-modal-dialog` | Modal popup centralizado com backdrop escuro blur, botão X, scroll interno e layout responsivo mobile. |
+| `.bb-status-badge` | Tag em pílula de alto contraste sobreposta à foto do pet (`font-weight: 800`, text-shadow e borda translúcida). |
+| `.bb-status-badge--perdido` | Variante de alerta com gradiente vermelho (`#ef4444` -> `#dc2626`) para animais desaparecidos. |
+| `.bb-status-badge--adocao` | Variante azul com gradiente para animais disponíveis para adoção. |
+| `.bb-status-badge--adotado` | Variante verde com gradiente para anúncio de adoção concluída. |
+| `.bb-status-badge--encontrado` | Variante ciano com gradiente para pet perdido recuperado. |
 
 ---
 
