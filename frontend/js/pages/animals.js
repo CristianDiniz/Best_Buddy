@@ -471,9 +471,77 @@ function goToAdoptTab(index) {
   if (body) body.scrollTop = 0;
 }
 
+function validateAdoptTab(tabIndex) {
+  modalAlertEl.innerHTML = "";
+  if (tabIndex === 0) {
+    const nomeEl = document.getElementById("pet-nome");
+    const sexoEl = document.getElementById("pet-sexo");
+    const descEl = document.getElementById("pet-descricao");
+
+    const nome = nomeEl?.value.trim();
+    const sexo = sexoEl?.value;
+    const desc = descEl?.value.trim();
+
+    if (!nome) {
+      modalAlertEl.innerHTML = '<div class="bb-alert bb-alert--error">Informe o nome do pet antes de avançar.</div>';
+      nomeEl?.focus();
+      return false;
+    }
+    if (!sexo || (sexo !== "M" && sexo !== "F")) {
+      modalAlertEl.innerHTML = '<div class="bb-alert bb-alert--error">Selecione um sexo válido para o pet antes de avançar.</div>';
+      sexoEl?.focus();
+      return false;
+    }
+    if (!desc) {
+      modalAlertEl.innerHTML = '<div class="bb-alert bb-alert--error">Escreva uma breve descrição antes de avançar.</div>';
+      descEl?.focus();
+      return false;
+    }
+    return true;
+  }
+
+  if (tabIndex === 1) {
+    const estadoEl = document.getElementById("pet-estado");
+    const cidadeEl = document.getElementById("pet-cidade");
+    const servicoEl = document.getElementById("pet-servico");
+    const localEl = document.getElementById("pet-local");
+
+    const estado = estadoEl?.value;
+    const cidade = cidadeEl?.value.trim();
+    const servico = servicoEl?.value;
+    const local = localEl?.value.trim();
+
+    if (servico === "PERDIDO" && !local) {
+      modalAlertEl.innerHTML = '<div class="bb-alert bb-alert--error">Informe o último local onde o pet foi visto.</div>';
+      localEl?.focus();
+      return false;
+    }
+    if (!estado) {
+      modalAlertEl.innerHTML = '<div class="bb-alert bb-alert--error">Selecione o estado (UF) antes de avançar.</div>';
+      estadoEl?.focus();
+      return false;
+    }
+    if (!cidade) {
+      modalAlertEl.innerHTML = '<div class="bb-alert bb-alert--error">Informe a cidade antes de avançar.</div>';
+      cidadeEl?.focus();
+      return false;
+    }
+    return true;
+  }
+
+  return true;
+}
+
 adoptTabs.forEach((tab) => {
   tab.addEventListener("click", () => {
-    goToAdoptTab(Number(tab.dataset.adoptTab || 0));
+    const target = Number(tab.dataset.adoptTab || 0);
+    if (target > activeAdoptTab) {
+      for (let i = activeAdoptTab; i < target; i++) {
+        if (!validateAdoptTab(i)) return;
+      }
+    }
+    modalAlertEl.innerHTML = "";
+    goToAdoptTab(target);
   });
 });
 
@@ -483,41 +551,7 @@ if (adoptPrevBtn) {
 
 if (adoptNextBtn) {
   adoptNextBtn.addEventListener("click", () => {
-    modalAlertEl.innerHTML = "";
-    if (activeAdoptTab === 0) {
-      const nome = document.getElementById("pet-nome")?.value.trim();
-      const desc = document.getElementById("pet-descricao")?.value.trim();
-      if (!nome) {
-        modalAlertEl.innerHTML = '<div class="bb-alert bb-alert--error">Informe o nome do pet antes de avançar.</div>';
-        document.getElementById("pet-nome")?.focus();
-        return;
-      }
-      if (!desc) {
-        modalAlertEl.innerHTML = '<div class="bb-alert bb-alert--error">Escreva uma breve descrição antes de avançar.</div>';
-        document.getElementById("pet-descricao")?.focus();
-        return;
-      }
-    } else if (activeAdoptTab === 1) {
-      const estado = document.getElementById("pet-estado")?.value;
-      const cidade = document.getElementById("pet-cidade")?.value.trim();
-      const servico = document.getElementById("pet-servico")?.value;
-      const local = document.getElementById("pet-local")?.value.trim();
-      if (servico === "PERDIDO" && !local) {
-        modalAlertEl.innerHTML = '<div class="bb-alert bb-alert--error">Informe o último local onde o pet foi visto.</div>';
-        document.getElementById("pet-local")?.focus();
-        return;
-      }
-      if (!estado) {
-        modalAlertEl.innerHTML = '<div class="bb-alert bb-alert--error">Selecione o estado (UF) antes de avançar.</div>';
-        document.getElementById("pet-estado")?.focus();
-        return;
-      }
-      if (!cidade) {
-        modalAlertEl.innerHTML = '<div class="bb-alert bb-alert--error">Informe a cidade antes de avançar.</div>';
-        document.getElementById("pet-cidade")?.focus();
-        return;
-      }
-    }
+    if (!validateAdoptTab(activeAdoptTab)) return;
     goToAdoptTab(activeAdoptTab + 1);
   });
 }
@@ -584,6 +618,37 @@ async function openAdoptModal(defaultService = "ADOCAO") {
     return;
   }
 
+  // Verificação preventiva de limite de anúncios (máx. 5 ativos para PF)
+  try {
+    const profile = await authService.getProfile();
+    const isOngOrStaff = profile?.tipo === "ONG" || profile?.is_superuser || profile?.is_staff;
+    if (!isOngOrStaff && profile?.id) {
+      const userAnimals = await animalService.list({ tutor_id: profile.id });
+      const activeAnimals = Array.isArray(userAnimals)
+        ? userAnimals.filter((a) => a.status === "DISPONIVEL" || a.status === "PERDIDO")
+        : [];
+      if (activeAnimals.length >= 5) {
+        const limitModal = document.getElementById("limit-reached-modal");
+        const closeBtn = document.getElementById("btn-close-limit-modal");
+        if (limitModal) {
+          limitModal.classList.remove("hidden");
+          document.body.style.overflow = "hidden";
+          if (closeBtn) {
+            closeBtn.onclick = () => {
+              limitModal.classList.add("hidden");
+              document.body.style.overflow = "";
+            };
+          }
+        } else {
+          alert("Limite atingido: você já possui 5 anúncios de animais ativos simultaneamente. Finalize algum anúncio no seu perfil antes de cadastrar outro.");
+        }
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn("Aviso ao checar limite preventivo:", err);
+  }
+
   currentEditingAnimalId = null;
   modalAlertEl.innerHTML = "";
   formAdoptPet.reset();
@@ -594,7 +659,7 @@ async function openAdoptModal(defaultService = "ADOCAO") {
 
   const labelImg = document.getElementById("label-pet-imagem");
   if (labelImg) {
-    labelImg.textContent = "Foto Principal * (JPEG, PNG ou WebP, máx 50MB - otimizada automaticamente)";
+    labelImg.innerHTML = '<span>Foto Principal</span> <span class="text-danger font-extrabold text-base">*</span> <span class="text-xs text-ink-300 font-normal">(máx 50MB)</span>';
   }
 
   if (wrapPetStatus) wrapPetStatus.classList.add("hidden");
@@ -678,9 +743,25 @@ if (adoptModal) {
   });
 }
 
+const limitModalEl = document.getElementById("limit-reached-modal");
+if (limitModalEl) {
+  limitModalEl.addEventListener("click", (e) => {
+    if (e.target === limitModalEl) {
+      limitModalEl.classList.add("hidden");
+      document.body.style.overflow = "";
+    }
+  });
+}
+
 window.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && adoptModal && !adoptModal.classList.contains("hidden")) {
-    closeAdoptModal();
+  if (e.key === "Escape") {
+    if (adoptModal && !adoptModal.classList.contains("hidden")) {
+      closeAdoptModal();
+    }
+    if (limitModalEl && !limitModalEl.classList.contains("hidden")) {
+      limitModalEl.classList.add("hidden");
+      document.body.style.overflow = "";
+    }
   }
 });
 
@@ -812,8 +893,8 @@ formAdoptPet.addEventListener("submit", async (e) => {
     return;
   }
 
-  if (!sexoVal) {
-    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">Por favor, selecione o sexo do pet.</div>`;
+  if (!sexoVal || (sexoVal !== "M" && sexoVal !== "F")) {
+    modalAlertEl.innerHTML = `<div class="bb-alert bb-alert--error">Por favor, selecione um sexo válido para o pet (Macho ou Fêmea).</div>`;
     goToAdoptTab(0);
     document.getElementById("pet-sexo")?.focus();
     return;
