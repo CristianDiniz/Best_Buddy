@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 import os
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
+
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -26,17 +28,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(
-    'SECRET_KEY',
-    'django-insecure--(m6f#2h@a4!l7d^hl)7)cng6zrflzb*cb_!-e*uvzf^8pwbmr'
-)
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1')
 
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    if not DEBUG:
+        raise ImproperlyConfigured('SECRET_KEY must be set when DEBUG=False.')
+    SECRET_KEY = 'django-insecure--(m6f#2h@a4!l7d^hl)7)cng6zrflzb*cb_!-e*uvzf^8pwbmr'
+
 allowed_hosts_env = os.getenv('ALLOWED_HOSTS', '*')
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',') if host.strip()]
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 REST_FRAMEWORK = {
@@ -62,6 +66,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "config.middleware.HealthCheckMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -168,6 +173,32 @@ CORS_ALLOWED_ORIGINS = list(dict.fromkeys(default_cors))
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+ANIMAL_MEDIA_BUCKET = os.getenv('ANIMAL_MEDIA_BUCKET', '').strip()
+AWS_REGION = os.getenv('AWS_REGION', 'us-east-2')
+
+if not DEBUG and not ANIMAL_MEDIA_BUCKET:
+    raise ImproperlyConfigured(
+        'ANIMAL_MEDIA_BUCKET must be set when DEBUG=False.'
+    )
+
+if ANIMAL_MEDIA_BUCKET:
+    STORAGES = {
+        'default': {
+            'BACKEND': 'storages.backends.s3.S3Storage',
+            'OPTIONS': {
+                'bucket_name': ANIMAL_MEDIA_BUCKET,
+                'region_name': AWS_REGION,
+                'addressing_style': 'path',
+                'default_acl': None,
+                'querystring_auth': True,
+                'file_overwrite': False,
+            },
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        },
+    }
 
 # Email Configuration
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')

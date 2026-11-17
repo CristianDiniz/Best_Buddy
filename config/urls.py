@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from .health import liveness_check, readiness_check
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -14,6 +15,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('healthz/live/', liveness_check, name='healthz-live'),
+    path('healthz/ready/', readiness_check, name='healthz-ready'),
 
     path('api/animais/', include('animais.urls')),
     path('api/usuarios/', include('usuarios.urls')),
