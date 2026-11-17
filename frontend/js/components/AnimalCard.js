@@ -1,3 +1,31 @@
+function bbFormatTimeAgo(dateString) {
+  if (!dateString) return "Publicado recentemente";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "Publicado recentemente";
+
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHours = Math.floor(diffMin / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffSec < 60) return "Publicado agora";
+  if (diffMin < 60) return `Publicado há ${diffMin} min`;
+  if (diffHours < 24) return diffHours === 1 ? "Publicado há 1 hora" : `Publicado há ${diffHours} horas`;
+  if (diffDays === 1) return "Publicado ontem";
+  if (diffDays < 7) return `Publicado há ${diffDays} dias`;
+  if (diffDays < 30) {
+    const weeks = Math.floor(diffDays / 7);
+    return weeks === 1 ? "Publicado há 1 semana" : `Publicado há ${weeks} semanas`;
+  }
+  return `Publicado em ${date.toLocaleDateString("pt-BR")}`;
+}
+
+if (typeof window !== "undefined") {
+  window.bbFormatTimeAgo = bbFormatTimeAgo;
+}
+
 function bbAnimalCardHtml(animal) {
   const isPerdido = animal.tipo_servico === "PERDIDO";
   const sexoLabel = animal.sexo === "M" ? "Macho" : animal.sexo === "F" ? "Fêmea" : "Indeterminado";
@@ -96,6 +124,11 @@ function bbAnimalCardHtml(animal) {
               Visto em: ${animal.local}
             </p>
           ` : ""}
+
+          <div class="bb-pet-card__posted flex items-center gap-1.5 text-[11px] text-slate-500 font-medium mt-2 pt-2 border-t border-slate-100" title="${animal.created_at ? new Date(animal.created_at).toLocaleString('pt-BR') : ''}">
+            <span class="text-xs">🕒</span>
+            <span>${bbFormatTimeAgo(animal.created_at)}</span>
+          </div>
         </div>
       </div>
 

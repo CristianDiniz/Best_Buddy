@@ -607,7 +607,10 @@
   }
 
   .bb-hero__arrow {
-    @apply absolute top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/85 hover:bg-white text-brand-900 flex items-center justify-center text-lg sm:text-xl font-bold shadow-card border-none cursor-pointer transition-all duration-200 ease-out-expo hover:scale-105;
+    @apply absolute top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-11 sm:h-11 rounded-full bg-white/90 hover:bg-white text-brand-900 flex items-center justify-center text-lg sm:text-xl font-bold shadow-card border-none cursor-pointer transition-all duration-200 ease-out-expo hover:scale-105;
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: manipulation;
   }
 
   .bb-hero__arrow--prev {
@@ -623,7 +626,18 @@
   }
 
   .bb-hero__dot {
-    @apply w-2.5 h-2.5 rounded-full bg-white/60 border-none cursor-pointer p-0 transition-all duration-200 ease-out-expo hover:bg-white/85;
+    @apply w-2.5 h-2.5 rounded-full bg-white/60 border-none cursor-pointer p-0 transition-all duration-200 ease-out-expo hover:bg-white/85 relative;
+    touch-action: manipulation;
+  }
+
+  .bb-hero__dot::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .bb-hero__dot.is-active {

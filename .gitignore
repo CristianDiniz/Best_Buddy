@@ -23,6 +23,7 @@ vault/assets/
 *.pt
 *.onnx
 !yolov8n.onnx
+!opennsfw2.onnx
 *.h5
 
 # Environment variables

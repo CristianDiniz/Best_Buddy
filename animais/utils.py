@@ -15,6 +15,7 @@ CONFIANCA_MINIMA_PET = 0.45
 LIMIAR_NSFW_SEGURANCA = 0.60
 
 _yolo_model = None
+_nsfw_model = None
 
 
 class _ONNXBox:
@@ -71,14 +72,53 @@ def get_yolo_detector():
     return _yolo_model
 
 
+class ONNXNSFWDetector:
+    """Wrapper leve sobre onnxruntime.InferenceSession para o modelo OpenNSFW2 (ONNX)."""
+    def __init__(self, model_path):
+        import onnxruntime as ort
+        self.session = ort.InferenceSession(model_path, providers=['CPUExecutionProvider'])
+        self.input_name = self.session.get_inputs()[0].name
+
+    def __call__(self, img_pil):
+        import numpy as np
+        img_rgb = img_pil if img_pil.mode == 'RGB' else img_pil.convert('RGB')
+        img_resized = img_rgb.resize((256, 256), Image.Resampling.BILINEAR)
+        img_cropped = img_resized.crop((16, 16, 240, 240))
+        arr = np.asarray(img_cropped, dtype=np.float32)[:, :, ::-1]
+        arr = arr - np.array([104.0, 117.0, 123.0], dtype=np.float32)
+        tensor = arr[np.newaxis, ...]
+
+        outputs = self.session.run(None, {self.input_name: tensor})[0]
+        return float(outputs[0][1])
+
+
+def get_nsfw_detector():
+    """Carrega o modelo OpenNSFW2 (ONNX) sob demanda em memória (Singleton)."""
+    global _nsfw_model
+    if _nsfw_model is None:
+        try:
+            base_dir = getattr(settings, 'BASE_DIR', None)
+            caminho_local = os.path.join(str(base_dir), 'opennsfw2.onnx') if base_dir else 'opennsfw2.onnx'
+            _nsfw_model = ONNXNSFWDetector(caminho_local if os.path.exists(caminho_local) else 'opennsfw2.onnx')
+            logger.info("OpenNSFW2 (ONNX) carregado com sucesso.")
+        except Exception as e:
+            logger.error(f"Falha ao carregar modelo OpenNSFW2 ONNX: {e}")
+            return None
+    return _nsfw_model
+
+
 def verificar_seguranca_nsfw(img_pil, threshold=LIMIAR_NSFW_SEGURANCA):
     """
     Verifica se a imagem contém conteúdo impróprio, adulto ou nudez/gore.
     Retorna: (is_safe: bool, score: float)
     """
+    detector = get_nsfw_detector()
+    if detector is None:
+        logger.warning("Filtro de segurança NSFW indisponível. Imagem aprovada por fallback resiliente.")
+        return True, 0.0
+
     try:
-        import opennsfw2 as n2
-        score = float(n2.predict_image(img_pil))
+        score = float(detector(img_pil))
         is_safe = score < threshold
         return is_safe, score
     except Exception as e:

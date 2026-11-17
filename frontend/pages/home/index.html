@@ -179,7 +179,7 @@
       unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
     }
   </style>
-  <link rel="stylesheet" href="../../css/tailwind.build.css?v=8" />
+  <link rel="stylesheet" href="../../css/tailwind.build.css?v=9" />
   <link rel="stylesheet" href="../../css/logo-loop.css" media="print" onload="this.media='all'" />
   <noscript>
     <link rel="stylesheet" href="../../css/logo-loop.css" />
@@ -192,7 +192,7 @@
       <div class="bb-topbar"></div>
       <header class="bb-header">
         <div class="bb-container bb-header__bar bb-header__bar--nav">
-          <a href="/pages/home/index.html" class="bb-logo shrink-0">
+          <a href="/pages/home/index.html" class="bb-logo shrink-0" aria-label="Ir para a página inicial">
             <span class="bb-logo__text bb-logo__text--dark">Best</span><span
               class="bb-logo__text bb-logo__text--accent">Buddy</span>
           </a>
@@ -217,9 +217,9 @@
           </nav>
           <div class="bb-nav__user flex items-center gap-1.5 sm:gap-2">
             <a href="/pages/auth/login.html"
-              class="bb-btn bb-btn--secondary !px-2.5 sm:!px-4 !py-1 sm:!py-1.5 !text-xs whitespace-nowrap">Entrar</a>
+              class="bb-btn bb-btn--secondary min-h-[44px] inline-flex items-center justify-center !px-3 sm:!px-4 !py-1.5 sm:!py-1.5 !text-xs whitespace-nowrap">Entrar</a>
             <a href="/pages/auth/register.html"
-              class="bb-btn bb-btn--primary !px-2.5 sm:!px-4 !py-1 sm:!py-1.5 !text-xs whitespace-nowrap">Cadastre-se</a>
+              class="bb-btn bb-btn--primary min-h-[44px] inline-flex items-center justify-center !px-3 sm:!px-4 !py-1.5 sm:!py-1.5 !text-xs whitespace-nowrap">Cadastre-se</a>
           </div>
         </div>
       </header>
@@ -357,30 +357,9 @@
           </div>
         </section>
 
-        <!-- Seção: Pets esperando por um lar -->
-        <section class="bb-pets-section">
-          <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-            <div>
-              <h2 class="text-xl md:text-2xl font-bold text-[#1e293b] flex items-center gap-2 mb-1">
-                Pets esperando por um lar
-              </h2>
-              <p class="text-xs text-[#64748b]">Conheça alguns dos companheiros disponíveis para adoção responsável.</p>
-            </div>
-            <div class="flex items-center gap-3">
-              <div id="bb-home-adopted-badge"
-                class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-700 text-xs font-semibold shadow-xs">
-                <span>🎉</span> <span id="bb-home-adopted-count" class="font-extrabold text-emerald-800">0</span> pets
-                já adotados!
-              </div>
-              <a href="/pages/animals/index.html"
-                class="text-xs font-semibold text-[#2f80ed] hover:text-[#1a6edb] hover:underline flex items-center gap-1 transition-colors">
-                Ver todos os pets →
-              </a>
-            </div>
-          </div>
-
-          <!-- Filtros rápidos por categoria (Todos, Cães, Gatos) -->
-          <div class="flex items-center gap-2 mb-6 flex-wrap" id="bb-home-filters">
+        <!-- Filtros rápidos por categoria (Todos, Cães, Gatos) com Dica Mobile -->
+        <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
+          <div class="flex items-center gap-2 flex-wrap" id="bb-home-filters">
             <button type="button" data-filter="ALL"
               class="bb-filter-pill active px-4 py-2 rounded-full text-xs font-semibold transition-all bg-[#2f80ed] text-white shadow-sm flex items-center gap-1.5 cursor-pointer">
               <span>🐾</span> Todos
@@ -394,9 +373,30 @@
               <span>🐱</span> Gatos
             </button>
           </div>
+          <span
+            class="text-[11px] font-semibold text-[#1d4ed8] bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full flex items-center gap-1 md:hidden">
+            <span>⇄</span> Deslize para o lado
+          </span>
+        </div>
 
-          <!-- Grid de Cards de Pets -->
-          <div id="bb-home-pets">
+        <!-- Seção 1: Animais para Adoção -->
+        <section class="bb-pets-section" id="bb-section-adopt" aria-label="Pets para adoção">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 class="text-xl md:text-2xl font-bold text-[#1e293b] flex items-center gap-2 mb-1">
+                <span>🐾</span> Pets esperando por um lar
+              </h2>
+              <p class="text-xs text-[#334155]">Recém-anunciados para adoção responsável (máx. 5 mais recentes).
+              </p>
+            </div>
+            <a href="/pages/animals/index.html"
+              class="text-xs font-semibold text-[#1d4ed8] hover:text-[#1e40af] hover:underline flex items-center gap-1 transition-colors">
+              Ver todos os pets para adoção →
+            </a>
+          </div>
+
+          <!-- Carrossel Strip: Adoção -->
+          <div id="bb-home-pets-adopt" class="bb-home-carousel-strip">
             <div class="bb-card--tight bg-surface-800 border border-border rounded-xl overflow-hidden">
               <div class="bb-skeleton aspect-[4/3] rounded-none"></div>
               <div class="p-4 flex flex-col gap-2">
@@ -411,6 +411,97 @@
                 <div class="bb-skeleton h-3 w-1/2"></div>
               </div>
             </div>
+            <div class="bb-card--tight bg-surface-800 border border-border rounded-xl overflow-hidden">
+              <div class="bb-skeleton aspect-[4/3] rounded-none"></div>
+              <div class="p-4 flex flex-col gap-2">
+                <div class="bb-skeleton h-4 w-3/4"></div>
+                <div class="bb-skeleton h-3 w-1/2"></div>
+              </div>
+            </div>
+            <div class="bb-card--tight bg-surface-800 border border-border rounded-xl overflow-hidden">
+              <div class="bb-skeleton aspect-[4/3] rounded-none"></div>
+              <div class="p-4 flex flex-col gap-2">
+                <div class="bb-skeleton h-4 w-3/4"></div>
+                <div class="bb-skeleton h-3 w-1/2"></div>
+              </div>
+            </div>
+            <div class="bb-card--tight bg-surface-800 border border-border rounded-xl overflow-hidden">
+              <div class="bb-skeleton aspect-[4/3] rounded-none"></div>
+              <div class="p-4 flex flex-col gap-2">
+                <div class="bb-skeleton h-4 w-3/4"></div>
+                <div class="bb-skeleton h-3 w-1/2"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Seção 2: Animais Desaparecidos -->
+        <section class="bb-pets-section" id="bb-section-lost" aria-label="Pets desaparecidos">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 class="text-xl md:text-2xl font-bold text-[#1e293b] flex items-center gap-2 mb-1">
+                <span>🔍</span> Animais Desaparecidos
+              </h2>
+              <p class="text-xs text-[#334155]">Ajude famílias a encontrarem seus pets perdidos recentemente (máx.
+                5 mais recentes).</p>
+            </div>
+            <a href="/pages/animals/index.html#bb-lost-section"
+              class="text-xs font-semibold text-amber-800 hover:text-amber-900 hover:underline flex items-center gap-1 transition-colors">
+              Ver todos os desaparecidos →
+            </a>
+          </div>
+
+          <!-- Carrossel Strip: Desaparecidos -->
+          <div id="bb-home-pets-lost" class="bb-home-carousel-strip">
+            <div class="bb-card--tight bg-surface-800 border border-border rounded-xl overflow-hidden">
+              <div class="bb-skeleton aspect-[4/3] rounded-none"></div>
+              <div class="p-4 flex flex-col gap-2">
+                <div class="bb-skeleton h-4 w-3/4"></div>
+                <div class="bb-skeleton h-3 w-1/2"></div>
+              </div>
+            </div>
+            <div class="bb-card--tight bg-surface-800 border border-border rounded-xl overflow-hidden">
+              <div class="bb-skeleton aspect-[4/3] rounded-none"></div>
+              <div class="p-4 flex flex-col gap-2">
+                <div class="bb-skeleton h-4 w-3/4"></div>
+                <div class="bb-skeleton h-3 w-1/2"></div>
+              </div>
+            </div>
+            <div class="bb-card--tight bg-surface-800 border border-border rounded-xl overflow-hidden">
+              <div class="bb-skeleton aspect-[4/3] rounded-none"></div>
+              <div class="p-4 flex flex-col gap-2">
+                <div class="bb-skeleton h-4 w-3/4"></div>
+                <div class="bb-skeleton h-3 w-1/2"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Seção 3: Animais Já Adotados -->
+        <section class="bb-pets-section" id="bb-section-adopted" aria-label="Pets já adotados">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 class="text-xl md:text-2xl font-bold text-[#1e293b] flex items-center gap-2 mb-1">
+                <span>🎉</span> Finais Felizes • Já Adotados
+              </h2>
+              <p class="text-xs text-[#334155]">Comemore com os pets que já ganharam um novo lar (máx. 5 mais
+                recentes).</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <div id="bb-home-adopted-badge"
+                class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-800 text-xs font-semibold shadow-xs">
+                <span>🎉</span> <span id="bb-home-adopted-count" class="font-extrabold text-emerald-900">0</span>
+                pets já adotados!
+              </div>
+              <a href="/pages/animals/index.html"
+                class="text-xs font-semibold text-[#1d4ed8] hover:text-[#1e40af] hover:underline flex items-center gap-1 transition-colors">
+                Ver todos →
+              </a>
+            </div>
+          </div>
+
+          <!-- Carrossel Strip: Já Adotados -->
+          <div id="bb-home-pets-adopted" class="bb-home-carousel-strip">
             <div class="bb-card--tight bg-surface-800 border border-border rounded-xl overflow-hidden">
               <div class="bb-skeleton aspect-[4/3] rounded-none"></div>
               <div class="p-4 flex flex-col gap-2">
@@ -439,7 +530,8 @@
         <section class="bb-steps-section" aria-label="Como funciona a adoção">
           <div class="text-center mb-12 md:mb-16">
             <h2 class="text-2xl md:text-3xl font-extrabold text-[#1e293b] mb-2">Como funciona a adoção?</h2>
-            <p class="text-sm text-[#64748b]">Processo simples, transparente e cheio de amor.</p>
+            <p class="text-sm text-[#334155]" ; style="padding: 20px;">Processo simples, transparente e cheio de amor.
+            </p>
           </div>
 
           <div class="bb-steps-grid">
@@ -453,7 +545,8 @@
                 </svg>
               </div>
               <h3 class="bb-step-card__title">Escolha um pet</h3>
-              <p class="bb-step-card__desc">Navegue pelos animais disponíveis e encontre seu companheiro ideal.</p>
+              <p class="bb-step-card__desc">Navegue pelos animais disponíveis e encontre seu companheiro ideal.
+              </p>
             </div>
 
             <!-- Passo 2 -->
@@ -470,7 +563,8 @@
                 </svg>
               </div>
               <h3 class="bb-step-card__title">Converse com o tutor</h3>
-              <p class="bb-step-card__desc">Entre em contato via WhatsApp ou ligação para tirar dúvidas e alinhar os
+              <p class="bb-step-card__desc">Entre em contato via WhatsApp ou ligação para tirar dúvidas e alinhar
+                os
                 detalhes da adoção.</p>
             </div>
 
@@ -489,7 +583,8 @@
                 </svg>
               </div>
               <h3 class="bb-step-card__title">Leve para casa</h3>
-              <p class="bb-step-card__desc">Combine o encontro para conhecer seu novo companheiro e dê a ele um lar
+              <p class="bb-step-card__desc">Combine o encontro para conhecer seu novo companheiro e dê a ele um
+                lar
                 cheio de amor.</p>
             </div>
           </div>
@@ -515,7 +610,7 @@
           <div style="display: flex; align-items: center; gap: 1.5rem; font-size: 0.8rem; flex-wrap: wrap;">
             <a href="/pages/about/index.html" id="bb-footer-link-about"
               style="color: #cbd5e1; text-decoration: none; transition: color 0.2s;">Sobre nós</a>
-            <a href="/pages/animals/index.html"
+            <a href="/pages/about/index.html#contato"
               style="color: #cbd5e1; text-decoration: none; transition: color 0.2s;">Contato</a>
             <a href="/pages/legal/terms.html"
               style="color: #cbd5e1; text-decoration: none; transition: color 0.2s;">Termos de Uso</a>
