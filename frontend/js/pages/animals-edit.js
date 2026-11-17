@@ -215,7 +215,7 @@
   function validate(values) {
     const errors = [];
     if (!values.nome) errors.push({ tab: 0, el: nomeInput, msg: "Informe o nome do pet." });
-    if (!values.sexo) errors.push({ tab: 0, el: sexoSelect, msg: "Selecione o sexo do pet." });
+    if (!values.sexo || (values.sexo !== "M" && values.sexo !== "F")) errors.push({ tab: 0, el: sexoSelect, msg: "Selecione um sexo válido para o pet (Macho ou Fêmea)." });
     if (!values.descricao) errors.push({ tab: 0, el: descInput, msg: "Escreva uma breve descrição do pet." });
     if (!values.estado) errors.push({ tab: 1, el: estadoSelect, msg: "Selecione o estado (UF)." });
     if (!values.cidade) errors.push({ tab: 1, el: cidadeInput, msg: "Informe a cidade." });
