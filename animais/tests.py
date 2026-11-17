@@ -35,6 +35,13 @@ class ValidadorImagemAITests(TestCase):
         self.assertEqual(codigo, 'PET_NOT_FOUND')
         self.assertIn("Não conseguimos identificar um cão ou gato com clareza", erro)
 
+    def test_verificar_seguranca_nsfw_onnx_ativo(self):
+        """O detector OpenNSFW2 (ONNX) deve avaliar a imagem neutra e retornar score > 0 (ativo) e is_safe=True."""
+        is_safe, score = verificar_seguranca_nsfw(self.img_neutra)
+        self.assertTrue(is_safe)
+        self.assertGreater(score, 0.0)
+        self.assertLess(score, 0.60)
+
     @patch('animais.utils.verificar_seguranca_nsfw')
     def test_rejeita_conteudo_inseguro_nsfw(self, mock_nsfw):
         """Se o classificador NSFW acusar risco, bloqueia com mensagem de segurança da comunidade."""
