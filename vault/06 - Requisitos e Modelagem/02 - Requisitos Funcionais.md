@@ -22,16 +22,12 @@ Este documento cataloga os Requisitos Funcionais do sistema **Best Buddy**, orga
 ### `RF03` — Redirecionamento de Usuários Autenticados
 * **Descrição:** Usuários logados, ao tentarem acessar as rotas de autenticação, serão redirecionados para a página Home.
 
-### `RF04` — Gestão de Perfil do Tutor ("Editar Perfil")
-* **Descrição:** Interface autenticada para o usuário gerenciar suas credenciais e contato com regras de segurança estritas:
-  1. **Imutabilidade do Nome:** O nome do usuário não pode ser alterado após a criação da conta, permanecendo como dado cadastral permanente na interface e na API (futura alteração mediante suporte).
-  2. **Alteração de E-mail (Duplo Fator - 2FA):** A alteração de e-mail exige obrigatoriamente autenticação em duas etapas:
-     - *1º Fator:* Informação da senha atual do usuário e formato válido do novo e-mail.
-     - *2º Fator:* Envio de token/código de confirmação ao novo e-mail solicitado e validação obrigatória do token. O e-mail só é atualizado no sistema após a confirmação do token.
-  3. **Alteração de Telefone (Duplo Fator - 2FA):** A alteração do número de telefone celular/WhatsApp exige obrigatoriamente autenticação em duas etapas:
-     - *1º Fator:* Solicitação pelo usuário autenticado informando o novo número de celular com DDD válido.
-     - *2º Fator:* Envio de código OTP de verificação via WhatsApp e validação obrigatória do código recebido. O novo telefone só é salvo e ativado no cadastro após a validação do código.
-  4. **Alteração de Senha:** Exige confirmação da senha atual para autorizar a definição e hash da nova senha forte (mínimo de 8 caracteres contendo letras maiúsculas, minúsculas, número e caractere especial).
+### `RF04` — Gestão de Perfil do Tutor ("Meu Perfil")
+* **Descrição:** Interface autenticada para o usuário consultar seus dados cadastrais, atualizar sua foto, gerenciar credenciais e administrar seus anúncios:
+  1. **Imutabilidade de Dados Cadastrais (Nome, E-mail e Telefone):** Por regras de integridade cadastral e segurança, o nome completo, o e-mail e o número de telefone/WhatsApp são fixos após o cadastro e não possuem formulários de edição livre na interface de perfil (permanecem visíveis como dados cadastrais consultivos permanentes; eventuais retificações dependem de suporte administrativo).
+  2. **Atualização de Foto de Perfil (Avatar):** O usuário pode atualizar ou remover sua foto de perfil, refletindo em tempo real nos componentes de identificação e navegação.
+  3. **Alteração de Senha:** Exige confirmação da senha atual para autorizar a definição e hash da nova senha forte (mínimo de 8 caracteres contendo letras maiúsculas, minúsculas, número e caractere especial).
+  4. **Gerenciamento de Anúncios ("Meus Anúncios Publicados"):** Visualização de todos os animais anunciados pelo usuário com indicação de status, contador de cota ativa (máx. 5 ativos), data de publicação, atalho para edição, encerramento rápido (marcar adotado/encontrado) e exclusão de anúncio.
 
 ---
 

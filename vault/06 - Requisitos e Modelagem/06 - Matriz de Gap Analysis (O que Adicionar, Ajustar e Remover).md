@@ -9,7 +9,7 @@ Este documento apresenta a análise de divergências entre a base de código do 
 
 | Recurso / Item | Onde Deve Ser Adicionado | Detalhes Técnicos da Adição | Prioridade |
 | :--- | :--- | :--- | :---: |
-| **Tela "Editar Perfil"** | Frontend: `pages/auth/profile.html`<br>Backend: `usuarios/views.py` | Telas e endpoints para: 1) Alteração de email com 2FA (senha atual + token por email); 2) Alteração de senha com confirmação de senha atual; 3) Alteração de telefone com 2FA (código OTP WhatsApp); 4) Bloqueio de alteração de nome (imutável após criação). | 🔴 Alta |
+| **Tela "Meu Perfil"** | Frontend: `pages/auth/profile.html`<br>Backend: `usuarios/views.py` | Telas e fluxos para: 1) Consulta de dados cadastrais imutáveis (nome, email, telefone); 2) Atualização de foto de perfil (avatar); 3) Alteração de senha com confirmação de senha atual; 4) Gestão de "Meus Anúncios Publicados" com ações de status e exclusão. | 🔴 Alta |
 | **Campo `telefone` no Usuário** | Backend: `usuarios/models.py`<br>Frontend: `register.html` e `profile.html` | Inclusão de `telefone` (CharField obrigatório e único com DDD) diretamente no modelo `Usuario`. | 🔴 Alta |
 | **Tabela Unificada de Animais (`Animal`)** | Backend: `animais/models.py`<br>Frontend: `animals/index.html` e modais | Unificar adoção e animais perdidos em uma única tabela com flag `tipo_servico` (`ADOCAO` / `PERDIDO`). Contato resolvido via FK com o tutor (`animal.tutor.telefone`). | 🔴 Alta |
 | **Padronização Geográfica (Estado e Cidade)** | Backend: `animais/models.py`<br>Frontend: formulários de animais | Adicionar campo `estado` (Enum de 27 UFs) e integração com ViaCEP/IBGE para preenchimento de cidade e estado sem permitir digitação livre inconsistente. | 🔴 Alta |

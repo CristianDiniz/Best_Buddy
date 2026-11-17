@@ -185,15 +185,34 @@ function bbCheckSessionExpiredNotice() {
   const params = new URLSearchParams(window.location.search);
   if (params.get("session") === "expired") {
     const banner = document.createElement("div");
-    banner.className =
-      "bg-amber-500/10 border border-amber-500/30 text-amber-700 text-sm px-4 py-3 rounded-xl mb-6 flex items-center justify-between";
+    banner.className = "bb-session-notice";
+    banner.style = "background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1px solid #fde68a; border-radius: 14px; padding: 14px 18px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.08); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;";
     banner.innerHTML = `
-      <div class="flex items-center gap-2">
-        <span>Sua sessão expirou por inatividade. Você pode continuar navegando ou entrar novamente quando quiser.</span>
+      <div style="display: flex; align-items: center; gap: 12px; min-width: 250px; flex: 1;">
+        <div style="width: 42px; height: 42px; min-width: 42px; border-radius: 10px; background: #fef3c7; border: 1px solid #fcd34d; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
+          ⏱️
+        </div>
+        <div>
+          <h4 style="font-size: 14px; font-weight: 700; color: #92400e; margin: 0 0 2px 0; line-height: 1.3;">
+            Sua sessão expirou por inatividade
+          </h4>
+          <p style="font-size: 12px; color: #b45309; margin: 0; line-height: 1.4;">
+            Faça login novamente para gerenciar seus anúncios e acessar sua conta com segurança.
+          </p>
+        </div>
       </div>
-      <button type="button" class="text-amber-700 hover:text-ink-100 text-xs font-bold uppercase tracking-wider ml-4 cursor-pointer" onclick="this.parentElement.remove()">&times;</button>
+
+      <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: auto; flex-wrap: wrap;">
+        <a href="/pages/auth/login.html" style="font-size: 12px; font-weight: 700; color: #ffffff; background: #d97706; padding: 8px 16px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); transition: background 0.15s ease;">
+          <span>🔑</span> Fazer Login
+        </a>
+        <button type="button" onclick="this.closest('.bb-session-notice').remove()" title="Continuar navegando" style="font-size: 12px; font-weight: 600; color: #92400e; background: #ffffff; border: 1px solid #fcd34d; padding: 7px 12px; border-radius: 8px; cursor: pointer; transition: all 0.15s ease;">
+          Dispensar
+        </button>
+      </div>
     `;
-    const container = document.querySelector(".bb-container");
+
+    const container = document.querySelector("main.bb-main .bb-container") || document.querySelector("main .bb-container") || document.querySelector(".bb-container");
     if (container) {
       container.insertBefore(banner, container.firstChild);
     }
