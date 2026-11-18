@@ -12,6 +12,11 @@ metadata:
     app: bestbuddy-api
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: bestbuddy-api
