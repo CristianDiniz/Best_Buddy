@@ -4,11 +4,12 @@ on:
   pull_request:
     branches: ["main"]
   push:
-    branches: ["main", "develop"]
+    branches: ["main", "develop", "aws"]
   workflow_dispatch:
 
 permissions:
   contents: read
+  pages: none
 
 env:
   AWS_REGION: us-east-2
@@ -46,7 +47,7 @@ jobs:
   deploy:
     name: Build image and deploy to EKS
     needs: test
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/aws') && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
