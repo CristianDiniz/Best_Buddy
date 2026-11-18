@@ -208,6 +208,10 @@
                 0
               </span>
             </div>
+            <a href="/pages/community/index.html"
+              class="text-xs text-brand-500 hover:underline flex items-center gap-1 font-medium">
+              Reportar desaparecimento no mural &rarr;
+            </a>
           </div>
           <p class="text-xs text-ink-300 mb-4">
             Estes pets precisam da ajuda da comunidade. Se reconhecer algum, entre em contato imediatamente com o tutor.
@@ -358,13 +362,13 @@
                   <div>
                     <label class="bb-label" for="pet-sexo">Sexo <span class="bb-edit-required">*</span></label>
                     <select class="bb-input" id="pet-sexo" required>
-                      <option value="" selected disabled hidden>Selecione...</option>
+                      <option value="" selected disabled>Selecione...</option>
                       <option value="M">Macho</option>
                       <option value="F">Fêmea</option>
                     </select>
                   </div>
                   <div>
-                    <label class="bb-label" for="pet-raca">Raça</label>
+                    <label class="bb-label" for="pet-raca">Raça (opcional)</label>
                     <input class="bb-input" type="text" id="pet-raca" placeholder="Ex: SRD, Poodle..." />
                   </div>
                   <div>
@@ -480,16 +484,10 @@
               </div>
 
               <div class="bb-edit-section">
-                <p class="bb-edit-section__title flex items-center gap-1.5 flex-wrap">
-                  <span>📷 Foto do Pet</span>
-                  <span class="text-danger font-extrabold text-xl leading-none" title="Campo obrigatório"
-                    aria-label="Obrigatório">*</span>
-                </p>
+                <p class="bb-edit-section__title">📷 Foto do Pet</p>
                 <div class="bb-edit-field">
-                  <label class="bb-label flex items-center gap-1" for="pet-imagem" id="label-pet-imagem">
-                    <span>Foto Principal</span>
-                    <span class="text-danger font-extrabold text-base">*</span>
-                  </label>
+                  <label class="bb-label" for="pet-imagem" id="label-pet-imagem">Foto Principal <span
+                      class="bb-edit-required">*</span></label>
                   <input class="hidden" type="file" id="pet-imagem"
                     accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
 
@@ -555,37 +553,6 @@
       </div>
     </div>
 
-    <!-- Modal Informativo: Limite de Anúncios Atingido (Aviso Preventivo Imediato) -->
-    <div id="limit-reached-modal" class="bb-modal-overlay hidden" role="dialog" aria-modal="true"
-      aria-labelledby="limit-modal-title">
-      <div class="bb-modal-dialog !max-w-md text-center !p-6 sm:!p-8">
-        <div
-          class="w-16 h-16 rounded-full bg-amber-100 text-amber-600 text-3xl flex items-center justify-center mx-auto mb-4 border border-amber-200 shadow-sm">
-          ⚠️
-        </div>
-        <h3 id="limit-modal-title" class="text-xl font-extrabold text-ink-100 mb-2">
-          Limite de Anúncios Atingido
-        </h3>
-        <p class="text-sm text-ink-300 mb-6 leading-relaxed">
-          Você já possui <strong class="text-ink-100 font-bold">5 anúncios ativos simultaneamente</strong> (limite
-          máximo para contas pessoais).
-          <br /><br />
-          Para cadastrar um novo animal, finalize algum anúncio anterior no seu perfil marcando-o como <span
-            class="text-emerald-700 font-semibold">Adotado</span> ou <span
-            class="text-brand-500 font-semibold">Encontrado</span>.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-2.5 justify-center">
-          <a href="/pages/auth/profile.html#meus-anuncios"
-            class="bb-btn bb-btn--primary text-sm py-2 px-4 whitespace-nowrap">
-            Gerenciar Meus Anúncios
-          </a>
-          <button type="button" class="bb-btn bb-btn--secondary text-sm py-2 px-4" id="btn-close-limit-modal">
-            Fechar
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- Modal de Edição de Anúncio (somente o dono do anúncio) -->
     <div id="edit-modal" class="bb-modal-overlay hidden" role="dialog" aria-modal="true"
       aria-labelledby="edit-modal-title">
@@ -642,7 +609,7 @@
               <div class="bb-edit-field">
                 <label class="bb-label" for="edit-sexo">Sexo <span class="bb-edit-required">*</span></label>
                 <select class="bb-input" id="edit-sexo" name="edit-sexo" required>
-                  <option value="" selected disabled hidden>Selecione...</option>
+                  <option value="" selected disabled>Selecione...</option>
                   <option value="M">Macho</option>
                   <option value="F">Fêmea</option>
                 </select>

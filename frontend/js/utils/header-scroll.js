@@ -12,26 +12,12 @@ function bbInitHeaderScrollEffect(headerEl) {
   if (!headerEl) return;
 
   const THRESHOLD = 40;
-  let ticking = false;
-  let lastScrolled = null;
-
-  function update() {
-    ticking = false;
-    const currentY = window.pageYOffset || document.documentElement.scrollTop || 0;
-    const isScrolled = currentY > THRESHOLD;
-    if (isScrolled !== lastScrolled) {
-      lastScrolled = isScrolled;
-      headerEl.classList.toggle("bb-header--scrolled", isScrolled);
-    }
-  }
 
   function onScroll() {
-    if (!ticking) {
-      ticking = true;
-      requestAnimationFrame(update);
-    }
+    const isScrolled = window.scrollY > THRESHOLD;
+    headerEl.classList.toggle("bb-header--scrolled", isScrolled);
   }
 
   window.addEventListener("scroll", onScroll, { passive: true });
-  update();
+  onScroll();
 }

@@ -128,3 +128,20 @@ Toda a documentação arquitetural, contratos de API, modelagem e regras de neg�
 - **Regras de Negócio & Roadmap**: `vault/06 - Requisitos e Modelagem/`
 
 Para visualizar a documentação interativa com links bidirecionais e navegação em grafo, abra a pasta `vault/` no aplicativo [Obsidian](https://obsidian.md).
+
+## Deploy na AWS (EKS)
+
+O diretório `k8s/` e o workflow `.github/workflows/deploy.yml` publicam a API e o frontend no EKS. Provisione primeiro a infraestrutura em `../infra-aws/terraform`; ela deve criar o cluster `cluster-app-best-buddy-aws`, o RDS `mysql-best-buddy-aws`, o repositório ECR `hello-aws-service` e o bucket S3 privado para fotos. O bucket esperado no Deployment é `bestbuddy-animal-media-306180879419-us-east-2`.
+
+Antes do `terraform init`, crie o bucket privado de estado `tfstate-best-buddy-aws-306180879419` na região `us-east-2`; o backend S3 do Terraform exige que ele já exista.
+
+Configure estes secrets no repositório GitHub antes de executar o workflow:
+
+- `AWS_ACCESS_KEY_ID` e `AWS_SECRET_ACCESS_KEY`: credenciais com permissões para publicar no ECR, acessar o EKS, consultar o RDS e ler o segredo de banco no Secrets Manager.
+- `DJANGO_SECRET_KEY`: chave longa e aleatória usada pelo Django em produção.
+
+O usuário/role das credenciais de deploy também precisa estar autorizado no cluster EKS. O workflow obtém as credenciais do RDS e cria o Secret Kubernetes `bestbuddy-api-secrets`; ele aplica as migrações na inicialização do container. O workflow executa deploy automaticamente em `main` após os testes.
+
+O backend usa URLs pré-assinadas regionais para ler imagens privadas no S3. Não defina credenciais AWS no Deployment: o acesso ao bucket usa a associação EKS Pod Identity do service account `bestbuddy-api`. Em desenvolvimento, sem `ANIMAL_MEDIA_BUCKET`, os uploads continuam em `MEDIA_ROOT`.
+
+O ALB definido pela infraestrutura está configurado apenas para HTTP. O Deployment desativa `SECURE_SSL_REDIRECT` para evitar redirecionamentos em loop; configure TLS no ALB antes de expor a aplicação em produção.

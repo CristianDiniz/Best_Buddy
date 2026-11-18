@@ -6,24 +6,6 @@ const bbAnimalId = new URLSearchParams(window.location.search).get("id");
 
 const bbSexoLabel = { M: "Macho", F: "Fêmea", I: "Indeterminado" };
 
-function bbFormatDetailDate(dateString) {
-  if (!dateString) return "Publicado recentemente";
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "Publicado recentemente";
-
-  const formattedDate = date.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
-  const now = new Date();
-  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-  let relative = "";
-  if (diffDays === 0) relative = "Hoje";
-  else if (diffDays === 1) relative = "Ontem";
-  else if (diffDays < 7) relative = `Há ${diffDays} dias`;
-  else if (diffDays < 30) relative = `Há ${Math.floor(diffDays / 7)} semanas`;
-  else relative = `Há ${Math.floor(diffDays / 30)} meses`;
-
-  return `Publicado em ${formattedDate} • ${relative}`;
-}
-
 async function bbLoadDetail() {
   bbDetailEl.innerHTML = typeof bbLoadingHtml !== "undefined" ? bbLoadingHtml : "Carregando...";
   try {
@@ -112,13 +94,6 @@ async function bbLoadDetail() {
             <h1 class="bb-page-title mb-0">${animal.nome || "Pet sem nome"}</h1>
             <span class="bb-status-badge ${animal.status === 'ADOTADO' ? 'bb-status-badge--adotado' : animal.status === 'ENCONTRADO' ? 'bb-status-badge--encontrado' : isPerdido ? 'bb-status-badge--perdido' : 'bb-status-badge--adocao'}">
               ${animal.status === 'ADOTADO' ? 'Adotado' : animal.status === 'ENCONTRADO' ? 'Encontrado' : isPerdido ? 'Desaparecido' : 'Para Adoção'}
-            </span>
-          </div>
-
-          <div class="flex items-center gap-2 mb-3 text-xs text-ink-300 font-medium">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-700/80 border border-border">
-              <span>🕒</span>
-              <span>${bbFormatDetailDate(animal.created_at)}</span>
             </span>
           </div>
 
